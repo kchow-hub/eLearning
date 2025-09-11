@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>2I 中文古詩朗讀｜題西林壁</title>
+<style>
+  :root{
+    --bg:#fffafc;
+    --card:#ffffff;
+    --line:#e6ddff;
+    --text:#242424;
+    --primary:#7c4dff;
+    --accent:#ffca28;
+    --ok:#2e7d32;
+    --soft:#f3e5f5;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,ui-rounded,Segoe UI,Arial,sans-serif;}
+  .wrap{max-width:960px;margin:0 auto;padding:16px 16px 96px;}
+  header{
+    background: linear-gradient(135deg,#b39ddb 0%,#e1bee7 100%);
+    border-radius:16px; padding:18px; color:#1f1b2d; position:relative; overflow:hidden;
+  }
+  header h1{margin:0;font-size:clamp(20px,4.8vw,30px);font-weight:800}
+  header .sub{margin-top:4px;opacity:.9}
+  .badge{
+    position:absolute; right:-10px; top:-10px; background:#fff; color:#7c4dff;
+    font-weight:800; padding:8px 12px; border-radius:14px; transform:rotate(12deg);
+    box-shadow:0 6px 20px rgba(0,0,0,.12);
+  }
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0}
+  .btn{
+    border:0; background:var(--primary); color:#fff; padding:10px 14px; border-radius:12px; font-weight:700;
+    cursor:pointer; box-shadow:0 4px 12px rgba(124,77,255,.25); display:inline-flex; gap:8px; align-items:center; font-size:16px;
+  }
+  .btn.secondary{background:#fff;color:#5e35b1;border:2px solid var(--line)}
+  .btn.ghost{background:transparent;color:#5e35b1;border:2px dashed var(--line)}
+  .btn.small{font-size:14px;padding:8px 12px;border-radius:10px}
+  .btn:active{transform:translateY(1px)}
+  select.voice{
+    appearance:auto; background:#fff;border:2px solid var(--line);border-radius:10px;padding:8px;font-weight:700;color:#5e35b1;
+    max-width:320px;
+  }
+  .panel{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px}
+  .title-author{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+  .chip{background:#ffecb3;border:2px solid #ffe082;border-radius:999px;padding:6px 10px;font-weight:700;color:#6d4c41}
+  .poem{margin-top:8px;display:flex;flex-direction:column;gap:14px}
+  .line{background:var(--soft);border:2px solid var(--line);border-radius:16px;padding:10px}
+  .line-head{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+  .chars{display:flex;flex-wrap:wrap;gap:8px}
+  .char{
+    background:#fff;border:2px solid var(--line);border-radius:14px;min-width:48px;min-height:56px;
+    display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;cursor:pointer;
+    box-shadow:0 2px 8px rgba(0,0,0,.06);transition:.15s;font-size:26px;line-height:1.1;
+  }
+  .char:active{transform:scale(.98)}
+  .char.punct{background:#fafafa;border-style:dashed}
+  .char.done{border-color:#c5e1a5;background:#f1f8e9}
+  ruby{ruby-position:over;font-size:.85em}
+  rt{font-size:.55em;color:#6a1b9a}
+  .progress{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .bar{height:10px;background:#eee;border-radius:999px;overflow:hidden;width:180px;border:2px solid var(--line)}
+  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#81c784,#ffd54f,#ba68c8)}
+  .hint{font-size:14px;color:#5e35b1}
+  .note{font-size:13px;color:#555}
+  footer{
+    position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:2px solid var(--line);padding:8px 12px;
+    display:flex;justify-content:space-between;gap:8px;align-items:center;z-index:9;flex-wrap:wrap
+  }
+  .diag{font-size:12px;color:#666}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;place-items:center;z-index:99}
+  .overlay.show{display:grid}
+  .modal{background:#fff;border-radius:18px;padding:18px;max-width:460px;width:92%;text-align:center;border:3px solid var(--line);position:relative;overflow:hidden}
+  .medal{font-size:52px}
+  canvas.confetti{position:absolute;inset:0;pointer-events:none}
+  @media (max-width:520px){
+    .char{min-width:42px;min-height:52px;font-size:24px}
+    .bar{width:140px}
+    select.voice{max-width:100%}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header role="banner" aria-label="2I 中文古詩朗讀">
+      <div class="badge">⭐ 2I</div>
+      <h1>2I 中文古詩朗讀</h1>
+      <div class="sub">趣味點讀｜普通話朗讀｜拼音輔助</div>
+    </header>
+
+    <div class="toolbar" aria-label="工具列">
+      <button class="btn" id="btnReadAll">▶️ 全詩朗讀</button>
+      <button class="btn secondary" id="btnReadTitle">📘 標題＋作者</button>
+      <button class="btn ghost" id="btnTogglePinyin">🔤 顯示/隱藏 拼音</button>
+      <button class="btn ghost" id="btnBgm">🎵 背景音樂：關</button>
+      <button class="btn small" id="btnReset">🔁 再玩一次</button>
+      <select id="voiceSel" class="voice" title="語音來源（選擇普通話/國語）"></select>
+      <button class="btn small secondary" id="btnReloadVoices">重載語音</button>
+      <button class="btn small secondary" id="btnTestVoice">測試語音</button>
+    </div>
+
+    <section class="panel">
+      <div class="title-author">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span class="chip">詩題</span>
+          <div style="font-weight:800;font-size:18px">《題西林壁》— 蘇軾</div>
+        </div>
+        <div class="progress">
+          <div class="bar" aria-label="完成度"><i id="barFill"></i></div>
+          <span class="hint" id="progressText">完成度 0%</span>
+        </div>
+      </div>
+
+      <div class="poem" id="poem"></div>
+
+      <p class="note">
+        提示：點按每個字可聽<strong>普通話</strong>讀音；也可按「整句朗讀」或「全詩朗讀」。<br>
+        如果仍聽到<strong>粵語</strong>，請在上方「語音來源」選擇 <em>Mandarin / 普通話 / zh‑CN / zh‑TW</em> 的聲音，或按「重載語音」。
+      </p>
+      <details class="diag"><summary>顯示診斷（遇到語音問題時）</summary>
+        <div id="diag"></div>
+      </details>
+    </section>
+  </div>
+
+  <!-- 完成獎勵 -->
+  <div class="overlay" id="reward">
+    <div class="modal">
+      <canvas class="confetti" id="confetti"></canvas>
+      <div class="medal">🏅</div>
+      <h2>太棒了！完成挑戰 🎉</h2>
+      <p>你獲得 <strong>小小朗讀達人</strong> 獎章！</p>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:10px">
+        <button class="btn ok" id="btnRewardOk">好！</button>
+        <button class="btn secondary" id="btnRewardAgain">再玩一次</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>👶 小提示：長按字卡也可以聽喔！</span>
+    <span id="supportNote" class="diag"></span>
+  </footer>
+
+<script>
+/* ===========================
+ * 內容：題西林壁（蘇軾）+ 拼音
+ * =========================== */
+const TITLE = "題西林壁";
+const AUTHOR = "蘇軾";
+const LINES = [
+  [
+    {c:"橫",p:"héng"},{c:"看",p:"kàn"},{c:"成",p:"chéng"},{c:"嶺",p:"lǐng"},
+    {c:"側",p:"cè"},{c:"成",p:"chéng"},{c:"峰",p:"fēng"},{c:"，",p:""}
+  ],
+  [
+    {c:"遠",p:"yuǎn"},{c:"近",p:"jìn"},{c:"高",p:"gāo"},{c:"低",p:"dī"},
+    {c:"各",p:"gè"},{c:"不",p:"bù"},{c:"同",p:"tóng"},{c:"。",p:""}
+  ],
+  [
+    {c:"不",p:"bù"},{c:"識",p:"shí"},{c:"廬",p:"lú"},{c:"山",p:"shān"},
+    {c:"真",p:"zhēn"},{c:"面",p:"miàn"},{c:"目",p:"mù"},{c:"，",p:""}
+  ],
+  [
+    {c:"只",p:"zhǐ"},{c:"緣",p:"yuán"},{c:"身",p:"shēn"},{c:"在",p:"zài"},
+    {c:"此",p:"cǐ"},{c:"山",p:"shān"},{c:"中",p:"zhōng"}
+  ]
+];
+
+/* ===========================
+ * 基本狀態與元素
+ * =========================== */
+const poemEl = document.getElementById('poem');
+const barFill = document.getElementById('barFill');
+const progressText = document.getElementById('progressText');
+const diagEl = document.getElementById('diag');
+
+let totalChars = 0; // 不含標點
+let learnedSet = new Set();
+let pinyinVisible = true;
+
+/* ===========================
+ * UI 構建
+ * =========================== */
+function makeRuby(char, py, punct=false){
+  if (punct) return char;
+  return `<ruby><rb>${char}</rb><rt>${py}</rt></ruby>`;
+}
+
+function buildPoem(){
+  poemEl.innerHTML = "";
+  learnedSet.clear();
+  totalChars = 0;
+  LINES.forEach((line, idx)=>{
+    const box = document.createElement('div');
+    box.className = "line";
+
+    const head = document.createElement('div');
+    head.className = "line-head";
+    const chip = document.createElement('div');
+    chip.className = "chip";
+    chip.textContent = `第 ${idx+1} 句`;
+    const btn = document.createElement('button');
+    btn.className = "btn small";
+    btn.textContent = "▶️ 整句朗讀";
+    btn.addEventListener('click', ()=>{
+      sfxClick();
+      ensureAudio();
+      speakSentence(line);
+    });
+    head.append(chip, btn);
+
+    const row = document.createElement('div'); row.className = "chars";
+    line.forEach(item=>{
+      const isPunct = /[，。！？、；：]/.test(item.c);
+      const el = document.createElement('button');
+      el.className = "char" + (isPunct?" punct":"");
+      el.innerHTML = makeRuby(item.c,item.p,isPunct);
+      if (!isPunct) totalChars++;
+
+      const mark = ()=>{
+        if (isPunct) return;
+        if (!el.classList.contains('done')){
+          el.classList.add('done');
+          learnedSet.add(el);
+          updateProgress();
+          sfxGood();
+        }
+      };
+
+      const onTap = ()=>{
+        ensureAudio();
+        speakChar(item.c);
+        mark();
+      };
+      el.addEventListener('click', onTap);
+      el.addEventListener('touchstart', onTap, {passive:true});
+
+      row.appendChild(el);
+    });
+
+    box.append(head, row);
+    poemEl.appendChild(box);
+  });
+  if (!pinyinVisible) togglePinyin(false);
+  updateProgress();
+}
+
+function updateProgress(){
+  const done = learnedSet.size;
+  const percent = Math.round(done / totalChars * 100);
+  barFill.style.width = percent + "%";
+  progressText.textContent = `完成度 ${percent}%`;
+  if (percent === 100) showReward();
+}
+
+function togglePinyin(force){
+  if (typeof force === "boolean") pinyinVisible = force; else pinyinVisible = !pinyinVisible;
+  document.querySelectorAll('rt').forEach(rt=>{
+    rt.style.display = pinyinVisible ? "" : "none";
+  });
+}
+
+/* ===========================
+ * 語音（強制普通話優先）
+ * =========================== */
+const supportNote = document.getElementById('supportNote');
+const voiceSel = document.getElementById('voiceSel');
+const synth = 'speechSynthesis' in window ? window.speechSynthesis : null;
+let allVoices = [];
+let currentVoice = null;
+
+function isCantonese(v){
+  const n=(v.name||"").toLowerCase();
+  const l=(v.lang||"").toLowerCase();
+  return /yue|cantonese|zh\-hk|zh_hk|hong\s*kong|粵|粤/.test(n+l);
+}
+function isMandarin(v){
+  const n=(v.name||"").toLowerCase();
+  const l=(v.lang||"").toLowerCase();
+  return /(zh\-cn|zh_cn|zh\-tw|zh_tw|cmn)/.test(l) || /mandarin|普通话|國語|国語/.test(n);
+}
+function bestMandarin(voices){
+  const cand = voices.filter(v=> !isCantonese(v));
+  const tiers = [
+    v=> isMandarin(v) && /zh\-cn/i.test(v.lang||"") && /female|女/.test((v.name||"").toLowerCase()),
+    v=> isMandarin(v) && /zh\-cn/i.test(v.lang||""),
+    v=> isMandarin(v) && /zh\-tw/i.test(v.lang||""),
+    v=> isMandarin(v),
+    v=> /zh/i.test(v.lang||"")
+  ];
+  for (const rule of tiers){
+    const v = cand.find(rule);
+    if (v) return v;
+  }
+  return cand[0] || voices[0] || null;
+}
+
+function populateVoiceSelect(){
+  voiceSel.innerHTML = "";
+  if (!allVoices.length){
+    voiceSel.appendChild(new Option("（尚無語音，請點一下頁面或按「重載語音」）",""));
+    diag("尚未取得語音列表。");
+    return;
+  }
+  const mand = allVoices.filter(v=> isMandarin(v) && !isCantonese(v));
+  const others = allVoices.filter(v=> !mand.includes(v));
+
+  const og1 = document.createElement('optgroup'); og1.label = "普通話/國語（建議）";
+  mand.forEach(v=>{
+    og1.appendChild(new Option(`${v.name} — ${v.lang}`, String(allVoices.indexOf(v))));
+  });
+  if (mand.length) voiceSel.appendChild(og1);
+
+  const og2 = document.createElement('optgroup'); og2.label = "其他語音";
+  others.forEach(v=>{
+    og2.appendChild(new Option(`${v.name} — ${v.lang}`, String(allVoices.indexOf(v))));
+  });
+  voiceSel.appendChild(og2);
+
+  const def = bestMandarin(allVoices);
+  if (def){
+    currentVoice = def;
+    voiceSel.value = String(allVoices.indexOf(def));
+  }
+  diag(`可用語音：${allVoices.length}；預設：${def?def.name+" ("+def.lang+")":"無"}`);
+}
+
+function refreshVoices(){
+  if (!synth) return;
+  const vs = synth.getVoices();
+  if (vs && vs.length){
+    allVoices = vs;
+    populateVoiceSelect();
+  } else {
+    // 再嘗試幾次（iOS 常需要時間）
+    setTimeout(refreshVoices, 500);
+  }
+}
+
+if (synth){
+  synth.onvoiceschanged = () => { allVoices = synth.getVoices(); populateVoiceSelect(); };
+  // 觸發一次
+  refreshVoices();
+} else {
+  supportNote.textContent = "⚠️ 此瀏覽器不支援語音朗讀（SpeechSynthesis）。";
+}
+
+function getVoice(){
+  const idx = Number(voiceSel.value);
+  if (!Number.isNaN(idx) && allVoices[idx]) return allVoices[idx];
+  return currentVoice || bestMandarin(allVoices);
+}
+
+function speakUtterance(text, rate=0.95){
+  if (!synth || !text) return;
+  const v = getVoice();
+  const u = new SpeechSynthesisUtterance(text);
+  if (v){ u.voice = v; u.lang = /zh\-tw/i.test(v.lang||"") ? "zh-TW" : "zh-CN"; }
+  else { u.lang = "zh-CN"; }
+  u.rate = rate; u.pitch = 1.0; u.volume = 1.0;
+  synth.speak(u);
+}
+
+function speakSingle(text, rate=0.95){
+  if (!synth) return;
+  synth.cancel();
+  speakUtterance(text, rate);
+}
+
+function speakQueue(arr, rate=0.95){
+  if (!synth) return;
+  synth.cancel();
+  arr.forEach(t => speakUtterance(t, rate));
+}
+
+/* 朗讀：字、句、全詩 */
+function speakChar(ch){
+  // 單字讀音
+  speakSingle(ch, 0.9);
+}
+function speakSentence(line){
+  const sentence = line.map(x=>x.c).join("");
+  speakSingle(sentence, 0.95);
+}
+function speakAll(){
+  const title = `《${TITLE}》；${AUTHOR}。`;
+  const lines = LINES.map(line=> line.map(x=>x.c).join(""));
+  speakQueue([title, ...lines], 0.95);
+}
+
+/* ===========================
+ * 背景音樂（超柔和／預設關）
+ * =========================== */
+let audioCtx = null, bgmTimer = null, bgmOn = false, bgmMaster = null;
+function ensureAudio(){ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
+function sfxClick(){
+  ensureAudio();
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = "sine"; o.frequency.value = 523.25; // C5
+  g.gain.value = 0.07;
+  g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+0.2);
+  o.connect(g).connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime+0.22);
+}
+function sfxGood(){
+  ensureAudio();
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = "sine"; o.frequency.setValueAtTime(659.25, audioCtx.currentTime); // E5
+  o.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime+0.16);
+  g.gain.value = 0.09;
+  g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+0.28);
+  o.connect(g).connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime+0.3);
+}
+function pluck(freq, vol=1){
+  ensureAudio();
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  const f = audioCtx.createBiquadFilter();
+  o.type = "triangle"; o.frequency.value = freq;
+  f.type = "lowpass"; f.frequency.value = 1800;
+  const now = audioCtx.currentTime;
+  if (!bgmMaster){ bgmMaster = audioCtx.createGain(); bgmMaster.gain.value = 0.05; bgmMaster.connect(audioCtx.destination); }
+  g.gain.setValueAtTime(0.0001, now);
+  g.gain.exponentialRampToValueAtTime(0.07*vol, now+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, now+0.7);
+  o.connect(f).connect(g).connect(bgmMaster);
+  o.start(now); o.stop(now+0.72);
+}
+function startBgm(){
+  ensureAudio();
+  stopBgm();
+  bgmOn = true;
+  const base = 261.63; const pent = [0,2,4,7,9]; // C 大調五聲
+  let step = 0; const beat = 750;
+  bgmTimer = setInterval(()=>{
+    if (!bgmOn) return;
+    const deg = pent[step % pent.length];
+    const f = base * Math.pow(2, deg/12);
+    pluck(f, 1);
+    if (step % 4 === 0) pluck(base/2, 0.6); // 溫柔低音
+    step++;
+  }, beat);
+  document.getElementById('btnBgm').textContent = "🎵 背景音樂：開";
+}
+function stopBgm(){
+  bgmOn = false;
+  if (bgmTimer){ clearInterval(bgmTimer); bgmTimer=null; }
+  if (bgmMaster){ try{ bgmMaster.disconnect(); }catch(e){} bgmMaster=null; }
+  document.getElementById('btnBgm').textContent = "🎵 背景音樂：關";
+}
+function toggleBgm(){ bgmOn ? stopBgm() : startBgm(); }
+
+/* ===========================
+ * 獎勵：彩帶
+ * =========================== */
+const reward = document.getElementById('reward');
+const confettiCanvas = document.getElementById('confetti');
+let confettiCtx, confettiPieces=[], confettiRAF=null;
+
+function showReward(){ reward.classList.add('show'); startConfetti(); }
+function hideReward(){ reward.classList.remove('show'); stopConfetti(); }
+function startConfetti(){
+  const c = confettiCanvas;
+  c.width = c.clientWidth; c.height = c.clientHeight;
+  confettiCtx = c.getContext('2d');
+  confettiPieces = Array.from({length:120}).map(()=> ({
+    x: Math.random()*c.width,
+    y: -10 - Math.random()*c.height,
+    r: 6 + Math.random()*10,
+    col: ["#ff8a65","#4db6ac","#ba68c8","#ffd54f","#90caf9"][Math.floor(Math.random()*5)],
+    spd: 1 + Math.random()*2,
+    rot: Math.random()*Math.PI*2
+  }));
+  const draw = ()=>{
+    confettiCtx.clearRect(0,0,c.width,c.height);
+    confettiPieces.forEach(p=>{
+      p.y += p.spd; p.x += Math.sin(p.y*0.02); p.rot += 0.1;
+      confettiCtx.save(); confettiCtx.translate(p.x,p.y); confettiCtx.rotate(p.rot);
+      confettiCtx.fillStyle = p.col; confettiCtx.fillRect(-p.r/2,-p.r/2,p.r,p.r*0.6);
+      confettiCtx.restore();
+      if (p.y > c.height + 20) p.y = -10;
+    });
+    confettiRAF = requestAnimationFrame(draw);
+  };
+  draw();
+}
+function stopConfetti(){ if (confettiRAF) cancelAnimationFrame(confettiRAF); }
+
+/* ===========================
+ * 事件
+ * =========================== */
+document.getElementById('btnReadAll').addEventListener('click', ()=>{ sfxClick(); ensureAudio(); speakAll(); });
+document.getElementById('btnReadTitle').addEventListener('click', ()=>{ sfxClick(); ensureAudio(); speakSingle(`《${TITLE}》，作者：${AUTHOR}。`, 0.98); });
+document.getElementById('btnTogglePinyin').addEventListener('click', ()=>{ sfxClick(); togglePinyin(); });
+document.getElementById('btnBgm').addEventListener('click', ()=>{ toggleBgm(); });
+document.getElementById('btnReset').addEventListener('click', ()=>{
+  sfxClick();
+  document.querySelectorAll('.char.done').forEach(el=> el.classList.remove('done'));
+  learnedSet.clear(); updateProgress();
+});
+document.getElementById('btnReloadVoices').addEventListener('click', ()=>{ sfxClick(); refreshVoices(); });
+document.getElementById('btnTestVoice').addEventListener('click', ()=>{
+  sfxClick(); ensureAudio();
+  speakSingle("你好！這是普通話測試。", 1.0);
+});
+voiceSel.addEventListener('change', ()=>{
+  const idx = Number(voiceSel.value);
+  if (allVoices[idx]) currentVoice = allVoices[idx];
+  diag(`已選語音：${currentVoice?currentVoice.name+" ("+currentVoice.lang+")":"無"}`);
+});
+document.getElementById('btnRewardOk').addEventListener('click', ()=>{ sfxClick(); hideReward(); });
+document.getElementById('btnRewardAgain').addEventListener('click', ()=>{ sfxClick(); hideReward();
+  document.getElementById('btnReset').click();
+});
+
+/* 在第一下互動時解鎖音訊（行動裝置需要） */
+document.addEventListener('pointerdown', ()=>{ try{ ensureAudio(); }catch(e){} }, {once:true});
+
+/* ===========================
+ * 小工具
+ * =========================== */
+function diag(msg){
+  const t = new Date().toLocaleTimeString();
+  diagEl.insertAdjacentHTML('beforeend', `<div>[${t}] ${msg}</div>`);
+}
+
+/* ===========================
+ * 啟動
+ * =========================== */
+buildPoem();
+togglePinyin(true); // 初始顯示拼音
+diag('初始化完成。若語音仍無法使用，請點擊「重載語音」或任意處以允許音訊。');
+
+</script>
+</body>
+</html>
