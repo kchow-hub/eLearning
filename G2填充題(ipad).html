@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小二中文挑戰 - iPad 離線音效版</title>
+    <style>
+        :root { --primary: #ff922b; --success: #51cf66; --error: #ff6b6b; --bg: #fff9db; }
+        body { font-family: "微軟正黑體", sans-serif; background-color: var(--bg); margin: 0; display: flex; justify-content: center; touch-action: manipulation; }
+        
+        /* 啟動畫面 */
+        #splash-screen { position: fixed; inset: 0; background: var(--primary); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
+        .start-btn { padding: 30px 80px; font-size: 40px; background: white; color: var(--primary); border: none; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 10px 0 #d9480f; }
+
+        .container { width: 95vw; max-width: 800px; height: 92vh; background: white; margin-top: 4vh; border-radius: 40px; box-shadow: 0 15px 0 #fcc419; border: 8px solid #fab005; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .header { padding: 20px; background: #fff3bf; border-bottom: 5px solid #fab005; display: flex; justify-content: space-between; align-items: center; font-size: 26px; font-weight: bold; color: #e67700; }
+        .content { flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .question-text { font-size: 34px; line-height: 1.6; color: #495057; background: #f8f9fa; padding: 30px; border-radius: 30px; width: 85%; margin-bottom: 25px; border: 2px solid #e9ecef; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; padding: 0 20px; box-sizing: border-box; }
+        .opt-btn { padding: 25px; font-size: 30px; cursor: pointer; border: 4px solid #ffe066; border-radius: 25px; background: white; font-weight: bold; color: #f08c00; box-shadow: 0 8px 0 #ffe066; }
+        .word-hint { font-size: 65px; letter-spacing: 15px; margin-bottom: 20px; font-weight: bold; }
+        input[type="text"] { font-size: 55px; width: 120px; height: 120px; text-align: center; border: 6px solid var(--primary); border-radius: 30px; outline: none; background: #fff9db; }
+        .big-btn { background: var(--primary); color: white; padding: 20px 60px; font-size: 30px; border: none; border-radius: 25px; box-shadow: 0 8px 0 #d9480f; cursor: pointer; font-weight: bold; }
+        .feedback-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.98); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        #report-card { position: absolute; inset: 0; background: white; z-index: 200; display: none; flex-direction: column; align-items: center; padding: 40px; }
+    </style>
+</head>
+<body>
+
+<div id="splash-screen">
+    <h1 style="font-size: 60px; margin-bottom: 40px;">🦁 中文小專家</h1>
+    <p style="font-size: 24px; margin-bottom: 40px;">點擊下方按鈕開啟聲音</p>
+    <button class="start-btn" onclick="startGame()">點擊開始</button>
+</div>
+
+<div class="container">
+    <div class="header">
+        <span>第 <span id="progress">1</span> / 20 題</span>
+        <span>分數: <span id="score">0</span></span>
+    </div>
+
+    <div class="content">
+        <div id="mode-label" style="color: #fd7e14; font-weight: bold; margin-bottom: 15px; font-size: 22px;"></div>
+        <div class="question-text" id="q-box"></div>
+        <div id="select-area" class="options-grid"></div>
+        <div id="input-area" style="display:none; text-align:center;">
+            <div class="word-hint" id="w-hint"></div>
+            <input type="text" id="u-input" maxlength="1">
+            <br><br>
+            <button class="big-btn" onclick="checkInput()">檢查答案</button>
+        </div>
+    </div>
+
+    <div id="feedback-layer" class="feedback-overlay">
+        <div id="fb-icon" style="font-size:100px;"></div>
+        <div id="fb-msg" style="font-size:40px; font-weight:bold; margin:20px 0;"></div>
+        <div id="fb-sub" style="font-size:30px; margin-bottom:40px;"></div>
+        <button class="big-btn" style="background:#51cf66; box-shadow: 0 8px 0 #2b8a3e;" onclick="closeFeedback()">下一題</button>
+    </div>
+
+    <div id="report-card">
+        <h1 style="font-size: 55px; color: #f08c00;">🎊 挑戰完成！</h1>
+        <p style="font-size: 35px;">你的總分：<span id="final-score">0</span></p>
+        <div id="wrong-list-box" style="width: 100%; text-align: left; font-size: 24px;"></div>
+        <button class="big-btn" style="margin-top:40px; background:#51cf66;" onclick="location.reload()">再玩一次</button>
+    </div>
+</div>
+
+<script>
+    // 內嵌式短音效 (不需連網)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playTone(freq, type, duration) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playWinSound() {
+        playTone(523.25, 'sine', 0.1); // C5
+        setTimeout(() => playTone(659.25, 'sine', 0.1), 100); // E5
+        setTimeout(() => playTone(783.99, 'sine', 0.3), 200); // G5
+    }
+
+    function playLoseSound() {
+        playTone(293.66, 'square', 0.2); // D4
+        setTimeout(() => playTone(220.00, 'square', 0.4), 200); // A3
+    }
+
+    function playFinishSound() {
+        [523, 659, 783, 1046].forEach((f, i) => {
+            setTimeout(() => playTone(f, 'triangle', 0.5), i * 150);
+        });
+    }
+
+    const quizData = [
+        { w: "愛護", s: "我們應該___公物，不應隨意破壞。" },
+        { w: "好像", s: "天上的白雲一朵朵，___柔軟的棉花。" },
+        { w: "種植", s: "農夫在田裏___了不少新鮮的蔬菜。" },
+        { w: "張開", s: "小鳥___翅膀，在天空中自由地飛翔。" },
+        { w: "乘涼", s: "夏天時，老人家喜歡在大樹下___。" },
+        { w: "興奮", s: "聽到要到海洋公園的消息，我們都感到十分___。" },
+        { w: "容易", s: "這道數學題很___，我很快就做好了。" },
+        { w: "慚愧", s: "小明因為說了謊話，感到十分___。" },
+        { w: "努力", s: "只要___複習，考試一定能取得好成績。" },
+        { w: "發現", s: "我在公園的草叢裏___了一隻小蝸牛。" },
+        { w: "優異", s: "姐姐憑着___的成績，獲得了進步獎。" },
+        { w: "領獎", s: "比賽結束後，得獎者依次上台___。" },
+        { w: "答應", s: "媽媽___我，星期六帶我去圖書館。" },
+        { w: "命令", s: "隊長發出___，要求大家集合。" },
+        { w: "奔跑", s: "運動員在跑道上拼命___。" },
+        { w: "派發", s: "老師請班長把考卷___給同學。" },
+        { w: "樹枝", s: "頑皮的小猴子在___上盪來盪去。" },
+        { w: "廣闊", s: "一望無際的海洋非常___。" },
+        { w: "家務", s: "我是好幫手，經常幫媽媽做___。" },
+        { w: "到達", s: "我們乘坐的飛機已經安全___香港。" },
+        { w: "照顧", s: "父母辛苦地___我們成長，我們要感恩。" },
+        { w: "失望", s: "雖然這場比賽輸了，但大家不要感到___。" },
+        { w: "請教", s: "遇到不明白的字，我會向老師___。" },
+        { w: "照料", s: "花園裏的花卉需要細心___才能長得漂亮。" },
+        { w: "麻雀", s: "窗外有幾隻___在吱吱喳喳地叫。" },
+        { w: "翠綠", s: "雨後的山頭一片___，景色迷人。" },
+        { w: "參加", s: "今年我___了學校的游泳比賽。" },
+        { w: "不慌不忙", s: "他___地從書包拿出文具開始寫字。" },
+        { w: "輕手輕腳", s: "為了不吵醒睡覺的貓咪，我___地走過。" },
+        { w: "撲撲亂跳", s: "快要見到偶像了，我的心緊張得___。" }
+    ];
+
+    let score = 0, qIdx = 0, wrongArr = [], curItem = {}, correctChar = "";
+
+    function startGame() {
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        document.getElementById('splash-screen').style.display = 'none';
+        init();
+    }
+
+    function init() {
+        if(qIdx >= 20) return end();
+        qIdx++;
+        document.getElementById("progress").innerText = qIdx;
+        curItem = quizData[Math.floor(Math.random()*quizData.length)];
+        Math.random() > 0.5 ? setInput() : setSelect();
+    }
+
+    function setSelect() {
+        document.getElementById("mode-label").innerText = "⭐ 選擇題";
+        document.getElementById("select-area").style.display = "grid";
+        document.getElementById("input-area").style.display = "none";
+        document.getElementById("q-box").innerHTML = curItem.s.replace("___", "<span class='blank'>_______</span>");
+        let opts = [curItem.w];
+        while(opts.length < 4) {
+            let r = quizData[Math.floor(Math.random()*quizData.length)].w;
+            if(!opts.includes(r)) opts.push(r);
+        }
+        opts.sort(() => Math.random()-0.5);
+        let zone = document.getElementById("select-area");
+        zone.innerHTML = "";
+        opts.forEach(o => {
+            let b = document.createElement("button");
+            b.className = "opt-btn";
+            b.innerText = o;
+            b.onclick = () => o === curItem.w ? showFeedback(true) : showFeedback(false, `答案是「${curItem.w}」`);
+            zone.appendChild(b);
+        });
+    }
+
+    function setInput() {
+        document.getElementById("mode-label").innerText = "✍️ 填字題";
+        document.getElementById("select-area").style.display = "none";
+        document.getElementById("input-area").style.display = "block";
+        document.getElementById("u-input").value = "";
+        document.getElementById("q-box").innerHTML = curItem.s.replace("___", "<span class='blank'>（ ? ）</span>");
+        let arr = curItem.w.split("");
+        let idx = Math.floor(Math.random()*arr.length);
+        correctChar = arr[idx];
+        arr[idx] = "＿";
+        document.getElementById("w-hint").innerText = arr.join("");
+    }
+
+    function checkInput() {
+        let v = document.getElementById("u-input").value.trim();
+        v === correctChar ? showFeedback(true) : showFeedback(false, `正確字是「${correctChar}」`);
+    }
+
+    function showFeedback(win, msg) {
+        let layer = document.getElementById("feedback-layer");
+        layer.style.display = "flex";
+        if(win) {
+            score += 10;
+            document.getElementById("fb-icon").innerText = "🌟";
+            document.getElementById("fb-msg").innerText = "答對了！";
+            document.getElementById("fb-msg").style.color = "#51cf66";
+            document.getElementById("fb-sub").innerText = "";
+            playWinSound();
+        } else {
+            wrongArr.push(curItem.w);
+            document.getElementById("fb-icon").innerText = "💡";
+            document.getElementById("fb-msg").innerText = "加油！再看清楚答案";
+            document.getElementById("fb-msg").style.color = "#ff6b6b";
+            document.getElementById("fb-sub").innerText = msg;
+            playLoseSound();
+        }
+        document.getElementById("score").innerText = score;
+    }
+
+    function closeFeedback() {
+        document.getElementById("feedback-layer").style.display = "none";
+        init();
+    }
+
+    function end() {
+        document.getElementById("report-card").style.display = "flex";
+        document.getElementById("final-score").innerText = score;
+        playFinishSound();
+        let box = document.getElementById("wrong-list-box");
+        let unique = [...new Set(wrongArr)];
+        box.innerHTML = unique.length > 0 ? "<h3>需要複習：</h3>" + unique.map(w => `<div>● ${w}</div>`).join("") : "<h2>滿分！🏆</h2>";
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>成語音效挑戰賽</title>
+    <style>
+        :root { --p: #ff8e53; --bg: #fff9f2; }
+        body { 
+            font-family: "Microsoft JhengHei", -apple-system, sans-serif; 
+            background: var(--bg); display: flex; flex-direction: column; align-items: center; 
+            padding: 20px; margin: 0; -webkit-user-select: none;
+        }
+        .card { 
+            background: white; padding: 25px; border-radius: 20px; 
+            box-shadow: 0 8px 20px rgba(255, 142, 83, 0.2); 
+            width: 85%; max-width: 400px; margin-bottom: 20px; text-align: center; 
+        }
+        h1 { color: #d35400; font-size: 1.8rem; margin-bottom: 5px; }
+        .btn { 
+            width: 100%; padding: 20px; margin: 12px 0; font-size: 1.3rem; font-weight: bold;
+            cursor: pointer; border: 2px solid #ffeaa7; border-radius: 15px; background: white;
+            display: block; touch-action: manipulation; transition: 0.1s;
+        }
+        .btn:active { transform: scale(0.95); background: #fff5d1; }
+        .btn-blue { color: #0984e3; background: #f0faff; border-color: #74b9ff; }
+        .btn-red { color: #d63031; background: #fff5f5; border-color: #ff7675; }
+        
+        #game-area { display: none; width: 90%; max-width: 450px; background: white; padding: 25px; border-radius: 30px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .q-box { font-size: 3.2rem; letter-spacing: 12px; margin: 25px 0; background: #fdf2e9; padding: 25px; border-radius: 20px; color: #333; }
+        .s-box { font-size: 1.6rem; line-height: 1.8; margin-bottom: 25px; text-align: left; padding: 15px; background: #f9f9f9; border-radius: 15px; }
+        .blank { color: #ff4757; border-bottom: 5px solid #ff4757; padding: 0 10px; font-weight: bold; }
+        .opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .opt-btn { 
+            padding: 25px 10px; font-size: 1.6rem; border-radius: 20px; font-weight: bold;
+            border: 3px solid #f1f2f6; background: white; cursor: pointer; touch-action: manipulation;
+        }
+        #msg { height: 45px; font-size: 1.6rem; font-weight: bold; margin-bottom: 15px; transition: 0.3s; }
+        
+        /* 動畫效果 */
+        @keyframes correct-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); color: #2ecc71; }
+            100% { transform: scale(1); }
+        }
+        .correct-anim { animation: correct-pop 0.5s ease; }
+    </style>
+</head>
+<body>
+
+    <h1>🎈 成語音效王 🎈</h1>
+    <p style="color:#e67e22; font-weight:bold;">小二中文必勝練習</p>
+    
+    <div id="main-menu">
+        <div class="card">
+            <h3 style="text-align:left; color:#666; margin-top:0;">📝 模式一：整句填充</h3>
+            <button class="btn btn-blue" onclick="startGame('unit1', 'full')">🐾 動物大本營</button>
+            <button class="btn btn-blue" onclick="startGame('unit2', 'full')">💪 身體很奇妙</button>
+        </div>
+        <div class="card">
+            <h3 style="text-align:left; color:#666; margin-top:0;">🔍 模式二：單字挑戰</h3>
+            <button class="btn btn-red" onclick="startGame('unit1', 'char')">🐾 動物大本營</button>
+            <button class="btn btn-red" onclick="startGame('unit2', 'char')">💪 身體很奇妙</button>
+        </div>
+    </div>
+
+    <div id="game-area">
+        <div id="msg"></div>
+        <div id="display"></div>
+        <div class="opt-grid" id="options"></div>
+        <p style="color:#999; margin-top:30px; font-size: 1.1rem;">🌟 已完成：<span id="cur">1</span> / <span id="total">9</span></p>
+        <button onclick="location.reload()" style="background:#eee; border:none; border-radius:10px; color:#666; font-size:1rem; padding:10px 20px; margin-top:10px;">返回主選單</button>
+    </div>
+
+    <script>
+        // 音效產生器
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                // 叮咚聲 (高音)
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.4);
+            } else {
+                // 答錯聲 (低音)
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.2);
+            }
+        }
+
+        const data = {
+            unit1: [
+                { w: "聞雞起舞", s: "爸爸每天早上______，練習網球技巧。" },
+                { w: "走馬看花", s: "哥哥看書很快，真是______。" },
+                { w: "九牛一毛", s: "這筆錢對富豪來說只是______。" },
+                { w: "天馬行空", s: "弟弟想像力豐富，思想______。" },
+                { w: "馬到成功", s: "祝你在比賽中______，拿到冠軍！" },
+                { w: "如魚得水", s: "他在球隊裡表現出色，簡直是______。" },
+                { w: "驚弓之鳥", s: "他受過驚嚇，現在像______一樣膽小。" },
+                { w: "盲人摸象", s: "看事情要全面，不能像______般片面。" },
+                { w: "馬不停蹄", s: "他下火車後便______地趕往會場。" }
+            ],
+            unit2: [
+                { w: "刮目相看", s: "他的進步大得令人______。" },
+                { w: "垂涎三尺", s: "看見美味的蛋糕，弟弟忍不住______。" },
+                { w: "眉開眼笑", s: "奶奶高興得______。" },
+                { w: "面紅耳赤", s: "他們吵得______，互不相讓。" },
+                { w: "洗耳恭聽", s: "我正準備好______你的建議。" },
+                { w: "有目共睹", s: "他的努力是大家______的。" },
+                { w: "眉飛色舞", s: "他______地講述著趣事。" },
+                { w: "令人髮指", s: "這種壞行為真是______。" },
+                { w: "拾人牙慧", s: "這篇文章沒新意，只是______。" }
+            ]
+        };
+
+        let currentList = [];
+        let curIdx = 0;
+        let gameMode = '';
+
+        function startGame(unit, mode) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            gameMode = mode;
+            currentList = [...data[unit]].sort(() => Math.random() - 0.5);
+            curIdx = 0;
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('game-area').style.display = 'block';
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const item = currentList[curIdx];
+            const display = document.getElementById('display');
+            const options = document.getElementById('options');
+            const msg = document.getElementById('msg');
+            
+            msg.innerText = "請選擇正確答案：";
+            msg.style.color = "#666";
+            document.getElementById('cur').innerText = curIdx + 1;
+            document.getElementById('total').innerText = currentList.length;
+            options.innerHTML = "";
+
+            if (gameMode === 'full') {
+                display.innerHTML = `<div class="s-box">${item.s.replace("______", "<span class='blank'>？</span>")}</div>`;
+                let pool = [item.w];
+                while(pool.length < 4) {
+                    let r = currentList[Math.floor(Math.random()*currentList.length)].w;
+                    if(!pool.includes(r)) pool.push(r);
+                }
+                drawButtons(pool, item.w);
+            } else {
+                let charIdx = Math.floor(Math.random() * 4);
+                let wordArr = item.w.split('');
+                let ans = wordArr[charIdx];
+                wordArr[charIdx] = "<span class='blank'>？</span>";
+                display.innerHTML = `<div class="q-box">${wordArr.join('')}</div>`;
+                
+                let pool = [ans];
+                const decoys = "大天地人心口手耳目山水一二三四五六七八九十".split('');
+                while(pool.length < 4) {
+                    let r = decoys[Math.floor(Math.random()*decoys.length)].trim();
+                    if(!pool.includes(r) && !item.w.includes(r)) pool.push(r);
+                }
+                drawButtons(pool, ans);
+            }
+        }
+
+        function drawButtons(arr, correct) {
+            arr.sort(() => Math.random() - 0.5).forEach(txt => {
+                const b = document.createElement('button');
+                b.className = 'opt-btn';
+                b.innerText = txt;
+                b.onclick = function() {
+                    if(txt === correct) {
+                        playSound('correct');
+                        document.getElementById('msg').innerText = "✨ 太棒了！答對了！ ✨";
+                        document.getElementById('msg').style.color = "#2ecc71";
+                        document.body.classList.add('correct-anim');
+                        setTimeout(() => {
+                            document.body.classList.remove('correct-anim');
+                            curIdx++;
+                            if(curIdx < currentList.length) renderQuestion();
+                            else { alert("🎉 滿分！你是成語小天才！"); location.reload(); }
+                        }, 700);
+                    } else {
+                        playSound('wrong');
+                        document.getElementById('msg').innerText = "❌ 再試一次看看！";
+                        document.getElementById('msg').style.color = "#e74c3c";
+                    }
+                };
+                document.getElementById('options').appendChild(b);
+            });
+        }
+    </script>
+</body>
+</html>

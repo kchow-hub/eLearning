@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>標點符號隨機大挑戰 (100題版)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700&display=swap');
+        * { touch-action: none; -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        body { font-family: 'Noto Sans TC', sans-serif; background: #E8F5E9; margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .game-card { background: white; width: 95%; max-width: 900px; height: 95vh; padding: 25px; border-radius: 40px; box-shadow: 0 15px 0 #43A047; border: 8px solid #81C784; text-align: center; display: flex; flex-direction: column; position: relative; }
+        .progress-container { width: 100%; height: 20px; background: #eee; border-radius: 20px; overflow: hidden; margin-bottom: 10px; }
+        #progress-bar { width: 0%; height: 100%; background: #4CAF50; transition: width 0.3s; }
+        .sentence-area { flex-grow: 1; font-size: 2rem; line-height: 2.8; margin: 15px 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; background: #F1F8E9; border-radius: 25px; padding: 25px; border: 2px solid #C8E6C9; }
+        .drop-zone { display: inline-block; width: 60px; height: 60px; border: 4px dashed #A5D6A7; border-radius: 12px; margin: 0 8px; vertical-align: middle; background: #fff; }
+        .drop-zone.hover { border-color: #4CAF50; background: #E8F5E9; transform: scale(1.1); }
+        .drop-zone.filled { border-style: solid; border-color: #4CAF50; background: #fff; }
+        .symbols-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 15px; background: #C8E6C9; border-radius: 25px; }
+        .symbol-card { height: 65px; background: white; border-radius: 15px; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: bold; color: #2E7D32; box-shadow: 0 5px 0 #A5D6A7; border: 2px solid #A5D6A7; cursor: grab; }
+        #next-btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 30px 60px; font-size: 2rem; background: #FF9800; color: white; border-radius: 60px; border: none; box-shadow: 0 10px 0 #E65100; display: none; z-index: 100; }
+        .win-screen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+    </style>
+</head>
+<body>
+    <div class="game-card">
+        <div id="quiz-ui">
+            <div class="progress-container"><div id="progress-bar"></div></div>
+            <div id="q-count" style="font-weight: bold; color: #2E7D32;">正在準備題目...</div>
+            <div class="sentence-area" id="sentence-box"></div>
+            <div class="symbols-container">
+                <div class="symbol-card" onpointerdown="dragStart(event)">，</div>
+                <div class="symbol-card" onpointerdown="dragStart(event)">。</div>
+                <div class="symbol-card" onpointerdown="dragStart(event)">？</div>
+                <div class="symbol-card" onpointerdown="dragStart(event)">！</div>
+                <div class="symbol-card" onpointerdown="dragStart(event)">：</div>
+                <div class="symbol-card" onpointerdown="dragStart(event)">「</div>
+                <div class="symbol-card" onpointerdown="dragStart(event)">」</div>
+                <div class="symbol-card" onpointerdown="dragStart(event)">《</div>
+                <div class="symbol-card" onpointerdown="dragStart(event)">》</div>
+                <div class="symbol-card" onpointerdown="dragStart(event)">、</div>
+            </div>
+            <button id="next-btn" onclick="goToNext()">答對了！下一題 ➔</button>
+        </div>
+        <div class="win-screen" id="win-ui">
+            <h2 style="font-size: 3rem; color: #2E7D32;">🌟 挑戰完成！🌟</h2>
+            <p style="font-size: 1.8rem;">妳今天完成了 10 題練習！</p>
+            <button onclick="location.reload()" style="padding:20px 50px; font-size:1.5rem; border-radius:30px; background:#4CAF50; color:white; border:none;">再玩一次</button>
+        </div>
+    </div>
+
+    <audio id="snd-pick" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+    <audio id="snd-drop" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+    <audio id="snd-correct" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
+    <audio id="snd-win" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
+
+    <script>
+        const allData = [
+            { text: "今天天氣真好[s1]我們去公園玩吧[s2]", ans: {s1: "，", s2: "。"} },
+            { text: "妳知道這本書是誰的嗎[s1]", ans: {s1: "？"} },
+            { text: "哇[s1]這份禮物多麼漂亮呀[s2]", ans: {s1: "！", s2: "！"} },
+            { text: "老師說[s1][s2]大家要保持安靜[s3][s4]", ans: {s1: "：", s2: "「", s3: "。", s4: "」"} },
+            { text: "我最愛看故事書[s1]格林童話[s2]", ans: {s1: "《", s2: "》"} },
+            { text: "桌上有蘋果[s1]香蕉和西瓜[s2]", ans: {s1: "、", s2: "。"} },
+            { text: "妳的作業寫完了嗎[s1]", ans: {s1: "？"} },
+            { text: "小鳥在樹上吱吱喳喳地唱歌[s1]", ans: {s1: "。"} },
+            { text: "快看[s1]流星飛過去了[s2]", ans: {s1: "！", s2: "！"} },
+            { text: "媽媽問[s1][s2]妳肚子餓不餓呢[s3][s4]", ans: {s1: "：", s2: "「", s3: "？", s4: "」"} },
+            { text: "爸爸買了一份[s1]星島日報[s2]", ans: {s1: "《", s2: "》"} },
+            { text: "今天我學會了游泳[s1]心裏真高興[s2]", ans: {s1: "，", s2: "。"} },
+            { text: "為什麼天會下雨呢[s1]", ans: {s1: "？"} },
+            { text: "這朵花真香呀[s1]", ans: {s1: "！"} },
+            { text: "書包裏有尺[s1]鉛筆盒和橡皮擦[s2]", ans: {s1: "、", s2: "。"} },
+            { text: "妹妹最喜歡聽[s1]白雪公主[s2]的故事[s3]", ans: {s1: "《", s2: "》", s3: "。"} },
+            { text: "醫生叮囑我[s1][s2]要多喝開水[s3][s4]", ans: {s1: "：", s2: "「", s3: "。", s4: "」"} },
+            { text: "那座山多麼高呀[s1]", ans: {s1: "！"} },
+            { text: "妳喜歡畫畫還是唱歌呢[s1]", ans: {s1: "？"} },
+            { text: "早晨[s1]太陽從東方升起[s2]", ans: {s1: "，", s2: "。"} },
+            // ...篇幅原因，此處重複擴充題目邏輯直到100題...
+            { text: "小貓[s1]小狗和小兔都是我的好朋友[s2]", ans: {s1: "、", s2: "。"} },
+            { text: "外婆家有一口老井[s1]", ans: {s1: "。"} },
+            { text: "這首歌真動聽呀[s1]", ans: {s1: "！"} },
+            { text: "小明[s1]妳在做什麼[s2]", ans: {s1: "，", s2: "？"} },
+            { text: "妳看過[s1]成語故事[s2]這本書嗎[s3]", ans: {s1: "《", s2: "》", s3: "？"} },
+            { text: "操場上[s1]同學們正在跑步[s2]", ans: {s1: "，", s2: "。"} },
+            { text: "這棵樹的葉子掉光了[s1]", ans: {s1: "。"} },
+            { text: "哎呀[s1]我不小心打破了花瓶[s2]", ans: {s1: "！", s2: "！"} },
+            { text: "聖誕節到了[s1]到處都是燈飾[s2]", ans: {s1: "，", s2: "。"} },
+            { text: "妳明天會去圖書館嗎[s1]", ans: {s1: "？"} },
+            { text: "春天來了[s1]花兒開了[s2]草兒綠了[s3]", ans: {s1: "，", s2: "，", s3: "。"} },
+            { text: "哥哥大聲喊[s1][s2]快跑呀[s3][s4]", ans: {s1: "：", s2: "「", s3: "！", s4: "」"} },
+            { text: "妳知道地球是圓的嗎[s1]", ans: {s1: "？"} },
+            { text: "媽媽做的菜真好吃呀[s1]", ans: {s1: "！"} },
+            { text: "森林裏住著大象[s1]老虎和獅子[s2]", ans: {s1: "、", s2: "。"} },
+            { text: "這是我最喜歡的[s1]十萬個為什麼[s2]", ans: {s1: "《", s2: "》"} },
+            { text: "放學了[s1]天邊出現了晚霞[s2]", ans: {s1: "，", s2: "。"} },
+            { text: "誰在那邊說話呢[s1]", ans: {s1: "？"} },
+            { text: "這場雨下得真大呀[s1]", ans: {s1: "！"} },
+            { text: "小強[s1]請妳把窗戶關上[s2]", ans: {s1: "，", s2: "。"} },
+            { text: "妳喜歡吃糖果嗎[s1]", ans: {s1: "？"} },
+            { text: "小船在海上漂浮著[s1]", ans: {s1: "。"} },
+            { text: "老師問[s1][s2]誰知道答案呢[s3][s4]", ans: {s1: "：", s2: "「", s3: "？", s4: "」"} },
+            { text: "大海真寬闊呀[s1]", ans: {s1: "！"} },
+            { text: "星期天[s1]我和家人去爬山[s2]", ans: {s1: "，", s2: "。"} },
+            { text: "妳聽過[s1]龜兔賽跑[s2]的故事嗎[s3]", ans: {s1: "《", s2: "》", s3: "？"} },
+            { text: "弟弟在地上爬來爬去[s1]", ans: {s1: "。"} },
+            { text: "多麼美麗的彩虹呀[s1]", ans: {s1: "！"} },
+            { text: "妳能幫我開門嗎[s1]", ans: {s1: "？"} },
+            { text: "超市裏有很多水果[s1]如蘋果[s2]梨子和桃子[s3]", ans: {s1: "，", s2: "、", s3: "。"} },
+            { text: "媽媽說[s1][s2]晚安[s3]寶貝[s4][s5]", ans: {s1: "：", s2: "「", s3: "，", s4: "。", s5: "」"} },
+            { text: "妳會寫[s1]山[s2]這個字嗎[s3]", ans: {s1: "「", s2: "」", s3: "？"} },
+            { text: "草地上有一群羊[s1]", ans: {s1: "。"} },
+            { text: "真是一場精彩的表演呀[s1]", ans: {s1: "！"} },
+            { text: "妳昨天為什麼沒來上學呢[s1]", ans: {s1: "？"} },
+            { text: "爺爺在花園裏澆水[s1]", ans: {s1: "。"} },
+            { text: "今天我讀了[s1]伊索寓言[s2]", ans: {s1: "《", s2: "》"} },
+            { text: "天黑了[s1]星星出來了[s2]", ans: {s1: "，", s2: "。"} },
+            { text: "妳是誰[s1]為什麼跟著我[s2]", ans: {s1: "？", s2: "？"} },
+            { text: "好大的雪呀[s1]", ans: {s1: "！"} },
+            { text: "文具盒裏有鋼筆盒[s1]圓珠筆和毛筆[s2]", ans: {s1: "、", s2: "。"} },
+            { text: "妹妹叫道[s1][s2]看[s3]蝴蝶[s4][s5]", ans: {s1: "：", s2: "「", s3: "，", s4: "！", s5: "」"} },
+            { text: "妳在看什麼書呢[s1]", ans: {s1: "？"} },
+            { text: "小溪緩緩地流著[s1]", ans: {s1: "。"} },
+            { text: "這棵樹多麼壯大呀[s1]", ans: {s1: "！"} },
+            { text: "妳見過雪嗎[s1]", ans: {s1: "？"} },
+            { text: "我喜歡看[s1]小王子[s2]", ans: {s1: "《", s2: "》"} },
+            { text: "天亮了[s1]公雞喔喔叫[s2]", ans: {s1: "，", s2: "。"} },
+            { text: "這是妳的筆嗎[s1]", ans: {s1: "？"} },
+            { text: "這裏的空氣真清新呀[s1]", ans: {s1: "！"} },
+            { text: "農場裏有鴨子[s1]鵝和雞[s2]", ans: {s1: "、", s2: "。"} },
+            { text: "老師叮囑大家[s1][s2]回家路上要安全[s3][s4]", ans: {s1: "：", s2: "「", s3: "。", s4: "」"} },
+            { text: "蝴蝶在花叢中飛舞[s1]", ans: {s1: "。"} },
+            { text: "多麼可愛的小狗呀[s1]", ans: {s1: "！"} },
+            { text: "妳想吃飯還是吃麵呢[s1]", ans: {s1: "？"} },
+            { text: "我買了[s1]西遊記[s2]和[s3]水滸傳[s4]", ans: {s1: "《", s2: "》", s3: "《", s4: "》"} },
+            { text: "小雨沙沙地落下[s1]", ans: {s1: "。"} },
+            { text: "這座橋真長呀[s1]", ans: {s1: "！"} },
+            { text: "妳知道他在哪裏嗎[s1]", ans: {s1: "？"} },
+            { text: "蜜蜂在採花蜜[s1]", ans: {s1: "。"} },
+            { text: "妳會游泳嗎[s1]", ans: {s1: "？"} },
+            { text: "真是一場大霧呀[s1]", ans: {s1: "！"} },
+            { text: "客廳裏有梳化[s1]茶几和電視機[s2]", ans: {s1: "、", s2: "。"} },
+            { text: "姐姐說[s1][s2]我們去圖書館吧[s3][s4]", ans: {s1: "：", s2: "「", s3: "。", s4: "」"} },
+            { text: "妳今天開心嗎[s1]", ans: {s1: "？"} },
+            { text: "月亮掛在天空中[s1]", ans: {s1: "。"} },
+            { text: "多麼神奇的魔術呀[s1]", ans: {s1: "！"} },
+            { text: "妳為什麼要哭呢[s1]", ans: {s1: "？"} },
+            { text: "我和小明是好朋友[s1]", ans: {s1: "。"} },
+            { text: "這朵雲像不像一隻兔子[s1]", ans: {s1: "？"} },
+            { text: "真漂亮的風景呀[s1]", ans: {s1: "！"} },
+            { text: "公園裏有長椅[s1]路燈和垃圾桶[s2]", ans: {s1: "、", s2: "。"} },
+            { text: "媽媽說[s1][s2]多吃蔬菜對身體好[s3][s4]", ans: {s1: "：", s2: "「", s3: "。", s4: "」"} },
+            { text: "妳畫的是什麼[s1]", ans: {s1: "？"} },
+            { text: "小狗在啃骨頭[s1]", ans: {s1: "。"} },
+            { text: "多麼明亮的月光呀[s1]", ans: {s1: "！"} },
+            { text: "妳認識那位老師嗎[s1]", ans: {s1: "？"} },
+            { text: "我在讀[s1]木偶奇遇記[s2]", ans: {s1: "《", s2: "》"} },
+            { text: "妳明天有空嗎[s1]", ans: {s1: "？"} },
+            { text: "真是一個驚喜呀[s1]", ans: {s1: "！"} }
+        ];
+
+        let quizQuestions = [];
+        let currentIdx = 0;
+        let dragElem = null;
+
+        function shuffleAndPick() {
+            let shuffled = [...allData].sort(() => 0.5 - Math.random());
+            quizQuestions = shuffled.slice(0, 10);
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = quizQuestions[currentIdx];
+            document.getElementById('q-count').innerText = `問題 ${currentIdx + 1} / 10`;
+            document.getElementById('progress-bar').style.width = ((currentIdx + 1) / 10 * 100) + "%";
+            let html = q.text.replace(/\[(s\d+)\]/g, (m, id) => `<div class="drop-zone" id="${id}"></div>`);
+            document.getElementById('sentence-box').innerHTML = html;
+            document.getElementById('next-btn').style.display = 'none';
+        }
+
+        function dragStart(e) {
+            playSnd('snd-pick');
+            dragElem = e.target.cloneNode(true);
+            dragElem.style.position = 'fixed'; dragElem.style.zIndex = '1000';
+            dragElem.style.pointerEvents = 'none'; dragElem.style.opacity = '0.8';
+            document.body.appendChild(dragElem);
+            const clientX = e.clientX || e.touches[0].clientX;
+            const clientY = e.clientY || e.touches[0].clientY;
+            updatePos(clientX, clientY);
+            window.onpointermove = (ev) => updatePos(ev.clientX, ev.clientY);
+            window.onpointerup = (ev) => dragEnd(ev);
+        }
+
+        function updatePos(x, y) {
+            if (!dragElem) return;
+            dragElem.style.left = (x - 30) + 'px'; dragElem.style.top = (y - 30) + 'px';
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                const r = zone.getBoundingClientRect();
+                if (x > r.left && x < r.right && y > r.top && y < r.bottom) zone.classList.add('hover');
+                else zone.classList.remove('hover');
+            });
+        }
+
+        function dragEnd(e) {
+            window.onpointermove = null; window.onpointerup = null;
+            const zones = document.querySelectorAll('.drop-zone');
+            zones.forEach(zone => {
+                const r = zone.getBoundingClientRect();
+                if (e.clientX > r.left && e.clientX < r.right && e.clientY > r.top && e.clientY < r.bottom) {
+                    zone.innerText = dragElem.innerText;
+                    zone.classList.add('filled');
+                    playSnd('snd-drop');
+                    checkAnswers();
+                }
+                zone.classList.remove('hover');
+            });
+            if(dragElem) document.body.removeChild(dragElem);
+            dragElem = null;
+        }
+
+        function checkAnswers() {
+            const q = quizQuestions[currentIdx];
+            const zones = document.querySelectorAll('.drop-zone');
+            let correctCount = 0;
+            zones.forEach(z => {
+                if(z.innerText === q.ans[z.id]) {
+                    z.style.color = "#2E7D32"; z.style.borderColor = "#2E7D32";
+                    correctCount++;
+                } else if(z.innerText !== "") {
+                    z.style.color = "#C62828"; z.style.borderColor = "#C62828";
+                }
+            });
+            if(correctCount === Object.keys(q.ans).length) {
+                playSnd('snd-correct');
+                document.getElementById('next-btn').style.display = 'block';
+            }
+        }
+
+        function goToNext() {
+            currentIdx++;
+            if (currentIdx < 10) loadQuestion();
+            else {
+                playSnd('snd-win');
+                document.getElementById('quiz-ui').style.display = 'none';
+                document.getElementById('win-ui').style.display = 'flex';
+            }
+        }
+
+        function playSnd(id) {
+            const s = document.getElementById(id);
+            s.currentTime = 0; s.play().catch(()=>{});
+        }
+
+        shuffleAndPick();
+    </script>
+</body>
+</html>
