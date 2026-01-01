@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>《歷代文言小故事》14、15、16、18、20</title>
+    <style>
+        body { font-family: "Microsoft JhengHei", sans-serif; background: #fdfdfd; display: flex; justify-content: center; padding: 20px; color: #333; }
+        #game-box { background: white; width: 100%; max-width: 850px; padding: 40px; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.1); border-top: 8px solid #2c3e50; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .menu-screen, .quiz-screen, .result-screen { display: none; }
+        .active { display: block; }
+        .btn { display: block; width: 100%; padding: 15px; margin: 10px 0; font-size: 17px; cursor: pointer; border-radius: 8px; border: 1px solid #ddd; background: #fff; transition: 0.2s; text-align: left; }
+        .btn:hover { background: #f0f8ff; border-color: #3498db; }
+        .q-text { font-size: 1.3rem; margin-bottom: 20px; line-height: 1.6; }
+        .target { color: #e74c3c; font-weight: bold; border-bottom: 2px solid #e74c3c; padding: 0 3px; }
+        .feedback { padding: 15px; border-radius: 8px; margin-top: 15px; font-weight: bold; display: none; }
+        .correct { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .wrong { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .nav-btn { background: #2c3e50; color: white; border: none; width: 100%; padding: 15px; margin-top: 20px; cursor: pointer; display: none; font-size: 18px; border-radius: 8px; text-align: center; }
+        .type-tag { background: #7f8c8d; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; margin-bottom: 10px; display: inline-block; }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <div class="header"><h1>📝 文言文考試衝刺：隨機挑戰版</h1></div>
+
+    <div id="menu" class="menu-screen active">
+        <p>請選擇複習單元（題目與選項順序每次皆不同）：</p>
+        <button class="btn" onclick="startQuiz(14)">單元 14. 狐假虎威</button>
+        <button class="btn" onclick="startQuiz(15)">單元 15. 指鹿為馬</button>
+        <button class="btn" onclick="startQuiz(16)">單元 16. 項羽不肯竟學</button>
+        <button class="btn" onclick="startQuiz(18)">單元 18. 霍光輔政</button>
+        <button class="btn" onclick="startQuiz(20)">單元 20. 大樹將軍</button>
+        <button class="btn" style="background:#2c3e50; color:white;" onclick="startQuiz('all')">🏆 模擬考試 (所有題目混合抽樣)</button>
+    </div>
+
+    <div id="quiz" class="quiz-screen">
+        <div id="q-content"></div>
+        <div id="options"></div>
+        <div id="feedback" class="feedback"></div>
+        <button id="next-btn" class="nav-btn" onclick="nextQuestion()">下一題</button>
+    </div>
+
+    <div id="result" class="result-screen">
+        <h2 style="text-align: center;">複習完畢！</h2>
+        <div id="final-score" style="font-size: 40px; text-align: center; margin: 20px 0;"></div>
+        <button class="btn" style="text-align:center" onclick="location.reload()">重新開始 / 返回主選單</button>
+    </div>
+</div>
+
+<script>
+    const database = [
+        // 單元 14：狐假虎威
+        { id: 14, type: "解釋詞義", q: "解釋「虎<span class='target'>求</span>百獸而食之」：", a: "尋找", opts: ["要求", "尋找", "請求", "營救"] },
+        { id: 14, type: "解釋詞義", q: "解釋「虎以為<span class='target'>然</span>」：", a: "對的", opts: ["樣子", "對的", "然後", "果然"] },
+        { id: 14, type: "解釋詞義", q: "解釋「天帝使我<span class='target'>長</span>百獸」：", a: "做長官", opts: ["年長", "做長官", "生長", "擅長"] },
+        { id: 14, type: "解釋詞義", q: "解釋「<span class='target'>逆</span>天帝之命也」：", a: "違背", opts: ["遇見", "接受", "違背", "迎向"] },
+        { id: 14, type: "句子翻譯", q: "翻譯：「虎不知獸畏己而走也，以為畏狐也。」", a: "老虎不知道百獸是害怕牠自己而逃跑的，以為牠們是害怕狐狸。", opts: ["老虎不知道百獸是害怕牠自己而逃跑的，以為牠們是害怕狐狸。", "老虎不知道百獸害怕狐狸，以為是害怕自己。", "老虎以為百獸跑掉是因為狐狸太聰明。"] },
+        { id: 14, type: "問答與填充", q: "狐狸為何說老虎不敢吃牠？", a: "天帝派自己做百獸長官，食之即違背天帝命令", opts: ["天帝派自己做百獸長官，食之即違背天帝命令", "牠是老虎的親友", "牠有毒", "牠比老虎強大"] },
+        { id: 14, type: "問答與填充", q: "百獸見到老虎都嚇得：", a: "落荒而逃", opts: ["落荒而逃", "驚惶而逃", "聞風而逃", "視若無睹"] },
+        { id: 14, type: "語氣與形容", q: "「虎不知獸畏己而走也...」句子帶有什麼語氣？", a: "諷刺", opts: ["疑問", "譴責", "諷刺", "勸喻"] },
+        { id: 14, type: "語氣與形容", q: "下列哪一個詞語可用來形容文中的狐狸？", a: "急中生智", opts: ["急中生智", "落荒而逃", "為虎作倀", "大智若愚"] },
+
+        // 單元 15：指鹿為馬 [cite: 27, 29, 128]
+        { id: 15, type: "解釋詞義", q: "解釋「左右<span class='target'>或</span>默」：", a: "有的 (人)", opts: ["或許", "有的 (人)", "如果", "或者"] },
+        { id: 15, type: "解釋詞義", q: "解釋「問<span class='target'>左右</span>」：", a: "周圍的人", opts: ["左邊和右邊", "周圍的人", "左右手", "控制"] },
+        { id: 15, type: "解釋詞義", q: "解釋「以<span class='target'>阿順</span>趙高」：", a: "阿諛奉承", opts: ["阿諛奉承", "聽從", "反對", "討好"] },
+        { id: 15, type: "解釋詞義", q: "解釋「高因<span class='target'>陰</span>中諸言鹿者」：", a: "暗中", opts: ["暗中", "陰暗", "陰險", "背後"] },
+        { id: 15, type: "句子翻譯", q: "翻譯：「謂鹿為馬。」", a: "將鹿稱之為馬。", opts: ["將鹿稱之為馬。", "說那是一匹馬。", "問那是鹿還是馬。"] },
+        { id: 15, type: "問答理解", q: "趙高為何要持鹿獻給二世？", a: "欲為亂，恐群臣不聽，乃先設驗", opts: ["欲為亂，恐群臣不聽，乃先設驗", "為了逗二世開心", "為了慶祝節日", "展示奇異動物"] },
+
+        // 單元 16：項羽不肯竟學 [cite: 50, 52, 54, 136]
+        { id: 16, type: "解釋詞義", q: "解釋「<span class='target'>去</span>，學劍」：", a: "放棄", opts: ["前往", "放棄", "離開", "除去"] },
+        { id: 16, type: "解釋詞義", q: "解釋「不足記名姓<span class='target'>而已</span>」：", a: "罷了", opts: ["罷了", "所以", "已經", "而且"] },
+        { id: 16, type: "解釋詞義", q: "解釋「又不肯<span class='target'>竟</span>學」：", a: "完 / 到底", opts: ["完 / 到底", "竟然", "最後", "考究"] },
+        { id: 16, type: "句子翻譯", q: "翻譯：「籍大喜，略知其意，又不肯竟學。」", a: "項籍十分高興，粗略知道了兵法的大意，又不肯學到底。", opts: ["項籍十分高興，粗略知道了兵法的大意，又不肯學到底。", "項籍很高興，明白意思後決定停止學習。", "項籍學得很開心，但最後沒有畢業。"] },
+        { id: 16, type: "內容理解", q: "項羽認為「學劍」有什麼缺點？", a: "一人敵，不足學", opts: ["一人敵，不足學", "太難寫字", "劍太重", "容易受傷"] },
+
+        // 單元 18：霍光輔政 [cite: 69, 75, 151]
+        { id: 18, type: "解釋詞義", q: "解釋「政<span class='target'>自</span>己出」：", a: "由 / 從", opts: ["由 / 從", "自己", "親自", "自然"] },
+        { id: 18, type: "解釋詞義", q: "解釋「眾庶莫不<span class='target'>多</span>光」：", a: "稱讚 / 讚美", opts: ["稱稱 / 讚美", "許多", "經常", "數量大"] },
+        { id: 18, type: "解釋詞義", q: "解釋「增此郎<span class='target'>秩</span>二等」：", a: "俸祿", opts: ["俸祿", "官職", "壽命", "財產"] },
+        { id: 18, type: "句子翻譯", q: "翻譯：「臣頭可得，璽不可得也！」", a: "你可以得到我的頭，不可以得到玉璽！", opts: ["你可以得到我的頭，不可以得到玉璽！", "你想要我的頭還是玉璽？", "我的頭和玉璽都給你。"] },
+        { id: 18, type: "內容理解", q: "尚符璽郎為何不肯授光璽印？", a: "守職盡責，認為頭可得而璽不可得", opts: ["守職盡責，認為頭可得而璽不可得", "他不認識霍光", "霍光想要篡位", "他怕被處罰"] },
+
+        // 單元 20：大樹將軍 [cite: 90, 93, 97, 166]
+        { id: 20, type: "解釋詞義", q: "解釋「謙退不<span class='target'>伐</span>」：", a: "誇耀", opts: ["誇耀", "砍伐", "進攻", "討伐"] },
+        { id: 20, type: "解釋詞義", q: "解釋「每所止<span class='target'>舍</span>」：", a: "休息 / 住宿", opts: ["休息 / 住宿", "房屋", "捨棄", "學校"] },
+        { id: 20, type: "解釋詞義", q: "解釋「各有配<span class='target'>隸</span>」：", a: "屬 / 隸屬", opts: ["屬 / 隸屬", "奴隸", "士兵", "徒弟"] },
+        { id: 20, type: "句子翻譯", q: "翻譯：「光武以此多之。」", a: "光武帝因此稱讚他。", opts: ["光武帝因此稱讚他。", "光武帝給他很多賞賜。", "光武帝覺得他很厲害。"] },
+        { id: 20, type: "內容理解", q: "軍中為何稱馮異為「大樹將軍」？", a: "論功時，馮異獨屏樹下，不自誇其功", opts: ["論功時，馮異獨屏樹下，不自誇其功", "他在樹下練武", "他像大樹一樣高大", "他在森林中打勝仗"] }
+    ];
+
+    let currentQset = [];
+    let idx = 0;
+    let score = 0;
+
+    // 洗牌函數（Shuffle array）
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function startQuiz(unit) {
+        // 篩選單元並洗牌題目順序
+        let filtered = unit === 'all' ? [...database] : database.filter(i => i.id === unit);
+        currentQset = shuffle(filtered);
+        
+        idx = 0; score = 0;
+        document.getElementById('menu').className = 'menu-screen';
+        document.getElementById('quiz').className = 'quiz-screen active';
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const item = currentQset[idx];
+        const content = document.getElementById('q-content');
+        content.innerHTML = `<span class='type-tag'>${item.type}</span><div class='q-text'>${item.q}</div>`;
+        
+        const optsDiv = document.getElementById('options');
+        optsDiv.innerHTML = '';
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+
+        // 洗牌選項順序
+        let shuffledOpts = shuffle([...item.opts]);
+
+        shuffledOpts.forEach(o => {
+            const b = document.createElement('button');
+            b.className = 'btn';
+            b.innerText = o;
+            b.onclick = () => check(o, item.a);
+            optsDiv.appendChild(b);
+        });
+    }
+
+    function check(sel, ans) {
+        const fb = document.getElementById('feedback');
+        document.querySelectorAll('#options .btn').forEach(b => b.disabled = true);
+        fb.style.display = 'block';
+        if (sel === ans) {
+            fb.innerText = "✅ 正確！";
+            fb.className = "feedback correct";
+            score++;
+        } else {
+            fb.innerText = "❌ 答錯了。正確答案是：「" + ans + "」";
+            fb.className = "feedback wrong";
+        }
+        document.getElementById('next-btn').style.display = 'block';
+    }
+
+    function nextQuestion() {
+        idx++;
+        if (idx < currentQset.length) showQuestion();
+        else {
+            document.getElementById('quiz').className = 'quiz-screen';
+            document.getElementById('result').className = 'result-screen active';
+            document.getElementById('final-score').innerText = `總得分：${score} / ${currentQset.length}`;
+        }
+    }
+</script>
+</body>
+</html>
