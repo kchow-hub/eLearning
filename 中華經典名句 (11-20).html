@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>中一名句溫習 - iPhone/iPad 修復版</title>
+    <style>
+        :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --error: #e74c3c; --bg: #f8f9fa; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            font-family: -apple-system, "PingFang HK", "Helvetica Neue", sans-serif; 
+            background-color: var(--bg); margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;
+        }
+        .game-card { 
+            width: 100%; max-width: 650px; min-height: 500px; background: white; padding: 30px; border-radius: 24px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08); display: flex; flex-direction: column;
+        }
+        .progress-bar { width: 100%; height: 6px; background: #eee; border-radius: 3px; margin-bottom: 20px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
+        h2 { color: var(--primary); font-size: 1.1em; text-align: center; margin: 0 0 20px 0; opacity: 0.7; }
+        
+        /* 確保題目區域可見 */
+        .question-content { 
+            flex-grow: 1; display: flex; flex-wrap: wrap; justify-content: center; align-content: center;
+            font-size: 1.8em; line-height: 2; color: #2c3e50; text-align: center; gap: 8px; margin: 20px 0;
+        }
+        @media (max-width: 480px) { .question-content { font-size: 1.4em; } input { width: 40px !important; height: 40px !important; } }
+
+        input { 
+            border: 2px solid #dfe6e9; width: 50px; height: 50px; text-align: center; font-size: 1em; 
+            border-radius: 12px; outline: none; background: #fff; transition: 0.2s; -webkit-appearance: none;
+        }
+        input:focus { border-color: var(--accent); background: #f0f7ff; }
+        input.correct { border-color: var(--success); background: #eafaf1; color: var(--success); }
+        input.wrong { border-color: var(--error); background: #fdeded; color: var(--error); }
+
+        .feedback { font-weight: bold; font-size: 1.1em; min-height: 1.5em; text-align: center; margin: 10px 0; }
+        button { 
+            width: 100%; padding: 18px; font-size: 1.1em; cursor: pointer; border: none; border-radius: 16px;
+            font-weight: bold; transition: 0.2s; touch-action: manipulation;
+        }
+        .check-btn { background: var(--primary); color: white; }
+        .next-btn { background: var(--success); color: white; display: none; }
+        .restart-btn { background: var(--accent); color: white; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="game-card">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <h2>中華經典名句 (11-20)</h2>
+    
+    <div class="question-content" id="question-box">載入中...</div>
+    <div class="feedback" id="feedback"></div>
+
+    <div class="footer-btns">
+        <button class="check-btn" id="check-btn" onclick="checkCurrentAnswer()">檢查答案 [cite: 80]</button>
+        <button class="next-btn" id="next-btn" onclick="nextQuestion()">下一題 [cite: 80]</button>
+        <button class="restart-btn" id="restart-btn" onclick="location.reload()">再玩一次 [cite: 80]</button>
+    </div>
+</div>
+
+<script>
+    const sentences = [
+        "採菊東籬下，悠然見南山。", // 11 
+        "明月松間照，清泉石上流。竹喧歸浣女，蓮動下漁舟。", // 12 
+        "山不在高，有仙則名。水不在深，有龍則靈。斯是陋室，惟吾德馨。", // 13 
+        "悠悠乎與顥氣俱，而莫得其涯；洋洋乎與造物者遊，而不知其所窮。", // 14 
+        "父母之年，不可不知也。一則以喜，一則以懼。", // 15 
+        "誰言寸草心，報得三春暉。", // 16 
+        "思爾為雛日，高飛背母時。當時父母念，今日爾應知！", // 17 
+        "百鳥豈無母？爾獨哀怨深。應是母慈重，使爾悲不任。", // 18 
+        "海內存知己，天涯若比鄰。", // 19 
+        "每逢佳節倍思親。" // 20 
+    ];
+
+    let currentIndex = 0;
+    let score = 0;
+
+    function loadQuestion() {
+        const box = document.getElementById('question-box');
+        const feedback = document.getElementById('feedback');
+        const progressFill = document.getElementById('progress-fill');
+        const text = sentences[currentIndex];
+        
+        progressFill.style.width = `${((currentIndex + 1) / 10) * 100}%`;
+        feedback.innerText = "";
+        box.innerHTML = "";
+        
+        let chars = text.split("");
+        let indices = chars.map((c, i) => /[，。？！；、]/.test(c) ? -1 : i).filter(i => i !== -1);
+        let numToHide = Math.min(3, Math.max(1, Math.floor(indices.length * 0.3)));
+        let hiddenIndices = indices.sort(() => 0.5 - Math.random()).slice(0, numToHide);
+
+        chars.forEach((char, i) => {
+            if (hiddenIndices.includes(i)) {
+                const input = document.createElement('input');
+                input.type = "text";
+                input.maxLength = 1;
+                input.dataset.ans = char;
+                input.setAttribute('inputmode', 'text');
+                input.oninput = function() {
+                    if(this.value.length === 1) {
+                        const all = Array.from(document.querySelectorAll('input'));
+                        const nextIdx = all.indexOf(this) + 1;
+                        if(all[nextIdx]) all[nextIdx].focus();
+                    }
+                };
+                box.appendChild(input);
+            } else {
+                const span = document.createElement('span');
+                span.innerText = char;
+                box.appendChild(span);
+            }
+        });
+
+        document.getElementById('check-btn').style.display = "block";
+        document.getElementById('next-btn').style.display = "none";
+    }
+
+    function checkCurrentAnswer() {
+        const inputs = document.querySelectorAll('#question-box input');
+        let isCorrect = true;
+        inputs.forEach(input => {
+            if (input.value === input.dataset.ans) { input.classList.add('correct'); } 
+            else { input.classList.add('wrong'); isCorrect = false; }
+            input.disabled = true;
+        });
+
+        const feedback = document.getElementById('feedback');
+        if (isCorrect) { feedback.innerText = "正確！✨"; feedback.style.color = "var(--success)"; score++; } 
+        else { feedback.innerText = `答案：${Array.from(inputs).map(i=>i.dataset.ans).join(',')}`; feedback.style.color = "var(--error)"; }
+
+        document.getElementById('check-btn').style.display = "none";
+        document.getElementById('next-btn').style.display = "block";
+    }
+
+    function nextQuestion() {
+        if (currentIndex < 9) { currentIndex++; loadQuestion(); } 
+        else { showFinalResult(); }
+    }
+
+    function showFinalResult() {
+        document.getElementById('title').innerText = "練習完畢";
+        document.getElementById('question-box').innerHTML = `<div style="width:100%">總得分<br><span style="font-size:2.5em; color:var(--accent);">${score}</span> / 10</div>`;
+        document.getElementById('next-btn').style.display = "none";
+        document.getElementById('restart-btn').style.display = "block";
+        document.getElementById('feedback').innerText = score >= 8 ? "表現優秀！🎉" : "繼續加油！";
+    }
+
+    // 確保 DOM 載入後執行
+    document.addEventListener('DOMContentLoaded', loadQuestion);
+</script>
+
+</body>
+</html>
