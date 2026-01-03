@@ -3,125 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SRL《中一成語名言警句手冊》考試溫習</title>
+    <title>中一成語應試助手</title>
     <style>
-        :root { --primary: #5856d6; --bg: #f2f2f7; --card: #ffffff; --success: #34c759; --error: #ff3b30; }
+        :root { --primary: #007aff; --bg: #f2f2f7; --card: #ffffff; --success: #34c759; --error: #ff3b30; }
         body { margin: 0; padding: 0; font-family: -apple-system, sans-serif; background-color: var(--bg); color: #000; height: 100vh; overflow: hidden; }
-        .app-container { width: 100%; max-width: 500px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; position: relative; }
-        .screen { flex: 1; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .app-container { width: 100%; max-width: 500px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; }
+        .screen { flex: 1; display: flex; flex-direction: column; padding: 25px; box-sizing: border-box; overflow-y: auto; }
         .hidden { display: none !important; }
         .card { background: var(--card); border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; text-align: center; }
-        .btn { background: var(--primary); color: white; border: none; border-radius: 12px; padding: 16px; font-size: 18px; font-weight: 600; margin: 8px 0; width: 100%; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .btn { background: var(--primary); color: white; border: none; border-radius: 12px; padding: 18px; font-size: 18px; font-weight: 600; margin: 10px 0; width: 100%; cursor: pointer; -webkit-tap-highlight-color: transparent; }
         .btn-outline { background: none; color: var(--primary); border: 2px solid var(--primary); }
-        .toolbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; background: rgba(242,242,247,0.8); backdrop-filter: blur(10px); z-index: 100; }
-        .sentence { font-size: 1.15rem; line-height: 1.6; margin: 20px 0; min-height: 80px; color: #3a3a3c; text-align: left; }
-        .hint-text { background: #e5e5ea; padding: 12px; border-radius: 10px; letter-spacing: 5px; font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; text-align: center; }
-        input { width: 90%; padding: 15px; font-size: 1.4rem; border: 2px solid #d1d1d6; border-radius: 15px; text-align: center; outline: none; -webkit-appearance: none; }
-        .list-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; text-align: left; border-left: 5px solid var(--primary); }
-        .list-item b { color: var(--primary); font-size: 1.1rem; }
+        .sentence { font-size: 1.2rem; line-height: 1.7; margin: 20px 0; color: #1c1c1e; text-align: left; }
+        .hint-text { background: #e5e5ea; padding: 15px; border-radius: 12px; letter-spacing: 5px; font-size: 1.3rem; font-weight: bold; margin-bottom: 20px; }
+        input { width: 100%; padding: 15px; font-size: 1.5rem; border: 2px solid #d1d1d6; border-radius: 15px; text-align: center; outline: none; box-sizing: border-box; -webkit-appearance: none; }
+        
+        /* List Style */
+        .list-item { background: white; padding: 18px; border-radius: 15px; margin-bottom: 15px; text-align: left; border-left: 6px solid var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .list-item b { color: var(--primary); font-size: 1.2rem; display: block; margin-bottom: 5px; }
+        .list-item .def { color: #d9534f; font-weight: 600; font-size: 0.95rem; margin-bottom: 5px; }
+        .list-item .eg { color: #636366; font-size: 0.9rem; font-style: italic; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <div class="toolbar">
-        <span style="font-weight: bold;">中一語文助手</span>
-        <button onclick="toggleSound()" id="sound-btn" style="border:none; background:none; font-size:24px;">🔊</button>
-    </div>
-
     <div id="scr-cover" class="screen">
-        <div class="card" style="margin-top: 20px;">
-            <div style="font-size: 60px;">📖</div>
-            <h1>親情與孝道</h1>
-            <p style="color: #8e8e93;">單元三及單元四成語清單</p>
+        <div class="card" style="margin-top: 40px;">
+            <div style="font-size: 60px;">📚</div>
+            <h1 style="font-size: 28px;">中一語文學霸</h1>
+            <p style="color: #8e8e93;">單元三、四：親情與孝道</p>
         </div>
-        <button class="btn" onclick="initAndShowLevel()">啟動並開始練習</button>
-        <button class="btn btn-outline" onclick="showSummary()">成語總覽 (Full List)</button>
+        <button class="btn" onclick="initAudioAndShowLevel()">開始練習 (10題)</button>
+        <button class="btn btn-outline" onclick="showSummary()">成語總覽 (含解釋)</button>
     </div>
 
     <div id="scr-level" class="screen hidden">
-        <button onclick="showHome()" style="background:none; border:none; color:var(--primary); text-align:left; font-size:18px;">← 返回</button>
+        <button onclick="showHome()" style="background:none; border:none; color:var(--primary); text-align:left; font-size:18px; padding: 10px 0;">← 返回</button>
         <h2 style="text-align:center;">選擇練習模式</h2>
-        <button class="btn" onclick="startGame(1)">Level 1 (手冊原句)</button>
-        <button class="btn" onclick="startGame(2)" style="background:#af52de">Level 2 (全新應用)</button>
+        <button class="btn" onclick="startGame(1)">Level 1 (手冊原句練習)</button>
+        <button class="btn" onclick="startGame(2)" style="background:#af52de">Level 2 (全新情境應用)</button>
     </div>
 
     <div id="scr-game" class="screen hidden">
-        <div id="progress" style="text-align:center; color:#8e8e93; margin-bottom:10px;"></div>
+        <div id="progress" style="text-align:center; color:#8e8e93; margin-bottom:15px; font-weight: 600;"></div>
         <div class="card">
             <div id="q-text" class="sentence"></div>
             <div id="q-hint" class="hint-text"></div>
             <input type="text" id="ans-input" placeholder="請輸入答案" autocomplete="off">
-            <div id="feedback" style="margin-top:15px; font-weight:bold; height:20px;"></div>
+            <div id="feedback" style="margin-top:20px; font-weight:bold; min-height:24px;"></div>
         </div>
         <button class="btn" onclick="checkAnswer()">提交答案</button>
     </div>
 
     <div id="scr-summary" class="screen hidden">
-        <button onclick="showHome()" style="background:none; border:none; color:var(--primary); text-align:left; font-size:18px; margin-bottom:10px;">← 返回主頁</button>
+        <button onclick="showHome()" style="background:none; border:none; color:var(--primary); text-align:left; font-size:18px; margin-bottom: 15px;">← 返回主頁</button>
+        <h2 style="margin-bottom: 20px;">成語/名言 完整清單</h2>
         <div id="full-list-content"></div>
     </div>
 
     <div id="scr-result" class="screen hidden">
         <div class="card" style="margin-top:40px;">
-            <h1 id="res-score"></h1>
-            <p id="res-msg"></p>
+            <h1 id="res-score" style="font-size: 48px; color: var(--primary);"></h1>
+            <p id="res-msg" style="font-size: 20px;"></p>
         </div>
-        <button class="btn" onclick="showHome()">回主頁</button>
+        <button class="btn" onclick="showHome()">返回主頁</button>
     </div>
 </div>
 
-<audio id="snd-ok" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
-<audio id="snd-no" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3"></audio>
+<audio id="snd-correct" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3" preload="auto"></audio>
+<audio id="snd-wrong" src="https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3" preload="auto"></audio>
 
 <script>
+// 完整數據庫：包含解釋與例句 
 const idiomBank = [
-    // 單元三數據 [cite: 2]
-    { word: "禍不單行", lv1: "他今天弄丟了錢包，還遺失了智能電話，真是______。", lv2: "剛丟了工作又生了一場重病，真是______。" },
-    { word: "來來往往", lv1: "每逢假日，樂園的穿梭巴士______接載遊客。", lv2: "旺角街頭人流______，熱鬧非凡。" },
-    { word: "東奔西走", lv1: "叔叔為了處理這次商業糾紛______，幸好最終能順利解決。", lv2: "為了尋找失蹤的貓兒，他在社區______了一整天。" },
-    { word: "掌上明珠", lv1: "表妹是舅父舅母的______，她想要甚麼，舅父舅母都會滿足她。", lv2: "小明是家中的獨生子，自然是父母的______。" },
-    { word: "舉目無親", lv1: "他獨自到海外升學，在當地______，十分掛念家中的雙親。", lv2: "隻身到異地打拼的他，感到十分寂寞且______。" },
-    { word: "煮豆燃萁", lv1: "這對兄弟為了家財而______，讓父母痛心難過。", lv2: "為了一點小利而手足相殘，簡直是______。" },
-    { word: "無微不至", lv1: "父母______地照顧我們，我們難以報答他們。", lv2: "醫護人員對患者的關照真是______。" },
-    { word: "相依為命", lv1: "家寶自小由祖母照顧，她們______，所以感情非常深厚。", lv2: "戰後這對孤兒兄妹只能______。" },
-    { word: "寸草春暉", lv1: "人們常說「______」，即使我們盡心盡力，也難以報答父母的養育之恩。", lv2: "父母恩情重如山，為人子者當懷______。" },
-    { word: "父慈子孝", lv1: "張先生三代同堂，______，一家幸福快樂地生活。", lv2: "幸福家庭的秘訣往往在於______。" },
-    { word: "樹欲靜而風不止，子欲養而親不在。", lv1: "「______」，因此我們要好好孝順父母，別讓日後後悔莫及。", lv2: "莫待雙親離去才遺憾「______」。" },
-    { word: "老吾老，以及人之老；幼吾幼，以及人之幼。", lv1: "假如人人做到「______」，不但能使家庭和睦，還能令社會達致和諧。", lv2: "這種推己及人的博愛精神正是「______」。" },
-    // 單元四數據 [cite: 4]
-    { word: "撲朔迷離", lv1: "這宗博物館失竊案______，轟動了全城。", lv2: "這部偵探小說的結局真是______，難以捉摸。" },
-    { word: "天倫之樂", lv1: "每逢假日，大批市民扶老攜幼，來到這個公園共敍______。", lv2: "假日與父母去郊遊，最能享受______。" },
-    { word: "遠走高飛", lv1: "你怎能丟下父母不理，自己______！", lv2: "他希望能放下一切，一個人去流浪，______。" },
-    { word: "慈烏反哺", lv1: "父母對我們有養育之恩，我們應當效法烏鴉，做到______。", lv2: "供養年邁的父母是為人子女應有的______之心。" },
-    { word: "孝子賢孫", lv1: "每逢清明節，便有大批______前往掃墓。", lv2: "他在村裡可是出名的______，對父母非常恭順。" },
-    { word: "任勞任怨", lv1: "媽媽______地照顧我們，我長大後一定要好好報答她。", lv2: "這位老員工在公司服務多年，一向______。" },
-    { word: "含辛茹苦", lv1: "這位母親長年累月______地照顧患病的孩子，令人敬佩。", lv2: "父母______把我們帶大，我們一定要好好報答。" },
-    { word: "慎終追遠", lv1: "人們在清明節掃墓祭祖，體現了______的精神。", lv2: "中華傳統文化非常講究祭祖和______。" },
-    { word: "翩翩起舞", lv1: "隨着悠揚的音樂響起，大家跟着拍子______。", lv2: "彩蝶在花叢中______。" },
-    { word: "每逢佳節倍思親。", lv1: "「______」，中秋節可說是最容易勾起遊子思鄉情懷的節日。", lv2: "獨自在外求學的人，在春節最能體會「______」。" }
+    { word: "禍不單行", def: "指不幸的事接連發生。", lv1: "他今天弄丟了錢包，還遺失了智能電話，真是______。", lv2: "剛丟了工作，家裡又遇上漏水，真是______。" },
+    { word: "來來往往", def: "形容不斷的往來。", lv1: "每逢假日，樂園的穿梭巴士______接載遊客。", lv2: "機場大廳人潮______，大家都趕著出國。" },
+    { word: "東奔西走", def: "形容四處奔走或為某個目的而到處活動。", lv1: "叔叔為了處理這次商業糾紛______，幸好最終能順利解決。", lv2: "為了替生病的母親籌醫藥費，他到處______。" },
+    { word: "掌上明珠", def: "比喻父母特別疼愛的女兒。", lv1: "表妹是舅父舅母的______，她想要甚麼，舅父舅母都會滿足她。", lv2: "他是家中的獨生女，自然被視為父母的______。" },
+    { word: "舉目無親", def: "沒有一個親人。形容孤苦無依。", lv1: "他獨自到海外升學，在當地______，十分掛念家中的雙親。", lv2: "隻身到異地打拼的他，深感孤獨，______。" },
+    { word: "煮豆燃萁", def: "比喻兄弟相逼，不顧親情，骨肉相殘。", lv1: "這對兄弟為了家財而______，讓父母痛心難過。", lv2: "為了遺產而鬧上法庭，兄弟相殘，簡直是______。" },
+    { word: "無微不至", def: "照顧到每一項細節。形容非常仔細。", lv1: "父母______地照顧我們，我們難以報答他們。", lv2: "護士對病人照顧得______，深受大家感激。" },
+    { word: "相依為命", def: "彼此依靠地生活。", lv1: "家寶自小由祖母照顧，她們______，所以感情非常深厚。", lv2: "這對老夫婦沒有子女，幾十年來一直______。" },
+    { word: "寸草春暉", def: "以小草比喻子女，春暉比喻母愛。指子女難以報答父母深重恩情。", lv1: "人們常說「______」，即使我們盡心盡力，也難以報答父母的養育之恩。", lv2: "每當想起父母的操勞，就深感______之情。" },
+    { word: "父慈子孝", def: "父親仁慈，疼愛子女；兒女孝順父母。", lv1: "張先生三代同堂，______，一家幸福快樂地生活。", lv2: "只要全家人和睦相處、______，家庭就會幸福。" },
+    { word: "樹欲靜而風不止，子欲養而親不在。", def: "形容世事不能如人意，子女欲盡孝時父母已不在。", lv1: "「______」，因此我們要好好孝順父母，別讓日後後悔莫及。", lv2: "不要等到父母離開後才感嘆「______」。" },
+    { word: "老吾老，以及人之老；幼吾幼，以及人之幼。", def: "尊敬自己的長輩，擴展到尊敬其他長者；關愛自己的孩子，推擴至愛護別人的孩子。", lv1: "假如人人做到「______」，不但能使家庭和睦，還能令社會達致和諧。", lv2: "這種推己及人的博愛精神，就是「______」。" },
+    { word: "撲朔迷離", def: "形容事情錯綜複雜，不易看清真相。", lv1: "這宗博物館失竊案______，轟動了全城。", lv2: "這部偵探小說的案情______，讓讀者猜不到真兇。" },
+    { word: "天倫之樂", def: "指家人團聚時的歡樂。", lv1: "每逢假日，大批市民扶老攜幼，來到這個公園共敍______。", lv2: "新年期間全家歡聚吃團年飯，共享______。" },
+    { word: "遠走高飛", def: "逃避到遠處去。", lv1: "你怎能丟下父母不理，自己______！", lv2: "他為了追求夢想，決定離開家鄉，獨自______。" },
+    { word: "慈烏反哺", def: "比喻子女報答父母的養育之恩。", lv1: "父母對我們有養育之恩，我們應當效法烏鴉，做到______。", lv2: "為人子女應盡孝道，實踐______的精神。" },
+    { word: "孝子賢孫", def: "謹守孝道的賢德子孫。", lv1: "每逢清明節，便有大批______前往掃墓。", lv2: "他是鄰里間公認的______，對長輩非常恭順。" },
+    { word: "任勞任怨", def: "做事不辭勞苦，不怕埋怨。", lv1: "媽媽______地照顧我們，我長大後一定要好好報答她。", lv2: "他在基層崗位上工作多年，一向______。" },
+    { word: "含辛茹苦", def: "忍受各種辛苦。", lv1: "這位母親長年累月______地照顧患病的孩子，令人敬佩。", lv2: "父母親______地供養我們讀書，我們必須心存感激。" },
+    { word: "慎終追遠", def: "慎重辦理喪事，誠心追念遠祖。", lv1: "人們在清明節掃墓祭祖，體現了______的精神。", lv2: "掃墓不僅是習俗，更是中華文化______的體現。" },
+    { word: "翩翩起舞", def: "輕盈飄逸地跳舞。", lv1: "隨着悠揚的音樂響起，大家跟着拍子______。", lv2: "美麗的蝴蝶在花叢中______。" },
+    { word: "每逢佳節倍思親。", def: "一個作客他鄉的人，每當佳節來臨時，就會加倍思念遠方的家人。", lv1: "「______」，中秋節可說是最容易勾起遊子思鄉情懷的節日。", lv2: "隻身在國外工作，農曆新年時最能感受「______」。" }
 ];
 
-let currentLevel = 1, currentQs = [], qIdx = 0, score = 0, soundOn = true;
-
-// --- iOS 音效修復關鍵步驟 ---
-function initAndShowLevel() {
-    // 當用戶點擊按鈕時，靜音播放一下音效以「解鎖」iOS 的音效開關
-    const s1 = document.getElementById('snd-ok');
-    const s2 = document.getElementById('snd-no');
-    s1.play().then(() => { s1.pause(); s1.currentTime = 0; });
-    s2.play().then(() => { s2.pause(); s2.currentTime = 0; });
-    
-    showLevel();
-}
+let currentLevel = 1, currentQs = [], qIdx = 0, score = 0;
 
 function showHome() { document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden')); document.getElementById('scr-cover').classList.remove('hidden'); }
 function showLevel() { document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden')); document.getElementById('scr-level').classList.remove('hidden'); }
-function toggleSound() { soundOn = !soundOn; document.getElementById('sound-btn').innerText = soundOn ? "🔊" : "🔈"; }
+
+// 初始化 iOS 音效並進入難度選擇
+function initAudioAndShowLevel() {
+    // 預播放解鎖 iOS 靜音限制
+    const c = document.getElementById('snd-correct');
+    const w = document.getElementById('snd-wrong');
+    c.play().then(() => { c.pause(); c.currentTime = 0; });
+    w.play().then(() => { w.pause(); w.currentTime = 0; });
+    showLevel();
+}
 
 function showSummary() {
     const cont = document.getElementById('full-list-content');
-    cont.innerHTML = idiomBank.map(i => `<div class="list-item"><b>${i.word}</b><p>${i.lv1}</p></div>`).join('');
+    // 生成包含解釋的清單 
+    cont.innerHTML = idiomBank.map(i => `
+        <div class="list-item">
+            <b>${i.word}</b>
+            <div class="def">【解釋】：${i.def}</div>
+            <div class="eg">【例句】：${i.lv1}</div>
+        </div>
+    `).join('');
     document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
     document.getElementById('scr-summary').classList.remove('hidden');
 }
@@ -136,15 +139,18 @@ function startGame(lv) {
 
 function loadQ() {
     const q = currentQs[qIdx];
-    document.getElementById('progress').innerText = `題目 ${qIdx + 1} / 10`;
+    document.getElementById('progress').innerText = `進度：${qIdx + 1} / 10`;
     document.getElementById('q-text').innerText = (currentLevel === 1) ? q.lv1 : q.lv2;
     
-    // 生成隨機提示
-    const r = Math.floor(Math.random()*4);
-    let h = ["□","□","□","□"]; 
-    if(q.word.length <= 4) { h[r] = q.word[r]; } else { h = ["名","言","句"]; }
-    
+    let h = ["□","□","□","□"];
+    if(q.word.length <= 4) {
+        const r = Math.floor(Math.random()*4);
+        h[r] = q.word[r];
+    } else {
+        h = ["名","言","警","句"];
+    }
     document.getElementById('q-hint').innerText = "提示：" + h.join(" ");
+    
     document.getElementById('ans-input').value = "";
     document.getElementById('feedback').innerText = "";
     document.getElementById('ans-input').focus();
@@ -156,12 +162,15 @@ function checkAnswer() {
     const fb = document.getElementById('feedback');
     
     if (user === correct) {
-        score++; fb.style.color = "var(--success)"; fb.innerText = "正確！👏";
-        if(soundOn) document.getElementById('snd-ok').play();
+        score++;
+        fb.style.color = "var(--success)";
+        fb.innerText = "答對了！👏";
+        document.getElementById('snd-correct').play();
         setTimeout(next, 1000);
     } else {
-        fb.style.color = "var(--error)"; fb.innerText = "正確答案：" + correct;
-        if(soundOn) document.getElementById('snd-no').play();
+        fb.style.color = "var(--error)";
+        fb.innerText = "答錯了！答案是：" + correct;
+        document.getElementById('snd-wrong').play();
         setTimeout(next, 2500);
     }
 }
@@ -170,14 +179,16 @@ function next() {
     qIdx++;
     if(qIdx < 10) loadQ();
     else {
-        document.getElementById('res-score').innerText = `得分：${score} / 10`;
-        document.getElementById('res-msg').innerText = score >= 8 ? "表現出色！繼續保持！" : "再多溫習清單，加油！";
+        document.getElementById('res-score').innerText = `${score} / 10`;
+        document.getElementById('res-msg').innerText = score >= 8 ? "你是成語小專家！" : "再多温習清單，加油！";
         document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
         document.getElementById('scr-result').classList.remove('hidden');
     }
 }
 
-document.getElementById('ans-input').addEventListener('keypress', (e)=>{if(e.key==='Enter') checkAnswer();});
+// 監聽 Enter 鍵提交
+document.getElementById('ans-input').addEventListener('keypress', (e)=>{ if(e.key==='Enter') checkAnswer(); });
 </script>
+
 </body>
 </html>
