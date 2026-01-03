@@ -3,54 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>小二古詩文大挑戰</title>
+    <title>小二古詩挑戰 - 修正版</title>
     <style>
-        :root { --blue: #4A90E2; --green: #48BB78; --red: #F56565; }
-        body { font-family: "PingFang TC", sans-serif; background: #F0F4F8; margin: 0; padding: 10px; display: flex; justify-content: center; touch-action: none; overflow: hidden; }
-        .container { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 95vw; max-width: 600px; height: 95vh; display: flex; flex-direction: column; border: 4px solid #BEE3F8; }
-        h1 { font-size: 1.4rem; text-align: center; color: #2D3748; margin: 5px 0; }
-        .feedback { text-align: center; font-size: 1.5rem; font-weight: bold; height: 2.2rem; margin-bottom: 5px; transition: all 0.2s; }
-        #game-box { flex-grow: 1; position: relative; background: #EDF2F7; border-radius: 15px; padding: 5px; overflow: hidden; }
-        .line { 
-            position: absolute; width: calc(100% - 30px); left: 15px;
-            background: white; padding: 15px 5px; border: 2px solid #CBD5E0; 
-            border-radius: 12px; font-size: 1.2rem; text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: top 0.2s ease;
-            touch-action: none; z-index: 10; user-select: none; font-weight: bold;
-        }
-        .line.active { z-index: 100; border-color: var(--blue); box-shadow: 0 8px 15px rgba(0,0,0,0.2); transition: none; background: #EBF8FF; }
-        .quiz-container { display: flex; flex-direction: column; height: 100%; justify-content: flex-start; padding-top: 10px; }
-        .opt { background: white; margin: 6px 0; padding: 14px; border-radius: 12px; font-size: 1.1rem; border: 2px solid #E2E8F0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        :root { --blue: #4A90E2; --green: #48BB78; --red: #F56565; --bg: #F0F4F8; }
+        body { font-family: "PingFang TC", sans-serif; background: var(--bg); margin: 0; padding: 10px; display: flex; justify-content: center; touch-action: none; overflow: hidden; }
+        .container { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 95vw; max-width: 650px; height: 95vh; display: flex; flex-direction: column; border: 4px solid #BEE3F8; }
+        h1 { font-size: 1.3rem; text-align: center; color: #2D3748; margin: 5px 0; }
+        .feedback { text-align: center; font-size: 1.4rem; font-weight: bold; height: 2rem; margin-bottom: 5px; }
+        #game-box { flex-grow: 1; position: relative; background: #EDF2F7; border-radius: 15px; padding: 10px; overflow-y: auto; }
+        .line { position: absolute; width: calc(100% - 40px); left: 20px; background: white; padding: 16px 5px; border: 2px solid #CBD5E0; border-radius: 12px; font-size: 1.15rem; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: top 0.2s ease; touch-action: none; z-index: 10; font-weight: bold; }
+        .line.active { z-index: 100; border-color: var(--blue); background: #EBF8FF; transition: none; }
+        .poem-ref { background: #FFF9C4; padding: 12px; border-radius: 10px; border: 1px solid #FFF176; font-size: 1.15rem; line-height: 1.6; text-align: center; margin-bottom: 15px; font-weight: bold; color: #5D4037; white-space: pre-wrap; }
+        .q-text { font-size: 1.1rem; font-weight: bold; margin-bottom: 10px; color: #2D3748; padding: 0 5px; }
+        .opt { background: white; margin: 8px 0; padding: 14px; border-radius: 12px; font-size: 1.05rem; border: 2px solid #E2E8F0; cursor: pointer; }
         .opt.selected { background: #FEEBC8; border-color: #ED8936; }
-        .btn { background: var(--blue); color: white; border: none; padding: 16px; border-radius: 50px; font-size: 1.3rem; font-weight: bold; margin-top: 10px; box-shadow: 0 4px 0 #2B6CB0; }
-        .hidden { display: none !important; }
+        .btn { background: var(--blue); color: white; border: none; padding: 16px; border-radius: 50px; font-size: 1.2rem; font-weight: bold; margin-top: 10px; box-shadow: 0 4px 0 #2B6CB0; }
     </style>
 </head>
 <body>
-
 <div class="container">
     <h1 id="lvl-title">讀取中...</h1>
     <div id="feedback" class="feedback"></div>
-    
     <div id="game-box"></div>
-
     <button id="main-btn" class="btn" onclick="handleMainClick()">檢查排序 ✅</button>
 </div>
 
 <script>
-    // 音效控制系統
     const SFX = {
         ctx: new (window.AudioContext || window.webkitAudioContext)(),
-        play(freq, type, duration, ramp = true) {
-            const osc = this.ctx.createOscillator();
-            const g = this.ctx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-            if(ramp) osc.frequency.exponentialRampToValueAtTime(freq/2, this.ctx.currentTime + duration);
-            g.gain.setValueAtTime(0.1, this.ctx.currentTime);
-            g.gain.linearRampToValueAtTime(0, this.ctx.currentTime + duration);
-            osc.connect(g); g.connect(this.ctx.destination);
-            osc.start(); osc.stop(this.ctx.currentTime + duration);
+        play(f, t, d, r=true) {
+            const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
+            o.type = t; o.frequency.setValueAtTime(f, this.ctx.currentTime);
+            if(r) o.frequency.exponentialRampToValueAtTime(f/2, this.ctx.currentTime + d);
+            g.gain.setValueAtTime(0.1, this.ctx.currentTime); g.gain.linearRampToValueAtTime(0, this.ctx.currentTime + d);
+            o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime + d);
         },
         correct() { this.play(523, 'sine', 0.3, false); setTimeout(()=>this.play(880, 'sine', 0.4, false), 100); },
         wrong() { this.play(150, 'sawtooth', 0.5); },
@@ -60,31 +46,34 @@
     const data = [
         {
             title: "《蜂》羅隱",
+            full: "不論平地與山尖，\n無限風光盡被佔。\n採得百花成蜜後，\n為誰辛苦為誰甜！",
             lines: ["不論平地與山尖，", "無限風光盡被佔。", "採得百花成蜜後，", "為誰辛苦為誰甜！"],
             qs: [
                 { q: "第一、二句主要寫了什麼？", opts: ["A. 郊外美麗的風光", "B. 蜂蜜的香甜", "C. 蜜蜂採蜜的場景", "D. 詩人對蜜蜂的讚美"], ans: 0 },
                 { q: "「甜」呼應第三句中的哪個詞？", opts: ["百花", "蜜", "採", "後"], ans: 1 },
-                { q: "詩中讚美蜜蜂什麼精神？(選二)", opts: ["辛勤勞動", "志向遠大", "顧全大局", "默默奉獻", "迎難而上"], ans: [0, 3], multi: true }
+                { q: "這首詩讚美了蜜蜂什麼精神？(選二)", opts: ["辛勤勞動", "志向遠大", "顧全大局", "默默奉獻", "迎難而上"], ans: [0, 3], multi: true }
             ]
         },
         {
             title: "《守株待兔》韓非子",
+            // 修正標點：只有最後一句是句號
+            full: "宋人有耕者，田中有株，\n兔走觸株，折頸而死，\n因釋其耒而守株，冀復得兔，\n兔不可復得，而身為宋國笑。",
             lines: ["宋人有耕者，田中有株，", "兔走觸株，折頸而死，", "因釋其耒而守株，冀復得兔，", "兔不可復得，而身為宋國笑。"],
             qs: [
                 { q: "文中哪一個詞與「農夫」意思相同？", opts: ["耕者", "宋人", "其", "株"], ans: 0 },
-                { q: "「復得」的意思是什麼？", opts: ["失去了", "最後得到", "再一次得到"], ans: 2 },
-                { q: "農夫撿到兔子後，他怎樣做？", opts: ["A. 在周圍設置陷阱", "B. 不再耕種，等待兔子撞死"], ans: 1 },
-                { q: "哪一項描述是正確的？", opts: ["A. 農夫意外撿到兔子", "B. 農夫把田地都賣了"], ans: 0 }
+                { q: "「復得」的意思是什麼？", opts: ["再一次得到", "最後得到", "失去了"], ans: 0 },
+                { q: "農夫撿到兔子後，他怎樣做？", opts: ["A. 在周圍設置很多陷阱", "B. 不再耕種，等待兔子撞死"], ans: 1 },
+                { q: "根據內容，哪一項描述正確？", opts: ["A. 農夫意外撿到兔子", "B. 農夫把田地都賣了"], ans: 0 }
             ]
         },
         {
             title: "《畫雞》唐寅",
+            full: "頭上紅冠不用裁，\n滿身雪白走將來。\n平生不敢輕言語，\n一叫千門萬戶開。",
             lines: ["頭上紅冠不用裁，", "滿身雪白走將來。", "平生不敢輕言語，", "一叫千門萬戶開。"],
             qs: [
                 { q: "公雞走路的樣子是？", opts: ["A. 快如閃電", "B. 精神抖擻", "C. 跌跌撞撞"], ans: 1 },
                 { q: "判斷：公雞平日經常啼叫嗎？", opts: ["正確", "錯誤"], ans: 1 },
-                { q: "公雞啼叫時聲音響亮嗎？", opts: ["正確", "錯誤"], ans: 0 },
-                { q: "哪些性格值得表揚？(選二)", opts: ["公平", "勇敢", "負責任", "有恩必報", "堅守崗位"], ans: [2, 4], multi: true }
+                { q: "公雞哪些性格值得表揚？(選二)", opts: ["公平", "勇敢", "負責任", "有恩必報", "堅守崗位"], ans: [2, 4], multi: true }
             ]
         }
     ];
@@ -95,101 +84,54 @@
         isQuiz = false; curQ = 0;
         document.getElementById('lvl-title').innerText = data[curLvl].title;
         document.getElementById('main-btn').innerText = "檢查排序 ✅";
-        document.getElementById('main-btn').style.opacity = "1";
-        const gameBox = document.getElementById('game-box');
-        gameBox.innerHTML = ""; elements = [];
-        
+        document.getElementById('main-btn').style.display = "block";
+        const box = document.getElementById('game-box'); box.innerHTML = ""; elements = [];
         let shuffled = [...data[curLvl].lines].sort(() => Math.random() - 0.5);
-        shuffled.forEach((txt, i) => {
-            const el = document.createElement('div');
-            el.className = 'line';
-            el.innerText = txt;
-            el.style.top = (i * 75 + 15) + "px";
-            el.addEventListener('touchstart', touchStart, {passive: false});
-            el.addEventListener('touchmove', touchMove, {passive: false});
-            el.addEventListener('touchend', touchEnd);
-            gameBox.appendChild(el);
-            elements.push(el);
+        shuffled.forEach((t, i) => {
+            const el = document.createElement('div'); el.className = 'line'; el.innerText = t; el.style.top = (i * 75 + 15) + "px";
+            el.addEventListener('touchstart', touchStart, {passive: false}); el.addEventListener('touchmove', touchMove, {passive: false}); el.addEventListener('touchend', touchEnd);
+            box.appendChild(el); elements.push(el);
         });
     }
 
     let startY, startTop, active = null;
-    function touchStart(e) { 
-        SFX.ctx.resume(); // 啟用 iPad 音頻
-        active = e.target; active.classList.add('active');
-        startY = e.touches[0].pageY; startTop = parseInt(active.style.top);
-    }
-    function touchMove(e) {
-        if(!active) return; e.preventDefault();
-        let moveY = e.touches[0].pageY - startY;
-        active.style.top = Math.max(5, Math.min(startTop + moveY, document.getElementById('game-box').offsetHeight - 60)) + "px";
-        elements.sort((a,b) => parseInt(a.style.top) - parseInt(b.style.top)).forEach((el, i) => {
-            if(el !== active) el.style.top = (i * 75 + 15) + "px";
-        });
-    }
-    function touchEnd() { 
-        if(!active) return; active.classList.remove('active');
-        elements.sort((a,b) => parseInt(a.style.top) - parseInt(b.style.top)).forEach((el, i) => {
-            el.style.top = (i * 75 + 15) + "px";
-        });
-        active = null; 
-    }
+    function touchStart(e) { SFX.ctx.resume(); active = e.target; active.classList.add('active'); startY = e.touches[0].pageY; startTop = parseInt(active.style.top); }
+    function touchMove(e) { if(!active) return; e.preventDefault(); let moveY = e.touches[0].pageY - startY; active.style.top = Math.max(5, Math.min(startTop + moveY, 280)) + "px"; elements.sort((a,b)=>parseInt(a.style.top)-parseInt(b.style.top)).forEach((el, i)=>{ if(el!==active) el.style.top=(i*75+15)+"px"; }); }
+    function touchEnd() { if(!active) return; active.classList.remove('active'); elements.sort((a,b)=>parseInt(a.style.top)-parseInt(b.style.top)).forEach((el,i)=>el.style.top=(i*75+15)+"px"); active=null; }
 
     function handleMainClick() {
         if(!isQuiz) {
-            const current = elements.sort((a,b) => parseInt(a.style.top) - parseInt(b.style.top)).map(el => el.innerText);
-            if(JSON.stringify(current) === JSON.stringify(data[curLvl].lines)) {
-                SFX.correct(); showMsg("✅ 排序正確！", "var(--green)");
-                setTimeout(startQuiz, 800);
-            } else { SFX.wrong(); showMsg("❌ 順序不對喔", "var(--red)"); }
-        } else { checkMultiFinal(); }
+            const cur = elements.sort((a,b)=>parseInt(a.style.top)-parseInt(b.style.top)).map(e=>e.innerText);
+            if(JSON.stringify(cur)===JSON.stringify(data[curLvl].lines)) { SFX.correct(); showMsg("✅ 排序正確！", "var(--green)"); setTimeout(startQuiz, 800); }
+            else { SFX.wrong(); showMsg("❌ 順序不對喔", "var(--red)"); }
+        } else checkMultiFinal();
     }
 
-    function startQuiz() {
-        isQuiz = true; document.getElementById('game-box').innerHTML = "";
-        showQuestion();
-    }
+    function startQuiz() { isQuiz = true; showQuestion(); }
 
     function showQuestion() {
-        const qData = data[curLvl].qs[curQ];
-        document.getElementById('main-btn').innerText = qData.multi ? "確認多選答案" : "點選正確答案";
-        document.getElementById('main-btn').style.opacity = qData.multi ? "1" : "0.5";
-        document.getElementById('game-box').innerHTML = `<div class="quiz-container"><p style="font-weight:bold; font-size:1.15rem; margin: 5px 10px;">${qData.q}</p><div id="opts" style="padding: 0 10px;"></div></div>`;
+        const qD = data[curLvl].qs[curQ];
+        document.getElementById('main-btn').style.display = qD.multi ? "block" : "none";
+        document.getElementById('main-btn').innerText = "確認多選答案";
+        document.getElementById('game-box').innerHTML = `
+            <div class="poem-ref">${data[curLvl].full}</div>
+            <div class="q-text">Q${curQ+1}: ${qD.q}</div>
+            <div id="opts"></div>
+        `;
         selectedMulti = [];
-        qData.opts.forEach((o, i) => {
+        qD.opts.forEach((o, i) => {
             const d = document.createElement('div'); d.className = 'opt'; d.innerText = o;
-            d.onclick = () => { SFX.ctx.resume(); qData.multi ? toggleM(i, d) : checkS(i); };
+            d.onclick = () => { SFX.ctx.resume(); qD.multi ? toggleM(i, d) : checkS(i); };
             document.getElementById('opts').appendChild(d);
         });
     }
 
-    function checkS(i) {
-        if(i === data[curLvl].qs[curQ].ans) { SFX.correct(); showMsg("🌟 答對了！", "var(--green)"); next(); }
-        else { SFX.wrong(); showMsg("❌ 再試一次", "var(--red)"); }
-    }
-
-    function toggleM(i, el) {
-        if(selectedMulti.includes(i)) { selectedMulti = selectedMulti.filter(x => x !== i); el.classList.remove('selected'); }
-        else { selectedMulti.push(i); el.classList.add('selected'); }
-    }
-
-    function checkMultiFinal() {
-        if(!data[curLvl].qs[curQ].multi) return;
-        const correct = data[curLvl].qs[curQ].ans.sort();
-        if(JSON.stringify(selectedMulti.sort()) === JSON.stringify(correct)) { SFX.correct(); showMsg("🌟 答對了！", "var(--green)"); next(); }
-        else { SFX.wrong(); showMsg("❌ 選項不完全對", "var(--red)"); }
-    }
-
-    function next() {
-        curQ++;
-        setTimeout(() => {
-            if(curQ < data[curLvl].qs.length) showQuestion();
-            else { curLvl++; if(curLvl < data.length) init(); else win(); }
-        }, 800);
-    }
-
+    function checkS(i) { if(i===data[curLvl].qs[curQ].ans) { SFX.correct(); showMsg("🌟 答對了！", "var(--green)"); next(); } else { SFX.wrong(); showMsg("❌ 再試一次", "var(--red)"); } }
+    function toggleM(i, el) { if(selectedMulti.includes(i)) { selectedMulti=selectedMulti.filter(x=>x!==i); el.classList.remove('selected'); } else { selectedMulti.push(i); el.classList.add('selected'); } }
+    function checkMultiFinal() { if(!data[curLvl].qs[curQ].multi) return; const corr = data[curLvl].qs[curQ].ans.sort(); if(JSON.stringify(selectedMulti.sort())===JSON.stringify(corr)) { SFX.correct(); showMsg("🌟 答對了！", "var(--green)"); next(); } else { SFX.wrong(); showMsg("❌ 選項不對喔", "var(--red)"); } }
+    function next() { curQ++; setTimeout(() => { if(curQ<data[curLvl].qs.length) showQuestion(); else { curLvl++; if(curLvl < data.length) init(); else win(); } }, 800); }
     function showMsg(m, c) { const f = document.getElementById('feedback'); f.innerText = m; f.style.color = c; }
-    function win() { SFX.win(); document.body.innerHTML = "<div style='text-align:center; margin-top:30vh; width:100%'><h1>🏆 挑戰成功！</h1><p>小朋友好棒，妳已經完全複習好了！</p><button class='btn' onclick='location.reload()'>再玩一次</button></div>"; }
+    function win() { SFX.win(); document.body.innerHTML = "<div style='text-align:center;margin-top:35vh;width:100%'><h1>🏆 全課複習完成！</h1><p>《蜂》、《守株待兔》、《畫雞》都考不到妳了！</p><button class='btn' onclick='location.reload()' style='width:200px'>再玩一次</button></div>"; }
 
     window.onload = init;
 </script>
