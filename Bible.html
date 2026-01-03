@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>二年級聖經金句重組 (語音版)</title>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <style>
+        :root {
+            --primary: #64b5f6;
+            --bg: #f8f9fa;
+            --correct: #66bb6a;
+            --error: #ef5350;
+            --text-color: #37474f;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            touch-action: none;
+        }
+
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { font-size: 1.5rem; color: #1565c0; margin: 5px 0; }
+
+        #game-box {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            padding: 20px;
+            border-radius: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+
+        .verse-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .verse-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #1976d2;
+        }
+
+        .speaker-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        #drag-area {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+            min-height: 200px;
+        }
+
+        .drag-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            color: var(--text-color);
+            text-align: center;
+            cursor: grab;
+            box-shadow: 0 4px 0 #eeeeee;
+        }
+
+        .btn-check {
+            width: 100%;
+            padding: 18px;
+            background: #ffb300;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            box-shadow: 0 5px 0 #e6a100;
+            cursor: pointer;
+        }
+
+        #msg {
+            height: 30px;
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>📖 金句重組 (廣東話版)</h1>
+    </div>
+
+    <div id="game-box">
+        <div class="verse-header">
+            <div id="verse-title" class="verse-title">載入中...</div>
+            <button class="speaker-btn" onclick="speakCurrentVerse()">🔊</button>
+        </div>
+        
+        <div id="drag-area"></div>
+
+        <button id="next-btn" class="btn-check" onclick="handleButtonClick()">檢查答案</button>
+
+        <div id="msg"></div>
+    </div>
+
+    <script>
+        const bibleData = [
+            {
+                lesson: "第一課: 約翰福音 3:16",
+                chunks: ["神愛世人，", "甚至將他獨一的兒子", "賜給他們，", "叫一切信他的人", "不致滅亡，", "得永生。"] 
+            },
+            {
+                lesson: "第二課: 路加福音 21:33",
+                chunks: ["天地要廢去，", "我的話卻", "絕不廢去。"]
+            },
+            {
+                lesson: "第二課: 詩篇 1:2下",
+                chunks: ["惟喜愛耶和華的律法，", "晝夜思想祂的律法；", "這人便為有福！"]
+            },
+            {
+                lesson: "第三課: 雅各書 4:6下",
+                chunks: ["神抵擋驕傲的人，", "但賜恩給", "謙卑的人。"]
+            },
+            {
+                lesson: "第四課: 創世記 18:14上",
+                chunks: ["耶和華", "豈有", "難成的事嗎？"]
+            },
+            {
+                lesson: "第五課: 雅各書 5:16下",
+                chunks: ["義人祈禱", "所發的力量", "是大有功效的。"]
+            },
+            {
+                lesson: "第六課: 創世記 22:14",
+                chunks: ["亞伯拉罕給那地方", "起名叫「耶和華以勒」。", "直到今日人還說：", "「在耶和華的山上", "必有預備。」"]
+            }
+        ];
+
+        let currentIdx = 0;
+        let sortable;
+
+        function speak(text) {
+            window.speechSynthesis.cancel(); // 停止之前的朗讀
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-HK'; // 設定為廣東話
+            utterance.rate = 0.9;     // 語速稍微放慢
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function speakCurrentVerse() {
+            const text = bibleData[currentIdx].chunks.join('');
+            speak(text);
+        }
+
+        function loadQuestion() {
+            const q = bibleData[currentIdx];
+            document.getElementById('verse-title').innerText = q.lesson;
+            document.getElementById('msg').innerText = "";
+            document.getElementById('next-btn').innerText = "檢查答案";
+            document.getElementById('next-btn').style.background = "#ffb300";
+
+            const area = document.getElementById('drag-area');
+            area.innerHTML = '';
+            
+            const shuffled = [...q.chunks].sort(() => Math.random() - 0.5);
+            shuffled.forEach(text => {
+                const div = document.createElement('div');
+                div.className = 'drag-card';
+                div.innerText = text;
+                area.appendChild(div);
+            });
+
+            if(sortable) sortable.destroy();
+            sortable = new Sortable(area, { animation: 200 });
+
+            // 延遲一點點朗讀，確保小朋友準備好
+            setTimeout(speakCurrentVerse, 500);
+        }
+
+        function handleButtonClick() {
+            if (document.getElementById('next-btn').innerText === "檢查答案") {
+                checkAnswer();
+            } else {
+                nextLevel();
+            }
+        }
+
+        function checkAnswer() {
+            const currentOrder = Array.from(document.querySelectorAll('.drag-card')).map(el => el.innerText);
+            const correctOrder = bibleData[currentIdx].chunks;
+            const msgEl = document.getElementById('msg');
+
+            if (JSON.stringify(currentOrder) === JSON.stringify(correctOrder)) {
+                msgEl.innerText = "🌟 太棒了！排列正確！";
+                msgEl.style.color = "#66bb6a";
+                document.getElementById('next-btn').innerText = "下一題";
+                document.getElementById('next-btn').style.background = "#66bb6a";
+                speak("答對了，做得好！");
+            } else {
+                msgEl.innerText = "❌ 順序不對，再試試看！";
+                msgEl.style.color = "#ef5350";
+                speak("順序唔啱，再試下啦。");
+            }
+        }
+
+        function nextLevel() {
+            currentIdx++;
+            if (currentIdx >= bibleData.length) {
+                document.getElementById('game-box').innerHTML = "<h2 style='text-align:center'>🏆 挑戰成功！</h2><button class='btn-check' onclick='location.reload()'>重新開始</button>";
+                speak("恭喜你，全部答啱晒！");
+            } else {
+                loadQuestion();
+            }
+        }
+
+        // 初始化
+        loadQuestion();
+    </script>
+</body>
+</html>
