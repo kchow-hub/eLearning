@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>G2音創_Unit 1</title>
+    <style>
+        :root { --primary: #FF9800; --secondary: #2196F3; --success: #4CAF50; --error: #F44336; --bg: #FFF3E0; 
+                --s1: #9C27B0; --s2: #E91E63; --s3: #673AB7; --s4: #3F51B5; --s5: #009688; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; touch-action: manipulation; -webkit-user-select: none; }
+        #game-container { width: 95%; max-width: 600px; background: white; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); margin: 15px 0; padding: 20px; text-align: center; border: 5px solid var(--primary); position: relative; min-height: 580px; box-sizing: border-box; }
+        .header { font-size: 22px; color: #E65100; margin-bottom: 5px; font-weight: bold; }
+        .score-board { font-size: 15px; color: #555; margin-bottom: 10px; background: #FFFDE7; padding: 5px; border-radius: 10px; }
+        .question-box { background: #FAFAFA; border-radius: 20px; padding: 15px; min-height: 250px; margin-bottom: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 2px dashed #ccc; }
+        
+        /* 五線譜繪製 */
+        .staff-container { width: 280px; height: 120px; position: relative; margin: 25px auto; border-left: 2px solid #333; border-right: 2px solid #333; background: white; }
+        .staff-line { position: absolute; width: 100%; height: 2px; background: #333; left: 0; }
+        .line5 { top: 20px; } .line4 { top: 40px; } .line3 { top: 60px; } .line2 { top: 80px; } .line1 { top: 100px; }
+        .clef { position: absolute; left: 8px; font-family: "serif"; line-height: 1; z-index: 1; color: #333; pointer-events: none; }
+        .treble-clef { top: 5px; font-size: 85px; }
+        .bass-clef { top: 18px; font-size: 65px; }
+        .staff-note { position: absolute; width: 26px; height: 20px; background: black; border-radius: 50%; transform: rotate(-15deg); left: 60%; margin-left: -13px; z-index: 10; }
+        .ledger-line { position: absolute; width: 40px; height: 2px; background: #333; left: 60%; margin-left: -20px; z-index: 5; }
+
+        .note-display { font-size: 100px; line-height: 1; margin: 10px; font-family: "serif"; color: #333; }
+        .math-symbol-box { font-size: 50px; color: #D84315; margin: 10px; font-weight: bold; }
+
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+        button { background: var(--secondary); border: none; border-radius: 12px; padding: 18px 5px; color: white; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #1565C0; -webkit-tap-highlight-color: transparent; }
+        button:active { transform: translateY(3px); box-shadow: none; }
+        button:disabled { background: #ccc !important; box-shadow: none !important; }
+        
+        #feedback { margin-top: 10px; font-weight: bold; font-size: 20px; height: 30px; }
+        .progress-bar { width: 100%; height: 12px; background: #eee; border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+        #progress { width: 0%; height: 100%; background: var(--success); transition: width 0.3s; }
+
+        #menu-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 20; display: flex; flex-direction: column; align-items: center; padding: 15px; box-sizing: border-box; overflow-y: auto; }
+        .menu-btn { width: 100%; max-width: 450px; margin: 6px 0; padding: 12px; font-size: 14px; border: none; border-radius: 12px; color: white; cursor: pointer; text-align: left; }
+        .menu-btn b { font-size: 16px; display: block; }
+        .tag-exam { float: right; background: #FF5252; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+        .tag-non { float: right; background: #757575; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="menu-overlay">
+        <h2 style="color: #E65100; margin: 10px 0;">🎶 音樂考試全能挑戰</h2>
+        <button class="menu-btn" style="background:var(--s1);" onclick="startSection(1)">
+            <span class="tag-exam">EXAM</span><b>SECTION 1: 音符與節奏 (24題)</b><small>名稱、時值、Kodaly、附點與連結線</small>
+        </button>
+        <button class="menu-btn" style="background:var(--s2);" onclick="startSection(2)">
+            <span class="tag-exam">EXAM</span><b>SECTION 2: 高音譜表 (C4-G4)</b><small>Middle C 至 Sol 的位置辨認</small>
+        </button>
+        <button class="menu-btn" style="background:var(--s3);" onclick="startSection(3)">
+            <span class="tag-non">NON-EXAM</span><b>SECTION 3: 高音譜表 (C4-C5)</b><small>Middle C 至 高音 Do</small>
+        </button>
+        <button class="menu-btn" style="background:var(--s4);" onclick="startSection(4)">
+            <span class="tag-exam">EXAM</span><b>SECTION 4: 低音譜表 (F3-C4)</b><small>低音 Fa 至 Middle C</small>
+        </button>
+        <button class="menu-btn" style="background:var(--s5);" onclick="startSection(5)">
+            <span class="tag-non">NON-EXAM</span><b>SECTION 5: 低音譜表 (C3-C4)</b><small>低音 Do 至 Middle C</small>
+        </button>
+    </div>
+
+    <div class="header">🎼 <span id="sec-title"></span> 🎼</div>
+    <div class="score-board">題目: <span id="cur-idx">0</span> / <span id="total-q">0</span> | 正確: <span id="score">0</span></div>
+    <div class="progress-bar"><div id="progress"></div></div>
+    
+    <div id="game-ui">
+        <div class="question-box" id="q-content"></div>
+        <div class="options-grid" id="options"></div>
+        <div id="feedback"></div>
+    </div>
+</div>
+
+<script>
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playTone(freq, type, duration, volume = 0.1) {
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+        osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + duration);
+    }
+    const soundCorrect = () => { playTone(523, 'sine', 0.3); setTimeout(() => playTone(659, 'sine', 0.5), 100); };
+    const soundWrong = () => playTone(220, 'sawtooth', 0.5, 0.05);
+
+    const qBank = [
+        // --- SECTION 1: 24題完整題庫 ---
+        { s:1, q:"音符是用來記錄音樂的什麼符號？", opts:["音樂符號","文字符號","數學符號","數字符號"], a:"音樂符號" },
+        { s:1, q:"不同的音符代表聲音不同的高度和？", opts:["長度","重量","音量","寬度"], a:"長度" },
+        { s:1, type:"note", n:"𝅝", q:"這個音符的名稱是？", opts:["全音符","二分音符","四分音符","八分音符"], a:"全音符" },
+        { s:1, type:"note", n:"𝅗𝅥", q:"這個音符的名稱是？", opts:["二分音符","全音符","四分音符","八分音符"], a:"二分音符" },
+        { s:1, type:"note", n:"𝅘𝅥", q:"這個音符的名稱是？", opts:["四分音符","二分音符","八分音符","十六分音符"], a:"四分音符" },
+        { s:1, type:"note", n:"𝅘𝅥𝅮", q:"這個音符的名稱是？", opts:["八分音符","十六分音符","四分音符","全音符"], a:"八分音符" },
+        { s:1, type:"note", n:"𝅘𝅥𝅯", q:"這個音符的名稱是？", opts:["十六分音符","八分音符","四分音符","二分音符"], a:"十六分音符" },
+        { s:1, q:"全音符 (𝅝) 代表多少拍？", opts:["4拍","2拍","1拍","3拍"], a:"4拍" },
+        { s:1, q:"二分音符 (𝅗𝅥) 代表多少拍？", opts:["2拍","4拍","1拍","半拍"], a:"2拍" },
+        { s:1, q:"四分音符 (𝅘𝅥) 代表多少拍？", opts:["1拍","2拍","半拍","4拍"], a:"1拍" },
+        { s:1, q:"八分音符 (𝅘𝅥𝅮) 代表多少拍？", opts:["半拍","1拍","1/4拍","2拍"], a:"半拍" },
+        { s:1, q:"十六分音符 (𝅘𝅥𝅯) 代表多少拍？", opts:["1/4拍","半拍","1拍","1/8拍"], a:"1/4拍" },
+        { s:1, q:"全音符 (𝅝) 的 Kodaly 讀音是？", opts:["T00-00-00-00","T00-00","Ta","Ti-ti"], a:"T00-00-00-00" },
+        { s:1, q:"二分音符 (𝅗𝅥) 的 Kodaly 讀音是？", opts:["T00-00","T00-00-00-00","Ta","Ti-ti"], a:"T00-00" },
+        { s:1, q:"四分音符 (𝅘𝅥) 的 Kodaly 讀音是？", opts:["Ta","Ti-ti","Tum","Tim"], a:"Ta" },
+        { s:1, q:"兩個八分音符 (𝅘𝅥𝅮𝅘𝅥𝅮) 的 Kodaly 讀音？", opts:["Ti-ti","Ti-ka-ti-ka","Ta","Too"], a:"Ti-ti" },
+        { s:1, q:"十六分音符 (𝅘𝅥𝅯𝅘𝅥𝅯𝅘𝅥𝅯𝅘𝅥𝅯) 的 Kodaly 讀音？", opts:["Ti-ka-ti-ka","Ti-ti","Ta","Tum"], a:"Ti-ka-ti-ka" },
+        { s:1, q:"附點音符那「一點」的長度是原本音符的？", opts:["一半","一倍","兩倍","三倍"], a:"一半" },
+        { s:1, q:"附點二分音符 (𝅗𝅥.) 有幾拍？", opts:["3拍","2拍","4拍","1.5拍"], a:"3拍", mathSym:"𝅗𝅥." },
+        { s:1, q:"附點四分音符 (𝅘𝅥.) 的 Kodaly 讀音？", opts:["Tum","Tim","Ta","Ti-ti"], a:"Tum", mathSym:"𝅘𝅥." },
+        { s:1, q:"附點八分音符 (𝅘𝅥𝅮.) 的拍數是？", opts:["3/4拍","半拍","1拍","1/4拍"], a:"3/4拍", mathSym:"𝅘𝅥𝅮." },
+        { s:1, q:"連結線連結兩個音高相同的音符，時值要？", opts:["加在一起","相減","除以二","不變"], a:"加在一起" },
+        { s:1, q:"連結線應該畫在音符的？", opts:["符頭一端","符幹一端","中間一端","尾巴一端"], a:"符頭一端" },
+        { s:1, q:"計算：𝅗𝅥 ⁀ 𝅘𝅥 (二分連四分) 等於幾拍？", opts:["3拍","2拍","4拍","5拍"], a:"3拍", mathSym:"𝅗𝅥 ⁀ 𝅘𝅥" },
+
+        // --- SECTION 2: 高音基本 (C4-G4) ---
+        { s:2, clef:"treble", type:"staff", q:"這是什麼音？ (下加一線)", y:120, ledger:true, opts:["C (Do)","D (Re)","E (Mi)","B (Ti)"], a:"C (Do)" },
+        { s:2, clef:"treble", type:"staff", q:"這是什麼音？ (第一條線下方)", y:110, opts:["D (Re)","C (Do)","E (Mi)","F (Fa)"], a:"D (Re)" },
+        { s:2, clef:"treble", type:"staff", q:"第一條線上的音是？", y:100, opts:["E (Mi)","F (Fa)","G (Sol)","D (Re)"], a:"E (Mi)" },
+        { s:2, clef:"treble", type:"staff", q:"第一間裡的音是？", y:90, opts:["F (Fa)","G (Sol)","E (Mi)","D (Re)"], a:"F (Fa)" },
+        { s:2, clef:"treble", type:"staff", q:"這是什麼音？ (第二條線)", y:80, opts:["G (Sol)","F (Fa)","E (Mi)","A (La)"], a:"G (Sol)" },
+
+        // --- SECTION 3: 高音擴展 (C4-C5) ---
+        { s:3, clef:"treble", type:"staff", q:"第二間裡的音是？", y:70, opts:["A (La)","B (Ti)","C (高音 Do)","G (Sol)"], a:"A (La)" },
+        { s:3, clef:"treble", type:"staff", q:"第三條線上的音是？", y:60, opts:["B (Ti)","A (La)","C (高音 Do)","D (高音 Re)"], a:"B (Ti)" },
+        { s:3, clef:"treble", type:"staff", q:"第三間裡的音是？", y:50, opts:["C (高音 Do)","B (Ti)","D (高音 Re)","A (La)"], a:"C (高音 Do)" },
+
+        // --- SECTION 4: 低音考試 (F3-C4) ---
+        { s:4, clef:"bass", type:"staff", q:"低音譜上方的加線音是？", y:0, ledger:true, opts:["Middle C","B (Ti)","A (La)","G (Sol)"], a:"Middle C" },
+        { s:4, clef:"bass", type:"staff", q:"低音譜上加一間是？", y:10, opts:["B (Ti)","A (La)","Middle C","G (Sol)"], a:"B (Ti)" },
+        { s:4, clef:"bass", type:"staff", q:"低音譜第五條線上的音是？", y:20, opts:["A (La)","G (Sol)","F (Fa)","E (Mi)"], a:"A (La)" },
+        { s:4, clef:"bass", type:"staff", q:"低音譜第四間裡的音是？", y:30, opts:["G (Sol)","F (Fa)","A (La)","E (Mi)"], a:"G (Sol)" },
+        { s:4, clef:"bass", type:"staff", q:"低音譜第四條線上的音是？ (譜號兩點中間)", y:40, opts:["F (Fa)","G (Sol)","E (Mi)","D (Re)"], a:"F (Fa)" },
+
+        // --- SECTION 5: 低音全域 (C3-C4) ---
+        { s:5, clef:"bass", type:"staff", q:"低音譜第三間裡的音是？", y:50, opts:["E (Mi)","D (Re)","F (Fa)","G (Sol)"], a:"E (Mi)" },
+        { s:5, clef:"bass", type:"staff", q:"低音譜第三條線上的音是？", y:60, opts:["D (Re)","C (低音 Do)","E (Mi)","F (Fa)"], a:"D (Re)" },
+        { s:5, clef:"bass", type:"staff", q:"低音譜第二間裡的音是？", y:70, opts:["C (低音 Do)","D (Re)","B (低音 Ti)","A (低音 La)"], a:"C (低音 Do)" }
+    ];
+
+    let activeQs = []; let curIdx = 0; let score = 0;
+
+    function startSection(n) {
+        audioCtx.resume();
+        const titles = ["", "音符與節奏邏輯", "高音基本 (C4-G4)", "高音擴展 (C4-C5)", "低音考試 (F3-C4)", "低音全域 (C3-C4)"];
+        document.getElementById('sec-title').innerText = titles[n];
+        activeQs = shuffle(qBank.filter(q => q.s === n || (n === 3 && q.s === 2) || (n === 5 && (q.s === 4 || q.s === 5))));
+        curIdx = 0; score = 0;
+        document.getElementById('total-q').innerText = activeQs.length;
+        document.getElementById('menu-overlay').style.display = 'none';
+        render();
+    }
+
+    function shuffle(a) { for (let i=a.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [a[i], a[j]]=[a[j], a[i]]; } return a; }
+
+    function render() {
+        const q = activeQs[curIdx];
+        const box = document.getElementById('q-content');
+        const optsDiv = document.getElementById('options');
+        document.getElementById('cur-idx').innerText = curIdx + 1;
+        document.getElementById('progress').style.width = `${(curIdx/activeQs.length)*100}%`;
+        document.getElementById('feedback').innerText = ""; optsDiv.innerHTML = "";
+
+        let html = `<p style="font-size:18px; font-weight:bold;">${q.q}</p>`;
+        if (q.type === "staff") {
+            const isT = q.clef === "treble";
+            html += `<div class="staff-container">
+                <div class="clef ${isT?'treble-clef':'bass-clef'}">${isT?'𝄞':'𝄢'}</div>
+                <div class="staff-line line5"></div><div class="staff-line line4"></div>
+                <div class="staff-line line3"></div><div class="staff-line line2"></div>
+                <div class="staff-line line1"></div>`;
+            if(q.ledger) html += `<div class="ledger-line" style="top:${q.y}px"></div>`;
+            html += `<div class="staff-note" style="top:${q.y-10}px"></div></div>`;
+        } else if (q.type === "note") {
+            html += `<div class="note-display">${q.n}</div>`;
+        } else if (q.mathSym) {
+            html += `<div class="math-symbol-box">${q.mathSym}</div>`;
+        } else {
+            html += `<div style="font-size:50px; margin:20px;"></div>`;
+        }
+        box.innerHTML = html;
+
+        shuffle([...q.opts]).forEach(o => {
+            const b = document.createElement('button'); b.innerText = o;
+            b.onclick = () => {
+                document.querySelectorAll('button').forEach(btn=>btn.disabled=true);
+                if(o === q.a){ score++; soundCorrect(); document.getElementById('feedback').innerHTML="<span style='color:var(--success)'>✔️ 正確！</span>"; }
+                else { soundWrong(); document.getElementById('feedback').innerHTML=`<span style='color:var(--error)'>❌ 答案是：${q.a}</span>`; }
+                document.getElementById('score').innerText = score;
+                setTimeout(()=>{ curIdx++; if(curIdx<activeQs.length) render(); else finish(); }, 1500);
+            };
+            optsDiv.appendChild(b);
+        });
+    }
+
+    function finish() {
+        document.getElementById('progress').style.width = "100%";
+        document.getElementById('q-content').innerHTML = `<h2>🎉 完成挑戰！</h2><p>最終得分: ${score} / ${activeQs.length}</p>`;
+        document.getElementById('options').innerHTML = `<button style="grid-column:1/3; background:var(--primary)" onclick="location.reload()">返回主選單</button>`;
+    }
+</script>
+</body>
+</html>
