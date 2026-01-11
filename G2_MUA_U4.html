@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>音樂欣賞複習遊戲</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --error-color: #f44336;
+            --bg-color: #f0f8ff;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+        }
+
+        #game-container {
+            width: 95%;
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .header {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #ffb74d;
+        }
+
+        h2 { color: #e65100; margin: 5px 0; font-size: 1.2rem; }
+        h3 { color: #5d4037; margin: 5px 0; font-size: 1rem; }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .youtube-btn {
+            background-color: #ff0000;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .question-box {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .speaker-btn {
+            background: #eee;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 25px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .options-container {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 3px solid var(--secondary-color);
+            padding: 20px;
+            font-size: 1.2rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .option-btn:active {
+            transform: scale(0.95);
+        }
+
+        .correct {
+            background-color: #c8e6c9 !important;
+            border-color: #4caf50 !important;
+        }
+
+        .wrong {
+            background-color: #ffcdd2 !important;
+            border-color: #f44336 !important;
+        }
+
+        #feedback-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.3);
+            z-index: 100;
+            width: 80%;
+            text-align: center;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 99;
+        }
+
+        #result-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .next-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div class="header">
+        <h2>【第四課：《皮爾金第一號組曲．清晨》】</h2>
+        <h3>葛利格(1843-1907)</h3>
+        <p style="font-size: 0.8rem;">Peer Gynt Suite No.1 - Morning Mood (Edvard Grieg)</p>
+        <a href="https://www.youtube.com/watch?v=aMs0rNtBZJk" target="_blank" class="youtube-btn">
+            <span>▶</span> 播放音樂影片
+        </a>
+    </div>
+
+    <div id="quiz-section">
+        <div class="progress-bar">
+            <span id="progress-text">已完成：0 / 12</span>
+            <span id="remain-text">餘下：12 題</span>
+        </div>
+
+        <div class="question-box">
+            <div id="question-text">題目載入中...</div>
+            <button class="speaker-btn" onclick="speakQuestion()">🔊</button>
+        </div>
+
+        <div class="options-container" id="options">
+            </div>
+    </div>
+
+    <div id="result-screen">
+        <h1 style="color: var(--primary-color);">太棒了！完成複習！</h1>
+        <p id="final-score" style="font-size: 1.5rem;"></p>
+        <button class="next-btn" onclick="location.reload()">再玩一次</button>
+    </div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div id="feedback-popup">
+    <h2 id="feedback-title" style="color: red;">答錯了！</h2>
+    <p id="feedback-msg" style="font-size: 1.3rem;"></p>
+    <button class="next-btn" onclick="closeFeedback()">下一題</button>
+</div>
+
+<script>
+    // 題庫數據
+    const questions = [
+        { q: "《皮爾金第一號組曲·清晨》一曲描繪摩洛哥哪一個情景？", a: "太陽上升", o: ["太陽上升", "太陽下山", "正午時分"] },
+        { q: "雙簧管和長笛屬於以下哪一個樂器組別？", a: "木管樂器", o: ["木管樂器", "敲擊樂器", "弦樂器"] },
+        { q: "以下哪一個意大利文是連音的意思？", a: "Legato", o: ["Legato", "Accelerando", "Staccato"] },
+        { q: "葛利格(Edvard Grieg)出生於哪一個國家？", a: "挪威", o: ["挪威", "俄國", "意大利"] },
+        { q: "《皮爾金第一組曲·清晨》是一部甚麼類型的作品？", a: "戲劇", o: ["戲劇", "電影", "芭蕾舞劇"] },
+        { q: "聖經告訴我們，是誰創造了這個世界？", a: "神", o: ["神", "老師", "父母"] },
+        { q: "樂曲的主題旋律起初由長笛和__________以連音方式演奏。", a: "雙簧管", o: ["雙簧管", "單簧管", "巴松管"] },
+        { q: "在《清晨》中，最後由整個__________演奏，描述太陽緩緩上升。", a: "管弦樂團", o: ["管弦樂團", "弦樂隊", "合唱團"] },
+        { q: "本課中，皮爾金到了北非的__________探險，看見太陽上升的美景。", a: "摩洛哥", o: ["摩洛哥", "埃及", "南非"] },
+        { q: "樂曲的拍子記號是__________。", a: "6/8", o: ["6/8", "3/4", "4/4"] },
+        { q: "樂曲運用了__________調來表達摩洛哥太陽上升的美景。", a: "大調", o: ["大調", "小調"] },
+        { q: "強弱記號 ff 代表甚麼意思？", a: "極強", o: ["極強", "很弱", "中強"] }
+    ];
+
+    let currentIdx = 0;
+    let shuffledQuestions = [];
+    let score = 0;
+
+    // 初始化遊戲
+    function initGame() {
+        shuffledQuestions = questions.sort(() => Math.random() - 0.5);
+        showQuestion();
+    }
+
+    function showQuestion() {
+        if (currentIdx >= shuffledQuestions.length) {
+            showResult();
+            return;
+        }
+
+        const qData = shuffledQuestions[currentIdx];
+        document.getElementById("question-text").innerText = qData.q;
+        
+        // 更新進度
+        document.getElementById("progress-text").innerText = `已完成：${currentIdx} / ${shuffledQuestions.length}`;
+        document.getElementById("remain-text").innerText = `餘下：${shuffledQuestions.length - currentIdx} 題`;
+
+        // 生成選項
+        const optionsDiv = document.getElementById("options");
+        optionsDiv.innerHTML = "";
+        const shuffledOptions = [...qData.o].sort(() => Math.random() - 0.5);
+        
+        shuffledOptions.forEach(opt => {
+            const btn = document.createElement("button");
+            btn.className = "option-btn";
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(opt, btn);
+            optionsDiv.appendChild(btn);
+        });
+
+        // 自動朗讀
+        setTimeout(() => speakQuestion(), 500);
+    }
+
+    function checkAnswer(selected, btn) {
+        const correctAns = shuffledQuestions[currentIdx].a;
+        const allBtns = document.querySelectorAll(".option-btn");
+        
+        // 禁用所有按鈕防止重複點擊
+        allBtns.forEach(b => b.style.pointerEvents = "none");
+
+        if (selected === correctAns) {
+            btn.classList.add("correct");
+            score++;
+            playTone(800, 0.2); // 答對音效
+            setTimeout(() => {
+                currentIdx++;
+                showQuestion();
+            }, 1000);
+        } else {
+            btn.classList.add("wrong");
+            playTone(200, 0.4); // 答錯音效
+            showFeedback(correctAns);
+        }
+    }
+
+    function showFeedback(correct) {
+        document.getElementById("feedback-msg").innerText = `正確答案是：${correct}`;
+        document.getElementById("overlay").style.display = "block";
+        document.getElementById("feedback-popup").style.display = "block";
+    }
+
+    function closeFeedback() {
+        document.getElementById("overlay").style.display = "none";
+        document.getElementById("feedback-popup").style.display = "none";
+        currentIdx++;
+        showQuestion();
+    }
+
+    function showResult() {
+        document.getElementById("quiz-section").style.display = "none";
+        document.getElementById("result-screen").style.display = "block";
+        document.getElementById("final-score").innerText = `得分：${score} / ${shuffledQuestions.length}`;
+    }
+
+    // 語音功能
+    function speakQuestion() {
+        const text = document.getElementById("question-text").innerText;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'zh-HK';
+        utterance.rate = 0.9;
+        window.speechSynthesis.cancel(); // 停止之前的朗讀
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // 簡易音效生成器 (不需要外部檔案)
+    function playTone(freq, duration) {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.frequency.value = freq;
+        oscillator.type = 'sine';
+        oscillator.start();
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        oscillator.stop(audioCtx.currentTime + duration);
+    }
+
+    // 啟動遊戲
+    initGame();
+</script>
+
+</body>
+</html>

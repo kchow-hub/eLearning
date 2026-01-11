@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>音樂欣賞複習：在山大王的殿中</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --error-color: #f44336;
+            --bg-color: #f8f9fa;
+        }
+        body {
+            font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #game-container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+        }
+        .header h1 { font-size: 1.1rem; color: #333; margin: 5px 0; }
+        .yt-btn {
+            background-color: #ff0000; color: white; border: none; padding: 10px 15px;
+            border-radius: 50px; text-decoration: none; display: inline-flex;
+            align-items: center; font-weight: bold; margin: 5px 0; font-size: 0.9rem;
+        }
+        .stats {
+            display: flex; justify-content: space-between; background: #e3f2fd;
+            padding: 10px; border-radius: 10px; font-weight: bold; margin-bottom: 15px;
+        }
+        .question-box {
+            font-size: 1.3rem; line-height: 1.5; margin-bottom: 20px;
+            min-height: 100px; position: relative; padding-right: 45px;
+        }
+        .speaker-icon {
+            cursor: pointer; font-size: 2.2rem; position: absolute;
+            right: 0; top: 0; color: var(--secondary-color);
+        }
+        .options-container { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        .btn {
+            padding: 15px; font-size: 1.2rem; border: 2px solid #ddd;
+            border-radius: 12px; background: white; cursor: pointer; text-align: left;
+        }
+        .correct { background-color: #c8e6c9 !important; border-color: #4caf50 !important; }
+        .wrong { background-color: #ffcdd2 !important; border-color: #f44336 !important; }
+        #feedback {
+            margin-top: 15px; padding: 12px; border-radius: 10px;
+            display: none; text-align: center; font-weight: bold; font-size: 1.1rem;
+        }
+        #next-btn {
+            display: none; width: 100%; margin-top: 15px; padding: 18px;
+            background-color: var(--primary-color); color: white; border: none;
+            border-radius: 12px; font-size: 1.4rem; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div class="header">
+        <h1>【第三課：《皮爾金第一號組曲》在山大王的殿中 】</h1>
+        <p>葛利格(1843-1907) Edvard Grieg</p>
+        <a href="https://www.youtube.com/watch?v=MNbzcokFJsM" target="_blank" class="yt-btn">▶ YouTube 影片</a>
+    </div>
+
+    <div id="game-ui">
+        <div class="stats">
+            <span id="progress-done">已完成：0</span>
+            <span id="progress-left">餘下：0</span>
+        </div>
+        <div class="question-box">
+            <span id="question-text">載入中...</span>
+            <span class="speaker-icon" onclick="speakQuestion()">🔊</span>
+        </div>
+        <div id="options" class="options-container"></div>
+        <div id="feedback"></div>
+        <button id="next-btn" onclick="loadNextQuestion()">下一題</button>
+    </div>
+</div>
+
+<script>
+    const examQuestions = [
+        // 作曲家生平 [cite: 14, 15, 21, 22, 23, 24]
+        { q: "作曲家葛利格 (Edvard Grieg) 出生於哪一個國家？", a: "挪威", o: ["挪威", "德國", "俄國"] },
+        { q: "葛利格在幾歲時開始跟母親學習鋼琴？", a: "6歲", o: ["6歲", "10歲", "15歲"] },
+        { q: "葛利格 15 歲時到了哪一個國家的音樂學院學習音樂？", a: "德國 (萊比錫)", o: ["德國 (萊比錫)", "挪威", "奧地利"] },
+        
+        // 樂曲介紹 [cite: 26, 27, 29, 31, 32]
+        { q: "《皮爾金》原本是文豪易卜生在 1867 年寫下的什麼作品？", a: "劇本", o: ["劇本", "電影", "交響曲"] },
+        { q: "葛利格為劇本創作的「劇樂」，是指戲劇中伴隨劇情的什麼？", a: "配樂", o: ["配樂", "舞蹈", "服裝"] },
+        { q: "劇樂的作用是為了突顯劇情中無法用什麼表達的情境？", a: "言語", o: ["言語", "動作", "燈光"] },
+        { q: "《皮爾金第一號組曲》是一首什麼類型的樂曲？", a: "管弦樂曲", o: ["管弦樂曲", "鋼琴獨奏曲", "合唱曲"] },
+        
+        // 組曲內容 [cite: 33, 34]
+        { q: "葛利格從 23 首劇樂中選出幾首編寫成兩個組曲？", a: "8首", o: ["8首", "4首", "23首"] },
+        { q: "《皮爾金第一號組曲》包含幾首樂曲？", a: "4首", o: ["4首", "8首", "2首"] },
+        { q: "《皮爾金第一號組曲》包括《在山大王的殿中》、《清晨》、《安妮特拉之舞》及 __________。", a: "《奧賽之死》", o: ["《奧賽之死》", "《皮爾金之死》", "《山大王之舞》"] },
+        
+        // 故事內容 
+        { q: "皮爾金在山上遇見的「綠衣少女」是誰的女兒？", a: "山大王", o: ["山大王", "森林國王", "挪威國王"] },
+        { q: "山大王一怒之下，把皮爾金關進了哪裡？", a: "監牢", o: ["監牢", "深井", "山洞"] },
+        { q: "皮爾金最後發現了什麼，讓他可以偷偷逃離監牢？", a: "秘密通道", o: ["秘密通道", "一把鑰匙", "隱形斗篷"] },
+        { q: "當皮爾金逃跑時，誰開始發現並追捕他？", a: "山大王的守衛", o: ["山大王的守衛", "老虎", "警察"] },
+        { q: "故事最後描述皮爾金如何逃跑？", a: "瘋狂地拼命逃跑", o: ["瘋狂地拼命逃跑", "慢慢地走", "躲在草叢裡"] },
+
+        // 音樂特色 [cite: 43, 44, 45, 51, 105, 107]
+        { q: "《在山大王的殿中》的主題旋律是由什麼樂器演奏？", a: "巴松管", o: ["巴松管", "長笛", "小提琴"] },
+        { q: "巴松管是以哪兩種奏法來演奏主題旋律？", a: "跳音和重音", o: ["跳音和重音", "連音和重音", "跳音和連音"] },
+        { q: "葛利格透過重複的什麼來描述皮爾金逃跑的腳步聲？", a: "節奏", o: ["節奏", "樂器", "音色"] },
+        { q: "樂曲以什麼手法表達守衛逼近時的緊張氣氛？", a: "漸強和漸快", o: ["漸強和漸快", "漸弱和漸慢", "漸強和漸慢"] },
+        { q: "音樂描述被追捕的情景時，守衛的人數有什麼變化？", a: "越來越多", o: ["越來越多", "越來越少", "沒有變化"] },
+
+        // 閱譜與符號 [cite: 43, 56, 129, 130, 131, 133]
+        { q: "在樂譜中，音符上方或下方的「 ‧ 」小圓點代表什麼？", a: "跳音 (staccato)", o: ["跳音 (staccato)", "重音 (accent)", "連音 (legato)"] },
+        { q: "在樂譜中，「 > 」這個符號代表什麼？", a: "重音 (accent)", o: ["重音 (accent)", "跳音 (staccato)", "弱音 (p)"] },
+        { q: "巴松管在樂譜中運用的是什麼譜號？", a: "低音譜號", o: ["低音譜號", "高音譜號", "中音譜號"] },
+        { q: "樂曲的拍子記號「 C 」代表什麼？", a: "四四拍子", o: ["四四拍子", "三四拍子", "二四拍子"] },
+        { q: "這首樂曲運用了什麼調性來表達皮爾金慌張的心情？", a: "小調", o: ["小調", "大調", "混合調"] },
+        
+        // 強弱記號 
+        { q: "強弱記號「 p 」代表什麼？", a: "弱音", o: ["弱音", "強音", "極強音"] },
+        { q: "強弱記號「 f 」代表什麼？", a: "強音", o: ["強音", "弱音", "漸強"] },
+        { q: "強弱記號「 ff 」代表什麼？", a: "極強音", o: ["極強音", "強音", "弱音"] },
+        { q: "「cresc.」這個記號代表音量要 __________。", a: "漸強", o: ["漸強", "漸弱", "漸快"] },
+        { q: "根據樂曲，強弱記號出現的正確次序是：", a: "p ➔ cresc. ➔ f ➔ ff", o: ["p ➔ cresc. ➔ f ➔ ff", "f ➔ p ➔ cresc. ➔ ff", "p ➔ f ➔ cresc. ➔ ff"] },
+
+        // 聖經金句 [cite: 17, 18, 19, 20]
+        { q: "聖經羅馬書教導：「因為世人都犯了罪，虧缺了神的 __________。」", a: "榮耀", o: ["榮耀", "大愛", "大能"] },
+        { q: "「如今卻蒙神的恩典，因基督耶穌的 __________，就白白的稱義。」", a: "救贖", o: ["救贖", "引領", "大能"] },
+        { q: "藉著誰的血，我們的罪得以洗淨，過犯得以赦免？", a: "耶穌基督", o: ["耶穌基督", "先知", "天使"] },
+        { q: "我們能「因信稱義」是因為耶穌成為了我們的 __________。", a: "救贖", o: ["救贖", "朋友", "國王"] }
+    ];
+
+    let questions = [];
+    let currentIndex = 0;
+
+    function initGame() {
+        questions = [...examQuestions].sort(() => Math.random() - 0.5);
+        currentIndex = 0;
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const feedback = document.getElementById('feedback');
+        const nextBtn = document.getElementById('next-btn');
+        const optionsContainer = document.getElementById('options');
+        feedback.style.display = 'none';
+        nextBtn.style.display = 'none';
+        optionsContainer.innerHTML = '';
+
+        if (currentIndex < questions.length) {
+            const qData = questions[currentIndex];
+            document.getElementById('question-text').innerText = qData.q;
+            document.getElementById('progress-done').innerText = `已完成：${currentIndex}`;
+            document.getElementById('progress-left').innerText = `餘下：${questions.length - currentIndex}`;
+
+            const shuffledOptions = [...qData.o].sort(() => Math.random() - 0.5);
+            shuffledOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(btn, opt, qData.a);
+                optionsContainer.appendChild(btn);
+            });
+            setTimeout(() => speakQuestion(), 600);
+        } else {
+            showFinalResult();
+        }
+    }
+
+    function checkAnswer(selectedBtn, selectedOpt, correctOpt) {
+        const btns = document.querySelectorAll('.btn');
+        const feedback = document.getElementById('feedback');
+        const nextBtn = document.getElementById('next-btn');
+        btns.forEach(b => b.disabled = true);
+
+        if (selectedOpt === correctOpt) {
+            selectedBtn.classList.add('correct');
+            feedback.innerHTML = "✓ 答對了！你好棒！";
+            feedback.style.color = "#2e7d32";
+        } else {
+            selectedBtn.classList.add('wrong');
+            feedback.innerHTML = `✗ 答錯了。正確答案是：${correctOpt}`;
+            feedback.style.color = "#d32f2f";
+            btns.forEach(b => { if(b.innerText === correctOpt) b.classList.add('correct'); });
+        }
+        feedback.style.display = 'block';
+        nextBtn.style.display = 'block';
+    }
+
+    function loadNextQuestion() { currentIndex++; loadQuestion(); }
+
+    function speakQuestion() {
+        const text = document.getElementById('question-text').innerText;
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'zh-HK';
+        msg.rate = 0.9;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(msg);
+    }
+
+    function showFinalResult() {
+        const container = document.getElementById('game-ui');
+        container.innerHTML = `
+            <div style="text-align:center; padding:30px;">
+                <h2 style="font-size:2rem; color:#f57f17;">🏆 全面複習完成！</h2>
+                <p style="font-size:1.4rem;">你完成了所有 ${examQuestions.length} 題知識點！</p>
+                <button class="btn" style="width:100%; text-align:center; background:#ffeb3b;" onclick="location.reload()">再玩一次</button>
+            </div>
+        `;
+    }
+    initGame();
+</script>
+</body>
+</html>

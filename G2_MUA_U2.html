@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>天鵝湖音樂複習 - 完整全題目版</title>
+    <style>
+        :root { --primary: #6c5ce7; --secondary: #00cec9; --accent: #ff7675; --bg: #f0f2f5; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg); margin: 0; display: flex; justify-content: center; touch-action: manipulation; }
+        #game-container { width: 100%; max-width: 600px; background: white; min-height: 100vh; padding: 20px; box-sizing: border-box; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+        header { text-align: center; border-bottom: 3px solid var(--primary); margin-bottom: 20px; padding-bottom: 10px; }
+        .menu-btn { width: 100%; padding: 20px; margin: 10px 0; font-size: 1.2rem; border: none; border-radius: 15px; background: var(--primary); color: white; cursor: pointer; font-weight: bold; }
+        .stats { display: flex; justify-content: space-between; background: #f1f2f6; padding: 10px; border-radius: 10px; margin-bottom: 15px; font-weight: bold; }
+        .question-box { font-size: 1.2rem; margin-bottom: 20px; line-height: 1.5; min-height: 60px; text-align: center; }
+        .symbol-display { text-align: center; margin: 15px 0; }
+        .text-symbol { font-size: 3.5rem; font-family: serif; font-style: italic; color: var(--accent); }
+        .options-container { display: grid; gap: 10px; }
+        button.option { background: white; border: 2px solid #dfe6e9; padding: 15px; font-size: 1.1rem; border-radius: 12px; cursor: pointer; text-align: left; }
+        .correct { background-color: #55efc4 !important; border-color: #00b894 !important; }
+        .wrong { background-color: #ff7675 !important; border-color: #d63031 !important; }
+        .feedback { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 30px; border-radius: 20px; font-size: 1.8rem; display: none; z-index: 100; text-align: center; width: 80%; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
+        .back-btn { background: #636e72; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin-bottom: 10px; }
+        svg { width: 160px; height: 70px; }
+        .yt-btn { display: inline-block; background: #ff0000; color: white; padding: 8px 20px; text-decoration: none; border-radius: 25px; font-size: 1rem; margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div id="game-container">
+    <header>
+        <h1>【第二課：《天鵝湖》】</h1>
+        <p>柴可夫斯基 (1840-1893)</p>
+        <a href="https://www.youtube.com/watch?v=L23XLW8DvXY" target="_blank" class="yt-btn">▶ 觀看《天鵝湖》影片</a>
+    </header>
+
+    <div id="main-menu">
+        <button class="menu-btn" onclick="startSection('history')">📖 1. 生平與故事 (全題庫)</button>
+        <button class="menu-btn" onclick="startSection('knowledge')">🎻 2. 音樂知識與樂器 (全題庫)</button>
+        <button class="menu-btn" onclick="startSection('symbols')">🎼 3. 樂譜記號 (修正版)</button>
+    </div>
+
+    <div id="quiz-area" style="display:none;">
+        <button class="back-btn" onclick="goHome()">⬅ 返回選單</button>
+        <div class="stats">
+            <span id="progress">進度：0 / 0</span>
+            <button onclick="speakCurrent()">🔊 讀題</button>
+        </div>
+        <div id="symbol-box" class="symbol-display"></div>
+        <div class="question-box" id="q-text"></div>
+        <div class="options-container" id="options"></div>
+    </div>
+
+    <div id="result-screen" style="display:none; text-align:center;">
+        <h2>🎉 完成此章節複習！</h2>
+        <button class="menu-btn" onclick="goHome()">回主選單</button>
+    </div>
+</div>
+<div id="feedback-pop" class="feedback"></div>
+
+<script>
+const database = {
+    history: [
+        { q: "柴可夫斯基出生於哪國？", a: "俄國", o: ["俄國", "英國", "法國", "德國"] },
+        { q: "柴可夫斯基因為熱愛音樂放棄了什麼工作？", a: "司法部工作", o: ["司法部工作", "醫生", "警察", "老師"] },
+        { q: "他曾考入哪所音樂學院修讀音樂？", a: "聖彼得堡音樂學院", o: ["聖彼得堡音樂學院", "演藝學院", "皇家學院"] },
+        { q: "以下哪齣不是他的三大芭蕾舞劇代表作？", a: "《米奇老鼠》", o: ["《天鵝湖》", "《胡桃夾子》", "《睡美人》", "《米奇老鼠》"] },
+        { q: "《天鵝湖》的故事中，公主變成了什麼？", a: "天鵝", o: ["天鵝", "青蛙", "貓", "睡美人"] },
+        { q: "王子在打獵時遇見公主，她們在什麼時間才能回復人形？", a: "夜間", o: ["夜間", "日間", "黃昏", "清晨"] },
+        { q: "王子在晚宴宣佈迎娶誰（惡魔的妹妹）？", a: "黑天鵝", o: ["黑天鵝", "白天鵝", "灰姑娘"] },
+        { q: "故事最後，誰對公主捨身的愛解除了魔咒？", a: "齊格菲王子", o: ["齊格菲王子", "惡魔", "柴可夫斯基"] },
+        { q: "聖經羅馬書5:8提到，誰在我們還作罪人的時候為我們死？", a: "耶穌基督", o: ["耶穌基督", "齊格菲王子", "神父"] }
+    ],
+    knowledge: [
+        { q: "芭蕾舞劇是用音樂和什麼來表達內容？", a: "舞蹈", o: ["舞蹈", "對白", "歌曲", "詩詞"] },
+        { q: "天鵝公主的主題旋律是由什麼樂器奏出？", a: "雙簧管", o: ["雙簧管", "長笛", "小提琴", "豎琴"] },
+        { q: "主題旋律中，由什麼樂器負責伴奏？", a: "豎琴", o: ["豎琴", "定音鼓", "單簧管", "鋼琴"] },
+        { q: "Andante 的意思是什麼？", a: "行板", o: ["行板", "快板", "慢板", "跳板"] },
+        { q: "長笛、雙簧管、單簧管和巴松管屬於什麼組別？", a: "木管樂器", o: ["木管樂器", "弦樂器", "銅管樂器", "敲擊樂器"] },
+        { q: "木管樂器由高至低排列，最高音是？", a: "長笛", o: ["長笛", "雙簧管", "單簧管", "巴松管"] },
+        { q: "木管樂器由高至低排列，最低音是？", a: "巴松管", o: ["巴松管", "長笛", "雙簧管", "單簧管"] },
+        { q: "大提琴和小提琴屬於什麼組別？", a: "弦樂器", o: ["弦樂器", "木管樂器", "銅管樂器", "敲擊樂器"] },
+        { q: "法國號、長號、大號屬於什麼組別？", a: "銅管樂器", o: ["銅管樂器", "弦樂器", "木管樂器", "敲擊樂器"] },
+        { q: "大鼓、小鼓、定音鼓屬於什麼組別？", a: "敲擊樂器", o: ["敲擊樂器", "銅管樂器", "木管樂器", "弦樂器"] },
+        { q: "拍子記號「C」代表幾分之幾拍？", a: "4/4 拍", o: ["4/4 拍", "3/4 拍", "2/4 拍", "2/2 拍"] },
+        { q: "樂譜中圈出的部分代表什麼（此題指代跳音）？", a: "跳音", o: ["跳音", "強音", "弱音"] }
+    ],
+    symbols: [
+        { isText: true, val: 'pp', q: "這個記號代表？", a: "極弱", o: ["極弱", "弱音", "強音"] },
+        { isText: true, val: 'p', q: "這個記號代表？", a: "弱音", o: ["弱音", "極弱", "漸弱"] },
+        { isText: true, val: 'f', q: "這個記號代表？", a: "強音", o: ["強音", "弱音", "極強"] },
+        { isText: true, val: 'ff', q: "這個記號代表？", a: "極強", o: ["極強", "強音", "漸強"] },
+        { isSym: true, val: '<svg viewBox="0 0 100 40"><path d="M10 20 L90 5 M10 20 L90 35" fill="none" stroke="black" stroke-width="3"/></svg>', q: "這個符號 < 代表什麼？", a: "漸強", o: ["漸強", "漸弱", "極強"] },
+        { isSym: true, val: '<svg viewBox="0 0 100 40"><path d="M90 20 L10 5 M90 20 L10 35" fill="none" stroke="black" stroke-width="3"/></svg>', q: "這個符號 > 代表什麼？", a: "漸弱", o: ["漸弱", "漸強", "弱音"] }
+    ]
+};
+
+let currentSection = []; let idx = 0; const synth = window.speechSynthesis;
+function startSection(key) { currentSection = [...database[key]].sort(() => Math.random() - 0.5); idx = 0; document.getElementById('main-menu').style.display = 'none'; document.getElementById('quiz-area').style.display = 'block'; document.getElementById('result-screen').style.display = 'none'; render(); }
+function render() {
+    if (idx >= currentSection.length) { showResult(); return; }
+    const data = currentSection[idx];
+    document.getElementById('progress').innerText = `進度：${idx + 1} / ${currentSection.length}`;
+    document.getElementById('q-text').innerText = data.q;
+    const symBox = document.getElementById('symbol-box'); symBox.innerHTML = '';
+    if (data.isText) symBox.innerHTML = `<div class="text-symbol">${data.val}</div>`;
+    else if (data.isSym) symBox.innerHTML = data.val;
+    const optsDiv = document.getElementById('options'); optsDiv.innerHTML = '';
+    [...data.o].sort(() => Math.random() - 0.5).forEach(opt => {
+        const b = document.createElement('button'); b.className = 'option'; b.innerText = opt;
+        b.onclick = () => check(opt, data.a, b); optsDiv.appendChild(b);
+    });
+    setTimeout(speakCurrent, 500);
+}
+function speakCurrent() {
+    let t = currentSection[idx].q.replace('pp','P P').replace('ff','F F');
+    const u = new SpeechSynthesisUtterance(t); u.lang = 'zh-HK'; synth.speak(u);
+}
+function check(sel, cor, btn) {
+    const pop = document.getElementById('feedback-pop'); document.querySelectorAll('.option').forEach(b => b.disabled = true);
+    if (sel === cor) { btn.classList.add('correct'); pop.innerText = "✅ 答對了！"; pop.style.backgroundColor = "#d4edda"; pop.style.color = "#155724"; }
+    else { btn.classList.add('wrong'); pop.innerText = `❌ 答案是：${cor}`; pop.style.backgroundColor = "#f8d7da"; pop.style.color = "#721c24"; }
+    pop.style.display = 'block';
+    setTimeout(() => { pop.style.display = 'none'; idx++; render(); }, 1800);
+}
+function showResult() { document.getElementById('quiz-area').style.display = 'none'; document.getElementById('result-screen').style.display = 'block'; }
+function goHome() { document.getElementById('main-menu').style.display = 'block'; document.getElementById('quiz-area').style.display = 'none'; document.getElementById('result-screen').style.display = 'none'; synth.cancel(); }
+</script>
+</body>
+</html>

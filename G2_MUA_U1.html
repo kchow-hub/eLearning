@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>G2 音樂欣賞複習遊戲</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --bg-color: #f0f7ff;
+            --header-bg: #fff176;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        #game-container {
+            width: 95%;
+            max-width: 600px;
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            max-height: 95vh;
+        }
+
+        .main-header {
+            background-color: var(--header-bg);
+            padding: 10px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            border: 2px solid #fbc02d;
+        }
+
+        .main-header h1 {
+            font-size: 1.2rem;
+            margin: 0;
+            color: #333;
+        }
+
+        .yt-link-btn {
+            background: #ff0000;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin: 5px 0;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1rem;
+            padding: 0 10px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .question-box {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: #fafafa;
+            border-radius: 15px;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .btn-speak {
+            background: white;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .options-container {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .option-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1.2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #357abd;
+        }
+
+        .option-btn:active {
+            transform: translateY(2px);
+            box-shadow: none;
+        }
+
+        .feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 30px;
+            border-radius: 20px;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: none;
+            z-index: 100;
+            width: 80%;
+            text-align: center;
+        }
+
+        .correct { background-color: var(--success-color); }
+        .wrong { background-color: var(--error-color); }
+
+        .progress-bar {
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        #progress-fill {
+            height: 100%;
+            background: var(--success-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        #final-screen { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div class="main-header">
+        <h1>主題：【第一課：G 大調弦樂小夜曲】<br>莫札特(1756-1791)</h1>
+    </div>
+
+    <div id="quiz-ui">
+        <a href="https://www.youtube.com/watch?v=f3u5-MkFY5E" target="_blank" class="yt-link-btn">▶ 播放音樂 (YouTube)</a>
+        
+        <div class="stats">
+            <span id="progress-text">已完成: 0 / 0</span>
+            <span id="remain-text">餘下: 0 題</span>
+        </div>
+        <div class="progress-bar"><div id="progress-fill"></div></div>
+
+        <div class="question-box">
+            <button class="btn-speak" onclick="speakCurrentQuestion()">🔊</button>
+            <h2 id="question-text">載入中...</h2>
+        </div>
+
+        <div id="options" class="options-container"></div>
+    </div>
+
+    <div id="final-screen">
+        <h1>🎉 太棒了！</h1>
+        <p>你已經完成所有複習題目。</p>
+        <button class="option-btn" onclick="startGame()">再玩一次</button>
+    </div>
+</div>
+
+<div id="feedback-pop" class="feedback"></div>
+
+<script>
+    // 題目資料庫 - 嚴格根據上傳文件 [cite: 1, 11, 12, 17, 22, 27, 28, 33, 34, 43, 81]
+    const questions = [
+        { q: "莫札特（Wolfgang Amadeus Mozart）在哪一個國家出生？", a: "奧地利", o: ["奧地利", "德國", "法國"] }, // [cite: 17, 18, 86]
+        { q: "莫札特的稱號是甚麼？", a: "「音樂神童」", o: ["「音樂神童」", "「音樂之父」", "「神劇之父」"] }, // [cite: 28, 88]
+        { q: "莫札特幾歲就開始作曲？", a: "五歲", o: ["五歲", "六歲", "八歲"] }, // [cite: 22]
+        { q: "莫札特幾歲開始跟著父親和姊姊巡迴演出？", a: "六歲", o: ["五歲", "六歲", "七歲"] }, // [cite: 27]
+        { q: "莫札特自幼學習彈奏古鍵琴、小提琴和什麼樂器？", a: "管風琴", o: ["管風琴", "長笛", "鋼琴"] }, // [cite: 20]
+        { q: "《G大調弦樂小夜曲》是為什麼人創作的？", a: "貴族們", o: ["貴族們", "農民", "士兵"] }, // 
+        { q: "這首樂曲通常在什麼時候演奏？", a: "黃昏或晚間", o: ["早上", "下午", "黃昏或晚間"] }, // [cite: 33, 100]
+        { q: "《G大調弦樂小夜曲》中「沒有」出現哪種樂器？", a: "長笛", o: ["長笛", "小提琴", "中提琴"] }, // [cite: 89, 90]
+        { q: "弦樂器家族排列（低音至高音）：低音大提琴、大提琴、中提琴、__________。", a: "小提琴", o: ["小提琴", "鋼琴", "小號"] }, // [cite: 36, 101, 111]
+        { q: "以下哪一件樂器「不屬於」弦樂器？", a: "巴松管", o: ["中提琴", "巴松管", "大提琴"] }, // [cite: 92, 94]
+        { q: "第一主題旋律的氣氛是怎樣的？", a: "衝勁", o: ["衝勁", "優雅", "平靜"] }, // [cite: 46, 132]
+        { q: "第二主題旋律的氣氛是怎樣的？", a: "優雅", o: ["優雅", "衝勁", "憂傷"] }, // [cite: 58]
+        { q: "強弱記號「f」(forte) 的意思是？", a: "強音", o: ["強音", "弱音", "漸強"] }, // [cite: 47, 129]
+        { q: "強弱記號「p」(piano) 的意思是？", a: "弱音", o: ["弱音", "強音", "漸慢"] }, // [cite: 59]
+        { q: "速度記號「Allegro」的意思是？", a: "快板", o: ["快板", "慢板", "行板"] }, // [cite: 116, 126]
+        { q: "《G大調弦樂小夜曲》由幾支弦樂器擔任演奏（室樂編制）？", a: "四支", o: ["四支", "三支", "五支"] } // [cite: 34]
+    ];
+
+    let currentQuestions = [];
+    let currentIndex = 0;
+    const synth = window.speechSynthesis;
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function startGame() {
+        currentQuestions = shuffle([...questions]);
+        currentIndex = 0;
+        document.getElementById('quiz-ui').style.display = 'block';
+        document.getElementById('final-screen').style.display = 'none';
+        showQuestion();
+    }
+
+    function showQuestion() {
+        if (currentIndex >= currentQuestions.length) {
+            endGame();
+            return;
+        }
+
+        const qData = currentQuestions[currentIndex];
+        document.getElementById('question-text').innerText = qData.q;
+        
+        const optionsDiv = document.getElementById('options');
+        optionsDiv.innerHTML = '';
+        
+        const shuffledOptions = shuffle([...qData.o]);
+        shuffledOptions.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(opt);
+            optionsDiv.appendChild(btn);
+        });
+
+        updateStats();
+        setTimeout(() => speakCurrentQuestion(), 500);
+    }
+
+    function updateStats() {
+        const total = currentQuestions.length;
+        document.getElementById('progress-text').innerText = `已完成: ${currentIndex} / ${total}`;
+        document.getElementById('remain-text').innerText = `餘下: ${total - currentIndex} 題`;
+        document.getElementById('progress-fill').style.width = `${(currentIndex / total) * 100}%`;
+    }
+
+    function checkAnswer(selected) {
+        const correct = currentQuestions[currentIndex].a;
+        const pop = document.getElementById('feedback-pop');
+        
+        if (selected === correct) {
+            pop.innerText = "答對了！🌟";
+            pop.className = "feedback correct";
+            currentIndex++;
+        } else {
+            pop.innerHTML = `不對喔！❌<br><span style="font-size:1.2rem">答案是：${correct}</span>`;
+            pop.className = "feedback wrong";
+        }
+        
+        pop.style.display = 'block';
+        setTimeout(() => {
+            pop.style.display = 'none';
+            showQuestion();
+        }, 2000);
+    }
+
+    function speakCurrentQuestion() {
+        synth.cancel();
+        const text = document.getElementById('question-text').innerText;
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'zh-HK';
+        utter.rate = 1.0;
+        synth.speak(utter);
+    }
+
+    function endGame() {
+        document.getElementById('quiz-ui').style.display = 'none';
+        document.getElementById('final-screen').style.display = 'block';
+    }
+
+    window.onload = startGame;
+</script>
+
+</body>
+</html>
