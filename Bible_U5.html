@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>聖經科 G2 U5 複習遊戲</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --bg: #fdfdfd;
+        }
+        body {
+            font-family: -apple-system, "PingFang HK", sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #game-container {
+            width: 90%;
+            max-width: 450px;
+            background: white;
+            padding: 25px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+        .progress-bar {
+            height: 10px;
+            background: #eee;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        #progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        .speaker-btn {
+            background: #f0f0f0;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 28px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 0 #ddd;
+        }
+        .question-text {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            min-height: 4em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+        .btn-opt {
+            background: white;
+            border: 2px solid #dfe6e9;
+            padding: 16px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .correct { background: var(--success) !important; color: white; border-color: var(--success) !important; }
+        .wrong { background: var(--error) !important; color: white; border-color: var(--error) !important; }
+        #hint-box {
+            margin-top: 20px;
+            font-weight: bold;
+            color: var(--error);
+            min-height: 24px;
+        }
+        .screen { display: none; }
+        .active { display: block; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="start-screen" class="screen active">
+        <h1 style="color: var(--primary);">聖經科複習</h1>
+        <h3>第五課：為別人禱告</h3>
+        <p>全範圍題目覆蓋</p>
+        <button class="btn-opt" style="width:100%; background: var(--primary); color:white;" onclick="startGame()">開始複習 (自動朗讀)</button>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="info-bar">
+            <span id="stat-done">已完成: 0 / 17</span>
+            <span id="stat-remain">餘下: 17 題</span>
+        </div>
+        <div class="progress-bar"><div id="progress-fill"></div></div>
+        
+        <button class="speaker-btn" onclick="speakCurrentQuestion()">🔊</button>
+        <div id="q-display" class="question-text"></div>
+        
+        <div id="options-display" class="options-grid"></div>
+        <div id="hint-box"></div>
+    </div>
+
+    <div id="end-screen" class="screen">
+        <h2>🎉 太棒了！複習完畢</h2>
+        <p id="final-result"></p>
+        <button class="btn-opt" style="width:100%; background: var(--primary); color:white;" onclick="location.reload()">再玩一次</button>
+    </div>
+</div>
+
+<script>
+    const rawData = [
+        // 經文閱讀與選擇 [cite: 19, 50-54]
+        { q: "亞伯拉罕是個什麼樣的人？", a: "義人", o: ["義人", "惡人"] },
+        { q: "亞伯拉罕行神眼中看為 __________ 的事。", a: "正", o: ["正", "惡"] },
+        { q: "亞伯拉罕 __________ 為所多瑪和蛾摩拉的人代求。", a: "盡力", o: ["盡力", "沒有"] },
+        { q: "亞伯拉罕共向神代求了多少次？", a: "六次", o: ["六次", "三次", "十次"] },
+        { q: "神說若在那裡找到 __________ 個義人，祂就不毀滅那城。", a: "十", o: ["十", "五十", "五"] },
+        
+        // 真理反思 [cite: 29-31]
+        { q: "神是公義的，祂必審判人的 __________ 。", a: "罪惡", o: ["罪惡", "善良"] },
+        { q: "神是慈愛的，祂必看顧義人，並應允他們的 __________ 。", a: "禱告", o: ["禱告", "要求"] },
+        
+        // 學而後行 [cite: 32-36, 55]
+        { q: "神不喜悅罪惡，我們要 __________ 惡事。", a: "遠離", o: ["遠離", "追求"] },
+        { q: "我們要警醒，追求 __________ ，遠離惡事。", a: "聖潔", o: ["聖潔", "名次"] },
+        { q: "我們可以學效 __________ 為別人的罪代求。", a: "亞伯拉罕", o: ["亞伯拉罕", "羅得"] },
+        { q: "為別人代求，願他們的 __________ 得到改變。", a: "生命", o: ["生命", "財富"] },
+        
+        // 金句填充 [cite: 39-46]
+        { q: "金句： __________ 祈禱所發的力量是大有功效的。", a: "義人", o: ["義人", "罪人", "壞人"] },
+        { q: "金句：義人祈禱 __________ 是大有功效的。", a: "所發的力量", o: ["所發的力量", "說的話語"] },
+        { q: "金句：義人祈禱所發的力量是 __________ 功效的。", a: "是大有", o: ["是大有", "沒有", "很少"] },
+        
+        // 罪的行為 [cite: 59-69]
+        { q: "以下哪一項是罪的行為？", a: "取笑別人", o: ["取笑別人", "稱讚別人"] },
+        { q: "以下哪一項是罪的行為？", a: "妒忌別人的成績", o: ["妒忌別人的成績", "與人分享"] },
+        { q: "以下哪一項是罪的行為？", a: "偷東西", o: ["偷東西", "幫助人"] }
+    ];
+
+    let questions = [];
+    let currentIdx = 0;
+    let score = 0;
+
+    function startGame() {
+        questions = [...rawData].sort(() => Math.random() - 0.5);
+        document.getElementById('start-screen').classList.remove('active');
+        document.getElementById('quiz-screen').classList.add('active');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const data = questions[currentIdx];
+        const total = questions.length;
+
+        document.getElementById('stat-done').innerText = `已完成: ${currentIdx} / ${total}`;
+        document.getElementById('stat-remain').innerText = `餘下: ${total - currentIdx} 題`;
+        document.getElementById('progress-fill').style.width = `${(currentIdx / total) * 100}%`;
+        document.getElementById('q-display').innerText = data.q;
+        document.getElementById('hint-box').innerText = "";
+
+        const optionsDiv = document.getElementById('options-display');
+        optionsDiv.innerHTML = "";
+        
+        const shuffledOpts = [...data.o].sort(() => Math.random() - 0.5);
+        shuffledOpts.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-opt';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(opt, data.a, btn);
+            optionsDiv.appendChild(btn);
+        });
+
+        setTimeout(speakCurrentQuestion, 400);
+    }
+
+    function checkAnswer(selected, correct, btn) {
+        const btns = document.querySelectorAll('.btn-opt');
+        btns.forEach(b => b.disabled = true);
+
+        if (selected === correct) {
+            btn.classList.add('correct');
+            score++;
+            setTimeout(nextQuestion, 1200);
+        } else {
+            btn.classList.add('wrong');
+            document.getElementById('hint-box').innerText = `💡 答案是：${correct}`;
+            setTimeout(nextQuestion, 2800);
+        }
+    }
+
+    function nextQuestion() {
+        currentIdx++;
+        if (currentIdx < questions.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('quiz-screen').classList.remove('active');
+        document.getElementById('end-screen').classList.add('active');
+        document.getElementById('final-result').innerText = `完成所有 ${questions.length} 題！\n答對了 ${score} 題。`;
+    }
+
+    function speakCurrentQuestion() {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const text = questions[currentIdx].q.replace(/__________/g, "什麼什麼");
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = 'zh-HK';
+            msg.rate = 0.9;
+            window.speechSynthesis.speak(msg);
+        }
+    }
+</script>
+
+</body>
+</html>

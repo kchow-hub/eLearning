@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>聖經科 Unit 4 復習遊戲</title>
+    <style>
+        body { font-family: "Microsoft JhengHei", sans-serif; background: #fff9c4; margin: 0; display: flex; justify-content: center; padding: 15px; }
+        #game-box { width: 100%; max-width: 450px; background: white; border-radius: 25px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; border: 4px solid #ffeb3b; }
+        .q-container { position: relative; margin-bottom: 25px; background: #fffde7; padding: 20px; border-radius: 15px; }
+        .q-text { font-size: 1.3rem; font-weight: bold; color: #333; margin-right: 35px; display: inline-block; text-align: left; vertical-align: middle; }
+        .speak-btn { background: #ff9800; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); box-shadow: 0 4px 0 #e65100; }
+        .speak-btn:active { box-shadow: none; transform: translateY(-45%); }
+        .btn-grid { display: grid; gap: 12px; }
+        button.option-btn { padding: 18px; font-size: 1.1rem; border: 2px solid #eee; border-radius: 15px; background: #fff; cursor: pointer; font-weight: 500; }
+        .correct { background: #c8e6c9 !important; border-color: #4caf50 !important; color: #2e7d32; animation: bounce 0.5s; }
+        .wrong { background: #ffcdd2 !important; border-color: #f44336 !important; color: #c62828; }
+        #hint { margin-top: 15px; font-weight: bold; color: #f57c00; font-size: 1rem; min-height: 24px; }
+        #progress { font-size: 0.9rem; color: #9e9e9e; margin-bottom: 10px; font-weight: bold; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <div id="progress">聖經科第四課：亞伯拉罕生以撒</div>
+    <div id="main-area">
+        <div class="q-container">
+            <div class="q-text" id="question">準備好開始溫習嗎？</div>
+            <button class="speak-btn" onclick="speakCurrentQ()" id="speak-icon">🔊</button>
+        </div>
+        <div class="btn-grid" id="options">
+            <button class="option-btn" onclick="startGame()">開始遊戲</button>
+        </div>
+    </div>
+    <div id="hint"></div>
+</div>
+
+<script>
+    const quizData = [
+        { q: "神應許給撒拉甚麼？", a: ["一個兒子", "房子", "一塊田", "金銀"], c: 0 },
+        { q: "撒拉聽見神的應許後有甚麼反應？", a: ["竊笑", "開心", "傷心", "憂愁"], c: 0 },
+        { q: "撒拉為什麼不相信自己能夠生孩子？", a: ["因為她已年老", "因為她不認為神愛她", "因為她有很多兒女", "因為她不想生小孩"], c: 0 },
+        { q: "神告訴撒拉甚麼時候她必生一個兒子？", a: ["一年後", "半年後", "兩年後", "三年後"], c: 0 },
+        { q: "亞伯拉罕給撒拉所生的兒子起名叫什麼？", a: ["以撒", "撒母耳", "挪亞", "以掃"], c: 0 },
+        { q: "是非題：撒拉年老時仍能生小孩是一個神蹟。", a: ["✔️ 對", "✖️ 錯"], c: 0 },
+        { q: "是非題：撒拉一直相信神應許她能懷孕生子。", a: ["✖️ 錯 (她曾竊笑)", "✔️ 對"], c: 0 },
+        { q: "是非題：撒拉和亞伯拉罕為著以撒感謝神的應許。", a: ["✔️ 對", "✖️ 錯"], c: 0 },
+        { q: "是非題：神是沒有事情做不到的。", a: ["✔️ 對", "✖️ 錯"], c: 0 },
+        { q: "金句填充：耶和華豈有____成的事嗎？", a: ["難", "苦", "易", "大"], c: 0 },
+        { q: "聖經填充：在信的人，____都能。", a: ["凡事", "很多事", "好事", "一些事"], c: 0 }
+    ];
+
+    let currentQ = 0;
+    let shuffledList = [];
+
+    function speak(text) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'zh-HK';
+        msg.rate = 0.9;
+        window.speechSynthesis.speak(msg);
+    }
+
+    function speakCurrentQ() {
+        const text = document.getElementById('question').innerText;
+        speak(text);
+    }
+
+    function startGame() {
+        shuffledList = [...quizData].sort(() => Math.random() - 0.5);
+        currentQ = 0;
+        document.getElementById('speak-icon').style.display = 'inline-flex';
+        showQuestion();
+    }
+
+    function showQuestion() {
+        if (currentQ >= shuffledList.length) {
+            document.getElementById('main-area').innerHTML = "<h2>🎉 溫習完成！</h2><button class='option-btn' style='width:100%;background:#ffeb3b' onclick='location.reload()'>重新開始</button>";
+            document.getElementById('progress').innerText = "小朋友好棒！";
+            document.getElementById('hint').innerText = "";
+            return;
+        }
+
+        const data = shuffledList[currentQ];
+        document.getElementById('progress').innerText = `題目 ${currentQ + 1} / ${shuffledList.length}`;
+        document.getElementById('question').innerText = data.q;
+        document.getElementById('hint').innerText = "";
+        
+        const optsDiv = document.getElementById('options');
+        optsDiv.innerHTML = "";
+
+        let indices = data.a.map((_, i) => i).sort(() => Math.random() - 0.5);
+        
+        indices.forEach(idx => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = data.a[idx];
+            btn.onclick = () => checkAnswer(idx, data.c, btn, data.a[data.c]);
+            optsDiv.appendChild(btn);
+        });
+        
+        // 自動讀出新題目
+        setTimeout(() => speak(data.q), 300);
+    }
+
+    function checkAnswer(picked, correct, btn, correctText) {
+        const buttons = document.querySelectorAll('.option-btn');
+        if (picked === correct) {
+            buttons.forEach(b => b.disabled = true);
+            btn.classList.add('correct');
+            speak("答對了！");
+            setTimeout(() => {
+                currentQ++;
+                showQuestion();
+            }, 1200);
+        } else {
+            btn.classList.add('wrong');
+            document.getElementById('hint').innerText = `提示：正確答案是「${correctText}」`;
+            speak("不正確，請再試一次。正確答案是 " + correctText);
+            // 不禁用按鈕，讓小朋友選對為止
+            setTimeout(() => btn.classList.remove('wrong'), 1500);
+        }
+    }
+    
+    // 初始隱藏喇叭
+    document.getElementById('speak-icon').style.display = 'none';
+</script>
+</body>
+</html>

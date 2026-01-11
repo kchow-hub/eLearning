@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>聖經科 U6 溫習遊戲</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --correct-color: #4caf50;
+            --wrong-color: #f44336;
+            --bg-color: #f0f7ff;
+            --sort-bg: #fff9db;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            touch-action: manipulation;
+        }
+
+        #game-container {
+            width: 95%;
+            max-width: 600px;
+            background: white;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .question-box {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            margin: 15px 0;
+            min-height: 60px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .audio-btn {
+            background: #ffeb3b;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #d4c200;
+            margin-bottom: 10px;
+        }
+
+        #sort-area {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 10px;
+            background: #eee;
+            border-radius: 10px;
+        }
+
+        .sort-item {
+            background: var(--sort-bg);
+            border: 2px dashed #e67e22;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: grab;
+            font-weight: bold;
+            font-size: 1.1rem;
+            touch-action: none;
+        }
+
+        .options-container {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 3px solid var(--primary-color);
+            padding: 15px;
+            font-size: 1.2rem;
+            border-radius: 15px;
+            cursor: pointer;
+            color: var(--primary-color);
+            font-weight: bold;
+            min-height: 65px;
+        }
+
+        .correct { background-color: var(--correct-color) !important; color: white !important; }
+        .wrong { background-color: var(--wrong-color) !important; color: white !important; }
+
+        .btn-check {
+            background: #e67e22;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            margin-top: 10px;
+            cursor: pointer;
+            display: none;
+        }
+
+        #feedback-modal {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: white; padding: 30px;
+            border-radius: 20px; z-index: 100;
+            width: 85%; text-align: center;
+            box-shadow: 0 0 50px rgba(0,0,0,0.3);
+        }
+
+        .overlay {
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 99;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div class="header-info">
+            <div id="progress">已完成：0</div>
+            <div id="remaining">餘下：0</div>
+        </div>
+
+        <button class="audio-btn" onclick="speakCurrentQuestion()">🔊</button>
+        <div class="question-box" id="question-text">載入中...</div>
+
+        <div id="sort-area"></div>
+        <button id="check-sort-btn" class="btn-check" onclick="verifySort()">檢查順序</button>
+
+        <div class="options-container" id="options"></div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div id="feedback-modal">
+        <h2 id="feedback-title">結果</h2>
+        <p id="feedback-msg" style="font-size: 1.2rem; line-height: 1.5;"></p>
+        <button class="option-btn" style="width:100%; margin-top:15px;" onclick="closeModal()">下一題</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+    <script>
+        const quizData = [
+            { q: "神吩咐亞伯拉罕把兒子獻為 __________。", a: "燔祭", options: ["燔祭", "平安祭", "贖罪祭"], type: "click" },
+            { q: "我要學習向神 __________ 最好的東西，因為一切都是祂賜的。", a: "奉獻", options: ["奉獻", "購買", "借用"], type: "click" },
+            { q: "亞伯拉罕被稱為「 __________ 」，是我們信心的榜樣。", a: "信心之父", options: ["信心之父", "智慧之王", "誠實之人"], type: "click" },
+            { q: "「 __________ 」的意思就是「耶和華必預備」。", a: "耶和華以勒", options: ["耶和華以勒", "耶和華沙龍", "耶和華尼西"], type: "click" },
+            { q: "以撒是亞伯拉罕 __________ 時所生的兒子。", a: "年老時", options: ["年少時", "年青時", "年老時"], type: "click" },
+            { q: "亞伯拉罕築壇後，將 __________ 捆綁，放在壇的柴上。", a: "以撒", options: ["僕人", "以撒", "母羊"], type: "click" },
+            { q: "神最後預備了一隻 __________ 代替以撒作為燔祭。", a: "公羊", options: ["公羊", "公牛", "驢子"], type: "click" },
+            { q: "將無殘疾和無瑕疵的牲畜放在壇上燒盡獻給神，這叫作 __________。", a: "燔祭", options: ["燔祭", "洗禮", "奉獻"], type: "click" },
+            { q: "亞伯拉罕願意獻上最心愛的兒子，表示他很 __________ 神及順服神。", a: "敬畏", options: ["敬畏", "害怕", "利用"], type: "click" },
+            { 
+                type: "sort",
+                q: "請拖動卡片排列金句 (創世記 22:14)：",
+                correctOrder: ["亞伯拉罕給那地方", "起名叫「耶和華以勒」。", "直到今日人還說：", "「在耶和華的山上", "必有預備。」"]
+            }
+        ];
+
+        let currentIdx = 0;
+        let shuffledQuiz = [];
+
+        function init() {
+            shuffledQuiz = [...quizData].sort(() => Math.random() - 0.5);
+            render();
+        }
+
+        function render() {
+            const data = shuffledQuiz[currentIdx];
+            document.getElementById('progress').innerText = `已完成：${currentIdx}`;
+            document.getElementById('remaining').innerText = `餘下：${shuffledQuiz.length - currentIdx}`;
+            document.getElementById('question-text').innerText = data.q;
+            
+            const optionsDiv = document.getElementById('options');
+            const sortArea = document.getElementById('sort-area');
+            const checkBtn = document.getElementById('check-sort-btn');
+            
+            optionsDiv.innerHTML = '';
+            sortArea.innerHTML = '';
+            sortArea.style.display = 'none';
+            checkBtn.style.display = 'none';
+
+            if (data.type === "sort") {
+                sortArea.style.display = 'flex';
+                checkBtn.style.display = 'inline-block';
+                [...data.correctOrder].sort(() => Math.random() - 0.5).forEach(text => {
+                    const div = document.createElement('div');
+                    div.className = 'sort-item';
+                    div.innerText = text;
+                    sortArea.appendChild(div);
+                });
+                new Sortable(sortArea, { animation: 150 });
+            } else {
+                [...data.options].sort(() => Math.random() - 0.5).forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.innerText = opt;
+                    btn.onclick = () => checkClick(opt, btn);
+                    optionsDiv.appendChild(btn);
+                });
+            }
+            setTimeout(speakCurrentQuestion, 500);
+        }
+
+        function verifySort() {
+            const items = Array.from(document.querySelectorAll('.sort-item')).map(el => el.innerText);
+            if (JSON.stringify(items) === JSON.stringify(shuffledQuiz[currentIdx].correctOrder)) {
+                showFeedback("太棒了！金句完全正確！", true);
+            } else {
+                showFeedback("順序還不對喔！\n提示：亞伯拉罕給那地方...起名叫...", false);
+            }
+        }
+
+        function checkClick(val, btn) {
+            if (val === shuffledQuiz[currentIdx].a) {
+                btn.classList.add('correct');
+                setTimeout(() => next(), 800);
+            } else {
+                btn.classList.add('wrong');
+                showFeedback(`答錯了，正確答案是：${shuffledQuiz[currentIdx].a}`, false);
+            }
+        }
+
+        function showFeedback(msg) {
+            document.getElementById('feedback-msg').innerText = msg;
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('feedback-modal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('feedback-modal').style.display = 'none';
+            if (shuffledQuiz[currentIdx].type !== 'sort' || document.getElementById('feedback-msg').innerText.includes("正確")) next();
+        }
+
+        function next() {
+            currentIdx++;
+            if (currentIdx < shuffledQuiz.length) render();
+            else {
+                document.getElementById('question-text').innerText = "複習完成！祝考試順利！";
+                document.getElementById('options').innerHTML = '<button class="option-btn" onclick="location.reload()">重新溫習</button>';
+            }
+        }
+
+        function speakCurrentQuestion() {
+            // 將底線讀作「XXXX」
+            const text = shuffledQuiz[currentIdx].q.replace(/__________/g, "嘟嘟嘟嘟");
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = 'zh-HK';
+            window.speechSynthesis.speak(msg);
+        }
+
+        init();
+    </script>
+</body>
+</html>

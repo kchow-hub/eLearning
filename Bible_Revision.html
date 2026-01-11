@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>G2 聖經科全方位複習</title>
+    <style>
+        :root { --primary: #6c5ce7; --secondary: #a29bfe; --correct: #00b894; --wrong: #d63031; --bg: #f8f9fa; }
+        body { font-family: "PingFang HK", "Microsoft JhengHei", sans-serif; background-color: var(--bg); margin: 0; display: flex; justify-content: center; touch-action: manipulation; }
+        #game-container { width: 100%; max-width: 600px; background: white; min-height: 100vh; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 3px solid var(--primary); margin-bottom: 10px; padding-bottom: 5px; }
+        .progress-info { text-align: center; font-size: 14px; color: #666; margin-bottom: 5px; font-weight: bold; }
+        .progress-bar { width: 100%; height: 12px; background: #eee; border-radius: 6px; margin-bottom: 20px; overflow: hidden; }
+        #progress-fill { height: 100%; background: var(--primary); width: 0%; transition: 0.4s; }
+        .question-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 15px; }
+        .tts-btn { background: var(--secondary); border: none; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; box-shadow: 0 4px #5649c0; }
+        .question-text { font-size: 20px; font-weight: bold; line-height: 1.5; color: #2d3436; }
+        mark { background-color: yellow; font-weight: bold; padding: 0 2px; border-radius: 2px; }
+        .option-btn { display: block; width: 100%; padding: 16px; margin: 10px 0; border: 2px solid #e0e0e0; border-radius: 12px; background: white; font-size: 18px; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .selected-container { min-height: 70px; padding: 12px; border: 2px dashed var(--primary); border-radius: 10px; margin-bottom: 10px; background: #fdfbff; display: flex; flex-direction: column; gap: 8px; }
+        .sort-tag { background: var(--primary); color: white; padding: 10px 16px; border-radius: 8px; font-size: 15px; cursor: pointer; }
+        .sort-tag::before { content: attr(data-index) ". "; font-weight: bold; }
+        .feedback-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); display: none; z-index: 100; justify-content: center; align-items: center; padding: 25px; }
+        .feedback-card { background: white; width: 100%; max-width: 420px; border-radius: 24px; padding: 30px; text-align: center; }
+        .ans-text { color: var(--wrong); font-weight: bold; margin-top: 15px; font-size: 16px; text-align: left; white-space: pre-wrap; }
+        .next-btn { margin-top: 20px; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 14px; font-size: 20px; cursor: pointer; width: 100%; font-weight: bold; }
+    </style>
+</head>
+<body onclick="unlockAudio()">
+
+<div id="game-container">
+    <div class="header"><h2>聖經科測驗複習 (23題全版)</h2></div>
+    <div class="progress-info" id="progress-text">準備開始...</div>
+    <div class="progress-bar"><div id="progress-fill"></div></div>
+    <div id="quiz-content"></div>
+    <div class="footer" style="margin-top:auto; text-align:center;"><div id="score-display" style="font-weight:bold; color:var(--primary); font-size:22px;">分數: 0</div></div>
+</div>
+
+<div id="feedback-overlay" class="feedback-overlay">
+    <div class="feedback-card">
+        <div id="feedback-emoji" style="font-size: 60px;"></div>
+        <div id="feedback-msg" style="font-size: 24px; font-weight: bold;"></div>
+        <div id="correct-ans-area" class="ans-text"></div>
+        <button class="next-btn" onclick="nextQuestion()">繼續</button>
+    </div>
+</div>
+
+<script>
+    const allQuestions = [
+        // 卷數與文字 (5題)
+        { type: 'mc', q: '全本聖經共多少卷書？', options: ['39卷', '27卷', '66卷'], correctText: '66卷' },
+        { type: 'mc', q: '<mark>舊約</mark>書卷數目是多少？', options: ['27', '39', '66'], correctText: '39' },
+        { type: 'mc', q: '<mark>新約</mark>書卷數目是多少？', options: ['39', '66', '27'], correctText: '27' },
+        { type: 'mc', q: '<mark>舊約</mark>寫成文字是什麼？', options: ['希臘文', '希伯來文', '英文'], correctText: '希伯來文' },
+        { type: 'mc', q: '<mark>新約</mark>寫成文字是什麼？', options: ['希伯來文', '希臘文', '中文'], correctText: '希臘文' },
+        
+        // 巴別塔排序 (1題)
+        { 
+            type: 'sort', q: '排序：巴別塔的事件經過', 
+            parts: [{id:'1', t:'天下的人的語言都是一樣的，他們有想建城和塔的想法。'}, {id:'2', t:'人們一起建築高塔，要高舉自己的名。'}, {id:'3', t:'神變亂人的口音。'}, {id:'4', t:'巴別塔不能完工，人們分散在全地上。'}],
+            correctOrder: '1234'
+        },
+
+        // 金句排序 (4題)
+        { type: 'sort', q: '金句：約翰福音 3:16', parts: [{id:'A', t:'神愛世人,甚至將他'}, {id:'D', t:'獨一的兒子賜給他們,'}, {id:'C', t:'叫一切信他的人'}, {id:'B', t:'不致滅亡,反得永生。'}], correctOrder: 'ADCB' },
+        { type: 'sort', q: '金句：路加福音 21:33', parts: [{id:'B', t:'天地'}, {id:'A', t:'要廢去,'}, {id:'C', t:'我的話'}, {id:'D', t:'卻絕不廢去。'}], correctOrder: 'BACD' },
+        { type: 'sort', q: '金句：詩篇 1:2 下', parts: [{id:'D', t:'惟喜愛耶和華的律法,'}, {id:'C', t:'晝夜思想'}, {id:'A', t:'祂的律法;'}, {id:'B', t:'這人便為有福!'}], correctOrder: 'DCAB' },
+        { type: 'sort', q: '金句：雅各書 4:6 下', parts: [{id:'B', t:'神抵擋'}, {id:'D', t:'驕傲的人,'}, {id:'A', t:'但賜恩'}, {id:'C', t:'給謙卑的人。'}], correctOrder: 'BDAC' },
+
+        // 選擇題 (5題)
+        { type: 'mc', q: '聖經大概用了多少年才寫成？', options: ['10年', '500年', '1600年'], correctText: '1600年' },
+        { type: 'mc', q: '「巴別」的意思是：', options: ['變亂', '創造', '謙卑'], correctText: '變亂' },
+        { type: 'mc', q: '神怎樣阻止人們興建巴別塔？', options: ['親手拆掉', '變亂人的語言', '降下烈火'], correctText: '變亂人的語言' },
+        { type: 'mc', q: '耶穌在死後第幾天復活？', options: ['第一天', '第三天', '第六天'], correctText: '第三天' },
+        { type: 'mc', q: '全本聖經的主旨是神的____。', options: ['罪', '耶穌', '救恩'], correctText: '救恩' },
+
+        // 是非題 (4題)
+        { type: 'mc', q: '是非題：這世界有一位真神，祂創造天地又創造人類。', options: ['√ 對', 'X 錯'], correctText: '√ 對' },
+        { type: 'mc', q: '是非題：從巴別塔的故事，我們知道神喜愛人驕傲。', options: ['√ 對', 'X 錯'], correctText: 'X 錯' },
+        { type: 'mc', q: '是非題：<mark>舊約</mark>是以中文寫成，而<mark>新約</mark>以英文寫成。', options: ['√ 對', 'X 錯'], correctText: 'X 錯' },
+        { type: 'mc', q: '是非題：凡相信耶穌基督的人，都能成為祂的兒女。', options: ['√ 對', 'X 錯'], correctText: '√ 對' },
+
+        // 填充題 (4題)
+        { type: 'mc', q: '我們____神的話，就必得著祝福。', options: ['遵守', '敬畏', '救恩'], correctText: '遵守' },
+        { type: 'mc', q: '人要對神存____的心，不應想像自己跟神有同樣的地位。', options: ['耶穌', '敬畏', '遵守'], correctText: '敬畏' },
+        { type: 'mc', q: '神應許藉____基督拯救及賜福予我們。', options: ['遵守', '耶穌', '救恩'], correctText: '耶穌' },
+        { type: 'mc', q: '由於世人都犯了____，結果與我們的神隔開了。', options: ['救恩', '遵守', '罪'], correctText: '罪' }
+    ];
+
+    let currentIdx = 0, score = 0, selectedIds = [], audioCtx = null, randomizedQuestions = [];
+
+    function shuffle(array) { return array.sort(() => Math.random() - 0.5); }
+
+    function unlockAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const b = audioCtx.createBuffer(1, 1, 22050);
+            const s = audioCtx.createBufferSource(); s.buffer = b; s.connect(audioCtx.destination); s.start(0);
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playSfx(win) {
+        if (!audioCtx) return;
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        o.frequency.setValueAtTime(win ? 523 : 150, audioCtx.currentTime);
+        if(win) o.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
+        g.gain.setValueAtTime(0.1, audioCtx.currentTime); o.start(); o.stop(audioCtx.currentTime + 0.3);
+    }
+
+    function render() {
+        const q = randomizedQuestions[currentIdx];
+        const container = document.getElementById('quiz-content');
+        const total = randomizedQuestions.length;
+        document.getElementById('progress-text').innerText = `題目：${currentIdx + 1} / ${total} (餘下 ${total - (currentIdx + 1)} 題)`;
+        document.getElementById('progress-fill').style.width = `${((currentIdx + 1) / total) * 100}%`;
+        
+        let h = `<div class="question-header"><button class="tts-btn" onclick="speakQuestion()">🔊</button><div class="question-text">${q.q}</div></div>`;
+        
+        if (q.type === 'mc') {
+            const shuffledOptions = shuffle([...q.options]);
+            shuffledOptions.forEach(opt => h += `<button class="option-btn" onclick="checkMC('${opt}')">${opt}</button>`);
+        } else {
+            h += `<div class="hint" style="font-size:14px; color:#666; margin-bottom:10px;">請按順序點擊 (點擊標籤可撤回)：</div><div class="selected-container" id="box"></div>`;
+            shuffle([...q.parts]).forEach(p => h += `<button class="option-btn" id="btn-${p.id}" onclick="pick('${p.id}','${p.t}')">${p.t}</button>`);
+            selectedIds = [];
+        }
+        container.innerHTML = h;
+    }
+
+    window.pick = (id, t) => {
+        const btn = document.getElementById(`btn-${id}`); if(btn.disabled) return;
+        btn.disabled = true; selectedIds.push(id);
+        const tag = document.createElement('div'); tag.className = 'sort-tag'; tag.id = `tag-${id}`; tag.innerText = t;
+        tag.setAttribute('data-index', selectedIds.length); tag.onclick = () => unpick(id);
+        document.getElementById('box').appendChild(tag);
+        if(selectedIds.length === randomizedQuestions[currentIdx].parts.length) {
+            setTimeout(() => showResult(selectedIds.join('') === randomizedQuestions[currentIdx].correctOrder), 200);
+        }
+    };
+
+    window.unpick = (id) => {
+        selectedIds = selectedIds.filter(x => x !== id);
+        document.getElementById(`btn-${id}`).disabled = false;
+        document.getElementById(`tag-${id}`).remove();
+        document.querySelectorAll('.sort-tag').forEach((t, i) => t.setAttribute('data-index', i + 1));
+    };
+
+    window.checkMC = (val) => showResult(val === randomizedQuestions[currentIdx].correctText);
+
+    function showResult(win) {
+        unlockAudio(); playSfx(win);
+        const q = randomizedQuestions[currentIdx];
+        document.getElementById('feedback-overlay').style.display = 'flex';
+        document.getElementById('feedback-emoji').innerText = win ? '🌟' : '📖';
+        document.getElementById('feedback-msg').innerText = win ? '答對了！' : '再試試看！';
+        document.getElementById('feedback-msg').style.color = win ? 'var(--correct)' : 'var(--wrong)';
+        let correctStr = q.type === 'mc' ? q.correctText : q.parts.sort((a,b) => q.correctOrder.indexOf(a.id) - q.correctOrder.indexOf(b.id)).map((p,i)=>(i+1)+'. '+p.t).join('\n');
+        document.getElementById('correct-ans-area').innerHTML = win ? "" : `正確答案：<br>${correctStr}`;
+        if(win) score += 5;
+        document.getElementById('score-display').innerText = `分數: ${score}`;
+    }
+
+    window.nextQuestion = () => {
+        document.getElementById('feedback-overlay').style.display = 'none';
+        if(++currentIdx < randomizedQuestions.length) render(); else finish();
+    };
+
+    function speakQuestion() {
+        const text = randomizedQuestions[currentIdx].q.replace(/<[^>]*>/g, '');
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'zh-HK'; window.speechSynthesis.speak(msg);
+    }
+
+    function finish() {
+        document.getElementById('quiz-content').innerHTML = `<div style="text-align:center; padding:40px;"><h2>🏆 恭喜完成 23 題複習！</h2><p>最終得分: ${score}</p><button class="next-btn" onclick="location.reload()">重新開始</button></div>`;
+    }
+
+    randomizedQuestions = shuffle([...allQuestions]);
+    render();
+</script>
+</body>
+</html>
