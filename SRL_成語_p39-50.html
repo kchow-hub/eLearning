@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>《中一成語名言警句手冊》單元四、五(P39-50)</title>
+    <style>
+        :root { --primary: #007aff; --bg: #f2f2f7; --card: #ffffff; --success: #34c759; --error: #ff3b30; --meaning: #e67e22; --example: #27ae60; }
+        body { margin: 0; font-family: -apple-system, sans-serif; background: var(--bg); display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+        .app { width: 100%; max-width: 500px; display: flex; flex-direction: column; }
+        .screen { flex: 1; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; overflow-y: auto; }
+        .hidden { display: none !important; }
+        .card { background: var(--card); border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; margin-bottom: 15px; }
+        .btn { background: var(--primary); color: white; border: none; border-radius: 14px; padding: 16px; font-size: 18px; font-weight: 600; margin: 8px 0; cursor: pointer; width: 100%; -webkit-tap-highlight-color: transparent; }
+        .btn-purple { background: #af52de; }
+        .btn-outline { background: none; color: var(--primary); border: 2px solid var(--primary); }
+        .toolbar { display: flex; justify-content: space-between; padding: 10px 20px; align-items: center; background: white; border-bottom: 1px solid #ddd; }
+        .back-link { color: var(--primary); background: none; border: none; font-size: 17px; font-weight: 600; cursor: pointer; padding: 10px 0; text-align: left; display: flex; align-items: center; }
+        .chapter-header { font-size: 1.4rem; font-weight: bold; margin: 20px 0 10px; color: #333; border-bottom: 3px solid var(--primary); display: block; padding-bottom: 5px; }
+        .list-item { background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .word-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .word-row b { font-size: 1.3rem; color: #003366; }
+        .exp-text { color: var(--meaning); font-size: 1rem; margin-bottom: 5px; font-weight: 600; }
+        .ex-text { color: var(--example); font-size: 0.95rem; line-height: 1.5; }
+        .speak-btn { background: #f2f2f7; border: none; border-radius: 50%; cursor: pointer; font-size: 1.2rem; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; }
+        input { width: 100%; padding: 15px; font-size: 1.5rem; border-radius: 15px; border: 2px solid #ccc; text-align: center; box-sizing: border-box; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="toolbar">
+            <span style="font-weight:700;">SRL中一成語應試神器</span>
+            <button onclick="toggleGlobalSnd()" id="snd-btn" style="border:none; background:none; font-size:22px;">🔊</button>
+        </div>
+
+        <div id="sc-cover" class="screen">
+            <div class="card" style="margin-top:20px;">
+                <div style="font-size:50px;">📚</div>
+                <h1>《中一成語名言警句手冊》</h1>
+                <p style="color: #8e8e93;">單元五、六(P39-50)</p>
+            </div>
+            <button class="btn" onclick="openChapterMenu('單元五')">單元五：大地景象</button>
+            <button class="btn" onclick="openChapterMenu('單元六')">單元六：生物奧妙</button>
+            <button class="btn" style="background:#5856d6" onclick="openChapterMenu('ALL')">綜合挑戰</button>
+            <button class="btn btn-outline" style="margin-top:15px;" onclick="renderFullList()">📜 總覽清單 (朗讀/分色)</button>
+        </div>
+
+        <div id="sc-level" class="screen hidden">
+            <button class="back-link" onclick="showScreen('sc-cover')">← 返回主頁</button>
+            <h2 id="chapter-title" style="text-align:center; margin-top:10px;"></h2>
+            <div class="card">
+                <button class="btn" onclick="startGame(1)">Level 1 (手冊原句)</button>
+                <button class="btn btn-purple" onclick="startGame(2)">Level 2 (全新應用)</button>
+            </div>
+        </div>
+
+        <div id="sc-game" class="screen hidden">
+            <button class="back-link" onclick="confirmExit()">← 放棄練習</button>
+            <div id="game-info" style="text-align:center; color:#8e8e93; margin-bottom:10px;"></div>
+            <div id="q-text" class="card" style="font-size:1.25rem; min-height:120px; display:flex; align-items:center; justify-content:center; line-height:1.6;"></div>
+            <div id="q-hint" style="text-align:center; letter-spacing:8px; font-size:1.5rem; font-weight:bold; margin:15px 0; background:#e5e5ea; border-radius:10px; padding:10px;"></div>
+            <input type="text" id="ans-in" placeholder="輸入成語" autocomplete="off">
+            <div id="fb" style="text-align:center; font-weight:bold; min-height:24px; margin-bottom:10px;"></div>
+            <button class="btn" onclick="checkAnswer()">提交答案</button>
+        </div>
+
+        <div id="sc-list" class="screen hidden">
+            <button class="back-link" onclick="showScreen('sc-cover')">← 返回主頁</button>
+            <div id="list-content"></div>
+        </div>
+
+        <div id="sc-res" class="screen hidden">
+            <div class="card" style="margin-top:40px; padding:40px 10px;">
+                <h1 id="res-score" style="font-size:3.5rem; margin:0;"></h1>
+                <p id="res-msg" style="font-weight:bold; color:#8e8e93;"></p>
+            </div>
+            <button class="btn" onclick="showScreen('sc-cover')">完成並返回</button>
+        </div>
+    </div>
+
+    <audio id="s-ok" src="https://cdn.pixabay.com/audio/2022/03/15/audio_806089163a.mp3"></audio>
+    <audio id="s-no" src="https://cdn.pixabay.com/audio/2022/03/10/audio_c356100570.mp3"></audio>
+
+<script>
+    const bank = [
+        { ch: "單元五", w: "肩摩轂擊", exp: "肩膀摩擦，車輪撞擊。形容熱鬧擁擠。", l1: "繁忙時間，商業區______，行人匆忙地穿梭。", l2: "節日的大街上車水馬龍，簡直是______。" },
+        { ch: "單元五", w: "熙來攘往", exp: "形容行人往來眾多，十分熱鬧。", l1: "年宵市場裏______，男女老幼樂也融融。", l2: "假日的商場總是______，非常熱鬧。" },
+        { ch: "單元五", w: "一箭之地", exp: "一枝箭射程的距離，表示距離不遠。", l1: "離兩處都不過「______」。", l2: "便利店離我家只有______，非常方便。" },
+        { ch: "單元五", w: "不毛之地", exp: "荒涼貧瘠的土地，不適合種植。", l1: "這片______終於變成適合稻米生長的良田。", l2: "在沙漠中心，到處都是______。" },
+        { ch: "單元五", w: "美不勝收", exp: "太多美好的東西，無法一一欣賞。", l1: "各種奇花異卉爭相盛放，______。", l2: "畫展的作品件件精美，令人______。" },
+        { ch: "單元五", w: "賞心悅目", exp: "看到美好的景色而心情舒暢。", l1: "一望無際的草原上點綴著野花，真叫人______。", l2: "聽著悠揚的音樂欣賞名畫，真是______。" },
+        { ch: "單元五", w: "欣欣向榮", exp: "形容草木茂盛或事物繁榮發展。", l1: "春天來了，郊外的花草______地生長。", l2: "新區的經濟發展迅速，一片______的景象。" },
+        { ch: "單元五", w: "五光十色", exp: "色彩鮮豔，光彩奪目。", l1: "嘉年華會上______的燈飾，吸引不少遊客。", l2: "海底世界的生物色彩斑斕，真是______。" },
+        { ch: "單元五", w: "山明水秀", exp: "山水秀麗，形容風景優美。", l1: "這裏昔日______，但因經濟活動而受到污染。", l2: "這座度假村環境______，非常適合放鬆。" },
+        { ch: "單元五", w: "氣象萬千", exp: "景象千變萬化，極為壯觀。", l1: "山上的雲海______，讓人目不暇給。", l2: "大自然的景象真是______。" },
+        { ch: "單元五", w: "雷聲大,雨點小", exp: "聲勢甚大，但實際行動很少。", l1: "他起初提出許多意見，但工作時卻不見人影，真是______。", l2: "這項計劃宣傳得驚天動地，結果實行時卻是______。" },
+        { ch: "單元五", w: "欲窮千里目,更上一層樓", exp: "比喻進取向上，更進一步。", l1: "老師鼓勵允行努力練習，並說：「______」。", l2: "在學習路上，我們要抱持「______」的精神。" },
+        { ch: "單元五", w: "禍不單行", exp: "指不幸的事接連發生。", l1: "他弄丟了錢包，還遺失了電話，真是______。", l2: "公司剛倒閉，家中又遭遇火災，真是______。" },
+        { ch: "單元六", w: "千里迢迢", exp: "形容路途遙遠漫長。", l1: "大雁、燕子那樣______，飛到温暖的南方。", l2: "叔叔______地趕回家與大家過年。" },
+        { ch: "單元六", w: "春暖花開", exp: "春天氣候和暖，百花綻放。", l1: "待到來年______時，蚊子、夜蛾活躍了。", l2: "在這______季節，遊人紛紛遠足。" },
+        { ch: "單元六", w: "金蟬脫殼", exp: "比喻用計謀巧妙地脫身。", l1: "魔術師竟然「______」從箱子裡逃出來。", l2: "歹徒在警方的包圍下，竟然用______之計溜走了。" },
+        { ch: "單元六", w: "風和日麗", exp: "微風柔和，陽光明媚。", l1: "海面上______，氣候炎熱。", l2: "今天______，適合去遠足。" },
+        { ch: "單元六", w: "寒氣逼人", exp: "形容極為寒冷。", l1: "熱烘烘的海面，變得______。", l2: "室內溫暖如春，室外卻______。" },
+        { ch: "單元六", w: "生意盎然", exp: "生命力旺盛，充滿活力。", l1: "古蓮子竟頂破硬殼，生意盎然。", l2: "陽台上種滿了植物，顯得______。" },
+        { ch: "單元六", w: "碩果僅存", exp: "比喻留下來的極少數物。", l1: "現在只剩下這間______的老店鋪。", l2: "這些建築是城中______的歷史見證。" },
+        { ch: "單元六", w: "光怪陸離", exp: "形容奇形怪狀、現象離奇。", l1: "大自然種種______的現象，令人嘖嘖稱奇。", l2: "這部科幻電影展現了一個______的世界。" },
+        { ch: "單元六", w: "曇花一現", exp: "比喻事物一出現便迅速消失。", l1: "這種生物只在晚上______，很難親眼看見。", l2: "網上熱潮往往只是______。" },
+        { ch: "單元六", w: "物競天擇,適者生存", exp: "物種競爭中能適應自然的生存。", l1: "我們要明白「______」的道理。", l2: "自然界遵循著「______」的規律運作。" },
+        { ch: "單元六", w: "一元復始,萬象更新", exp: "新年開始，景象煥然一新。", l1: "新一年來臨，「______」，充滿歡樂氣氛。", l2: "祝願大家______，事事順心。" },
+        { ch: "單元六", w: "麻雀雖小,五臟俱全", exp: "比喻面積小但必備東西齊全。", l1: "這家店常用的文具和專業工具也有。", l2: "這間公寓面積不大，但卻是______。" }
+    ];
+
+    let currentCh = 'ALL', activeSet = [], qIdx = 0, score = 0, level = 1, sndOn = true;
+
+    function speak(txt) { 
+        if (!window.speechSynthesis) return;
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(txt);
+        msg.lang = 'zh-HK'; msg.rate = 0.95;
+        window.speechSynthesis.speak(msg);
+    }
+
+    function toggleGlobalSnd() { sndOn = !sndOn; document.getElementById('snd-btn').innerText = sndOn ? "🔊" : "🔈"; }
+    function playSfx(type) { if(sndOn) document.getElementById(type==='ok'?'s-ok':'s-no').play(); }
+    function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+
+    function openChapterMenu(ch) {
+        currentCh = ch;
+        document.getElementById('chapter-title').innerText = ch === 'ALL' ? '綜合挑戰' : ch;
+        showScreen('sc-level');
+    }
+
+    function confirmExit() { if(confirm("確定要放棄目前的練習並回到主頁嗎？")) { showScreen('sc-cover'); } }
+
+    function renderFullList() {
+        const box = document.getElementById('list-content');
+        box.innerHTML = "";
+        const chapters = ["單元五", "單元六"];
+        chapters.forEach(ch => {
+            const head = document.createElement('div');
+            head.className = "chapter-header"; head.innerText = ch;
+            box.appendChild(head);
+            bank.filter(i => i.ch === ch).forEach(i => {
+                const item = document.createElement('div');
+                item.className = "list-item";
+                item.innerHTML = `
+                    <div class="word-row"><b>${i.w}</b><button class="speak-btn" onclick="speak('${i.w}')">🔊</button></div>
+                    <div class="exp-text">解釋：${i.exp} <button class="speak-btn" style="display:inline; width:25px; height:25px; font-size:0.8rem" onclick="speak('${i.exp}')">🔊</button></div>
+                    <div class="ex-text">例句：${i.l1.replace('______', i.w)} <button class="speak-btn" style="display:inline; width:25px; height:25px; font-size:0.8rem" onclick="speak('${i.l1.replace('______', i.w)}')">🔊</button></div>
+                `;
+                box.appendChild(item);
+            });
+        });
+        showScreen('sc-list');
+    }
+
+    function startGame(lv) {
+        level = lv; qIdx = 0; score = 0;
+        let pool = currentCh === 'ALL' ? bank : bank.filter(i => i.ch === currentCh);
+        if (pool.length === 0) { alert("數據加載失敗，請重試！"); return; }
+        activeSet = [...pool].sort(() => Math.random() - 0.5).slice(0, 10);
+        showScreen('sc-game');
+        loadNextQ();
+    }
+
+    function loadNextQ() {
+        if(qIdx >= activeSet.length) { finishGame(); return; }
+        const q = activeSet[qIdx];
+        document.getElementById('game-info').innerText = `題目 ${qIdx + 1} / ${activeSet.length}`;
+        document.getElementById('q-text').innerText = level === 1 ? q.l1 : q.l2;
+        let hintChars = q.w.split('').map(c => (Math.random() > 0.75 || c === ',') ? c : "□");
+        if (!hintChars.includes("□")) hintChars[0] = "□";
+        document.getElementById('q-hint').innerText = hintChars.join('');
+        document.getElementById('ans-in').value = ""; document.getElementById('fb').innerText = "";
+        document.getElementById('ans-in').focus();
+    }
+
+    function checkAnswer() {
+        const user = document.getElementById('ans-in').value.trim();
+        const correct = activeSet[qIdx].w;
+        const fb = document.getElementById('fb');
+        if(user === correct) {
+            score++; fb.style.color = "var(--success)"; fb.innerText = "正確！✓"; playSfx('ok');
+            setTimeout(() => { qIdx++; loadNextQ(); }, 1000);
+        } else {
+            fb.style.color = "var(--error)"; fb.innerText = `答案：${correct}`; playSfx('no');
+            setTimeout(() => { qIdx++; loadNextQ(); }, 2500);
+        }
+    }
+
+    function finishGame() {
+        document.getElementById('res-score').innerText = `${score} / ${activeSet.length}`;
+        document.getElementById('res-msg').innerText = score >= 8 ? "表現完美！考試必贏！" : "多溫習一下清單吧！";
+        showScreen('sc-res');
+    }
+
+    document.getElementById('ans-in').addEventListener('keypress', e => { if(e.key==='Enter') checkAnswer(); });
+</script>
+</body>
+</html>
