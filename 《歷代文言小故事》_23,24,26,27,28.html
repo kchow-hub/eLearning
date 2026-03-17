@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>中一文言文全攻略 (原文對照版)</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --success: #27ae60;
+            --error: #e74c3c;
+            --bg: #f4f7f6;
+            --highlight: #e74c3c;
+        }
+        body {
+            font-family: "Microsoft JhengHei", -apple-system, sans-serif;
+            background-color: var(--bg);
+            margin: 0; padding: 10px;
+            display: flex; justify-content: center;
+        }
+        #game-box {
+            width: 100%; max-width: 650px;
+            background: white; padding: 25px;
+            border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .header { text-align: center; margin-bottom: 20px; color: var(--primary); }
+        .menu-btn {
+            display: block; width: 100%; padding: 18px; margin: 10px 0;
+            background: white; border: 2px solid var(--accent);
+            border-radius: 12px; font-size: 1.1em; font-weight: bold;
+            color: var(--primary); cursor: pointer; text-align: left;
+        }
+        .all-btn { background: var(--accent); color: white; text-align: center; }
+        
+        /* 原文顯示區 */
+        .source-text {
+            background: #fff9db;
+            padding: 15px;
+            border-left: 5px solid #f1c40f;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            font-size: 1.1em;
+            color: #444;
+        }
+        .highlight { color: var(--highlight); font-weight: bold; text-decoration: underline; }
+
+        .stats { display: flex; justify-content: space-between; font-size: 0.9em; color: #7f8c8d; margin-bottom: 10px; }
+        .q-text { font-size: 1.25em; margin: 15px 0; line-height: 1.4; color: var(--primary); font-weight: bold; }
+        
+        .opt-btn {
+            display: block; width: 100%; padding: 16px; margin-bottom: 10px;
+            border: 2px solid #eee; border-radius: 10px; background: #fff;
+            font-size: 1.1em; text-align: left; cursor: pointer;
+            transition: 0.2s;
+        }
+        .correct { background: var(--success) !important; color: white; border-color: var(--success); }
+        .wrong { background: var(--error) !important; color: white; border-color: var(--error); }
+        
+        .nav-btn {
+            width: 100%; padding: 15px; margin-top: 10px;
+            border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer;
+        }
+        .next { background: var(--accent); color: white; }
+        .back { background: #95a5a6; color: white; }
+        .hidden { display: none; }
+        .audio-icon { cursor: pointer; font-size: 1.3em; margin-left: 8px; }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <div id="menu">
+        <h2 class="header">📚 歷代文言小故事<br><small>(原文對照複習)</small></h2>
+		<!-- <button class="menu-btn" onclick="start(22)">22. 陳蕃願掃除天下</button> -->
+        <button class="menu-btn" onclick="start(23)">23. 匡衡鑿壁借光</button>
+        <button class="menu-btn" onclick="start(24)">24. 朱暉退賊</button>
+        <!-- <button class="menu-btn" onclick="start(25)">25. 曹沖稱象</button> -->
+        <button class="menu-btn" onclick="start(26)">26. 曹植善屬文</button>
+        <button class="menu-btn" onclick="start(27)">27. 曹植作七步詩</button>
+        <button class="menu-btn" onclick="start(28)">28. 二鍾見魏文帝</button>
+        <button class="menu-btn all-btn" onclick="start('all')">🌟 全範圍總複習 (COVER ALL)</button>
+    </div>
+
+    <div id="play" class="hidden">
+        <div class="stats">
+            <span id="label"></span>
+            <span>題目: <span id="idx"></span> / <span id="total"></span></span>
+        </div>
+        
+        <div id="source-display" class="source-text"></div>
+
+        <div class="q-text">
+            <span id="question"></span>
+            <span class="audio-icon" onclick="speak()">🔊</span>
+        </div>
+
+        <div id="options"></div>
+        <div id="hint" class="hidden" style="text-align:center; padding:10px; font-weight:bold;"></div>
+        
+        <button id="nextBtn" class="nav-btn next hidden" onclick="goNext()">下一題</button>
+        <button class="nav-btn back" onclick="location.reload()">返回目錄</button>
+    </div>
+
+    <div id="result" class="hidden" style="text-align:center;">
+        <h2 style="color:var(--success)">🎉 任務完成！</h2>
+        <p>你已經完成所有選定的文言文練習。</p>
+        <button class="nav-btn next" onclick="location.reload()">回到主目錄</button>
+    </div>
+</div>
+
+<script>
+    const sources = {
+        22: "陳蕃年十五，嘗閒居一室，而庭宇蕪穢。父友薛勤來候之，謂藩曰：「孺子何不灑掃以待賓客？」藩曰：「大丈夫處世，當掃除天下，安事一室乎？」勤知其有清世志，甚奇之。",
+        23: "匡衡字稚圭，勤學而無燭。鄰舍有燭而不逮，衡乃穿壁引其光，以書映光而讀之。邑人大姓文不識，家富多書，衡乃與其傭作而不求償。主人怪問衡，衡曰：「願得主人書遍讀之。」主人感歎，資給以書，遂成大學。",
+        24: "朱暉早孤，年十三，王莽敗，天下亂，道遇群賊，白刃劫諸婦女，略奪衣物。昆弟賓客皆惶迫，伏地莫敢動。暉拔劍前曰：「財物皆可取耳，諸母衣不可得。今日朱暉死日也！」賊見其小，壯其志，笑曰：「童子內刀。」遂舍之而去。",
+        25: "曹沖五六歲，智意所及，有若成人。孫權曾致巨象，太祖欲知其斤重，訪之左右，莫能出其理。沖曰：「置象大船之上，而刻其水痕所至，稱物以載之，則校可知。」太祖大喜，即日施行。",
+        26: "曹植年十餘歲，誦讀《詩》、《論》及辭賦數十萬言，善屬文。太祖嘗視其文，謂植曰：「汝請人邪？」植跪曰：「言出為論，下筆成章，顧當面試，奈何請人？」時鄴銅雀臺新成，太祖悉將諸子登臺，使各為賦。植援筆立成，可觀，太祖異之。",
+        27: "文帝嘗令東阿王七步中作詩，不成者行大法。應聲便為詩曰：「煮豆持作羹，漉菽以為汁。萁在釜下燃，豆在釜中泣。本是同根生，相煎何太急！」帝深有慚色。",
+        28: "鍾毓、鍾會少有令譽，年十三，魏文帝聞之，語其父鍾繇曰：「可令二子來！」於是敕見。毓面有汗，帝曰：「卿面何以汗？」毓對曰：「戰戰惶惶，汗出如漿。」復問會：「卿何以不汗？」對曰：「戰慄慄，汗不敢出。」"
+    };
+
+    const db = [
+        <!-- // 22. 陳蕃 [cite: 5, 7, 8] -->
+        <!-- { id: 22, t: "22. 陳蕃", q: "「庭宇蕪穢」的意思是？", a: "院子和屋簷下荒蕪骯髒", o: ["院子和屋簷下荒蕪骯髒", "室內非常髒亂", "牆壁破舊不堪", "花園雜草叢生"], kw: ["庭宇蕪穢"] }, -->
+        <!-- { id: 22, t: "22. 陳蕃", q: "「候之」的意思是？", a: "拜訪他", o: ["拜訪他", "等待他", "看望他", "監視他"], kw: ["候之"] }, -->
+        <!-- { id: 22, t: "22. 陳蕃", q: "「清世志」中的「志」是指？", a: "志向", o: ["志向", "標記", "記錄", "意志"], kw: ["志"] }, -->
+        <!-- { id: 22, t: "22. 陳蕃", q: "翻譯：「安事一室乎？」", a: "哪用得著服侍一間屋子？", o: ["哪用得著服侍一間屋子？", "怎麼能住在這間屋子？", "為什麼要打掃屋子？", "這間屋子安全嗎？"], kw: ["安事一室乎？"] }, -->
+        <!-- { id: 22, t: "22. 陳蕃", q: "「甚奇之」中「奇」的意思是？", a: "認為……很與眾不同", o: ["認為……很與眾不同", "感到奇怪", "特別的", "奇怪的事"], kw: ["甚奇之"] }, -->
+
+        // 23. 匡衡 [cite: 11, 13, 14]
+        { id: 23, t: "23. 匡衡", q: "「邑人」中「邑」的意思是？", a: "當地，縣裏", o: ["當地，縣裏", "家鄉", "國家", "鄰舍"], kw: ["邑"] },
+        { id: 23, t: "23. 匡衡", q: "「主人怪問衡」中「怪」的意思是？", a: "感到奇怪", o: ["感到奇怪", "責怪", "生氣", "奇怪的人"], kw: ["怪"] },
+        { id: 23, t: "23. 匡衡", q: "「遍讀之」中「遍」的意思是？", a: "全部", o: ["全部", "一遍", "普通", "遍地"], kw: ["遍"] },
+        { id: 23, t: "23. 匡衡", q: "「資給以書」中「資給」的意思是？", a: "借", o: ["借", "送給", "賣", "資助"], kw: ["資給"] },
+        { id: 23, t: "23. 匡衡", q: "翻譯：「衡乃穿壁引其光」", a: "匡衡便鑿壁洞把隔壁的燭光引進來。", o: ["匡衡便鑿壁洞把隔壁的燭光引進來。", "匡衡穿過牆壁去看光。", "匡衡把牆壁拆了引光。", "匡衡在牆上畫畫。"], kw: ["穿壁引其光"] },
+        { id: 23, t: "23. 匡衡", q: "翻譯：「衡乃與其傭作而不求償」", a: "匡衡便給他做僱工而不要求報酬。", o: ["匡衡便給他做僱工而不要求報酬。", "匡衡僱用別人做事不給錢。", "匡衡要求主人給他報酬。", "匡衡不願意工作。"], kw: ["傭作而不求償"] },
+
+        // 24. 朱暉 [cite: 19, 21, 22]
+        { id: 24, t: "24. 朱暉", q: "「朱暉早孤」中「孤」的意思是？", a: "失去父親", o: ["失去父親", "孤單", "孤兒", "失去母親"], kw: ["孤"] },
+        { id: 24, t: "24. 朱暉", q: "「壯其志」中「壯」的意思是？", a: "認為……大", o: ["認為……大", "強壯", "偉大", "讚賞"], kw: ["壯"] },
+        { id: 24, t: "24. 朱暉", q: "「遂舍之而去」中「舍」的意思是？", a: "釋放，拋下", o: ["釋放，拋下", "宿舍", "房屋", "離開"], kw: ["舍"] },
+        { id: 24, t: "24. 朱暉", q: "翻譯：「白刃劫諸婦女」", a: "（拔出）亮晃晃的刀劫持眾婦女。", o: ["（拔出）亮晃晃的刀劫持眾婦女。", "用白色的刀殺婦女。", "用刀指著女孩子。", "強盜放下了武器。"], kw: ["白刃劫諸婦女"] },
+        { id: 24, t: "24. 朱暉", q: "翻譯：「昆弟賓客皆惶迫」", a: "兄弟及賓客都害怕緊張。", o: ["兄弟及賓客都害怕緊張。", "大家都很驚慌。", "客人們都逃跑了。", "兄弟都在哭泣。"], kw: ["昆弟賓客皆惶迫"] },
+
+        <!-- // 25. 曹沖 [cite: 26, 28, 29] -->
+        <!-- { id: 25, t: "25. 曹沖", q: "「智意所及」中「及」的意思是？", a: "達到", o: ["達到", "以及", "趕上", "及格"], kw: ["及"] }, -->
+        <!-- { id: 25, t: "25. 曹沖", q: "「置象大船之上」中「置」的意思是？", a: "安放", o: ["安放", "位置", "設置", "買賣"], kw: ["置"] }, -->
+        <!-- { id: 25, t: "25. 曹沖", q: "「水痕所至」中「至」的意思是？", a: "達到的地方", o: ["達到的地方", "至於", "到來", "最"], kw: ["至"] }, -->
+        <!-- { id: 25, t: "25. 曹沖", q: "翻譯：「訪之左右」", a: "向手下人詢問。", o: ["向手下人詢問。", "問左右兩邊。", "拜訪左右大臣。", "詢問附近的人。"], kw: ["訪之左右"] }, -->
+        <!-- { id: 25, t: "25. 曹沖", q: "翻譯：「莫能出其理」", a: "都不能想出稱象的辦法。", o: ["都不能想出稱象的辦法。", "沒人能說出道理。", "無法理解原因。", "沒有人能理睬。"], kw: ["莫能出其理"] }, -->
+        <!-- { id: 25, t: "25. 曹沖", q: "翻譯：「即日施行」", a: "就（按曹沖的方法）實行了。", o: ["就（按曹沖的方法）實行了。", "當天就做了。", "立刻執行命令。", "馬上出發。"], kw: ["即日施行"] }, -->
+
+        // 26. 曹植善屬文 [cite: 32, 34, 35, 36]
+        { id: 26, t: "26. 曹植屬文", q: "「善屬文」中「屬」的意思是？", a: "寫", o: ["寫", "屬於", "家屬", "叮囑"], kw: ["屬"] },
+        { id: 26, t: "26. 曹植屬文", q: "「言出為論」中「論」的意思是？", a: "議論", o: ["議論", "理論", "論語", "辯論"], kw: ["論"] },
+        { id: 26, t: "26. 曹植屬文", q: "「植援筆立成」中「援」的意思是？", a: "提起", o: ["提起", "支援", "援救", "援引"], kw: ["援"] },
+        { id: 26, t: "26. 曹植屬文", q: "翻譯：「顧當面試，奈何請人？」", a: "只要當面試驗，為什麼要請人（代筆）？", o: ["只要當面試驗，為什麼要請人（代筆）？", "看著面試，請人幫忙。", "照顧面試的人。", "為何請人代筆？"], kw: ["顧當面試，奈何請人？"] },
+        { id: 26, t: "26. 曹植屬文", q: "「可觀」在文中意指？", a: "值得一看，意為寫得很好。", o: ["值得一看，意為寫得很好。", "可以觀看。", "景象壯觀。", "可以看到。"], kw: ["可觀"] },
+
+        // 27. 七步詩 [cite: 41, 43, 44]
+        { id: 27, t: "27. 七步詩", q: "「煮豆持作羹」中「持」的意思是？", a: "拿來", o: ["拿來", "持有", "支持", "持續"], kw: ["持"] },
+        { id: 27, t: "27. 七步詩", q: "「萁在釜下燃」中「釜」的意思是？", a: "鍋子", o: ["鍋子", "斧頭", "爐灶", "釜山"], kw: ["釜"] },
+        { id: 27, t: "27. 七步詩", q: "「相煎何太急」中「何」在此指代？", a: "指代「豆」", o: ["指代「豆」", "為什麼", "何時", "如何"], kw: ["何"] },
+        { id: 27, t: "27. 七步詩", q: "「豆在釜中泣」的「泣」字好在哪裡？", a: "指豆煮後流汁似泣，亦指作者傷心。", o: ["指豆煮後流汁似泣，亦指作者傷心。", "指水燒開了。", "指火太猛烈。", "指曹丕哭了。"], kw: ["泣"] },
+        { id: 27, t: "27. 七步詩", q: "「煮豆燃萁」比喻好在哪裡？", a: "豆與萁同根生，喻兄弟骨肉相殘形象準確。", o: ["豆與萁同根生，喻兄弟骨肉相殘形象準確。", "說明火很旺。", "說明煮豆很快。", "說明農田收成。"], kw: ["煮豆持作羹", "萁在釜下燃"] },
+
+        // 28. 二鍾 [cite: 47, 50]
+        { id: 28, t: "28. 二鍾", q: "「魏文帝聞之」中「之」指代？", a: "指代二鍾「少有令譽」一事", o: ["指代二鍾「少有令譽」一事", "代指鍾繇", "代指汗水", "去到那裡"], kw: ["之"] },
+        { id: 28, t: "28. 二鍾", q: "「可令二子來」中「令」的意思是？", a: "使", o: ["使", "命令", "縣令", "令人"], kw: ["令"] },
+        { id: 28, t: "28. 二鍾", q: "「於是敕見」中「敕」的意思是？", a: "皇帝的命令", o: ["皇帝的命令", "敕令", "赦免", "請見"], kw: ["敕"] },
+        { id: 28, t: "28. 二鍾", q: "「復問會」中「復」的意思是？", a: "又", o: ["又", "回復", "重複", "復習"], kw: ["復"] },
+        { id: 28, t: "28. 二鍾", q: "翻譯：「卿面何以汗？」", a: "你臉上為什麼出汗？", o: ["你臉上為什麼出汗？", "你的臉像汗。", "為什麼流汗？", "臉上有水。"], kw: ["卿面何以汗？"] },
+        { id: 28, t: "28. 二鍾", q: "翻譯：「戰戰惶惶，汗出如漿」", a: "因為膽戰心驚，所以汗如水漿般流出。", o: ["因為膽戰心驚，所以汗如水漿般流出。", "戰鬥之後很慌張。", "汗多得像漿糊。", "雖然害怕但沒流汗。"], kw: ["戰戰惶惶，汗出如漿"] }
+    ];
+
+    let current = [];
+    let qIdx = 0;
+
+    function start(mode) {
+        current = mode === 'all' ? [...db] : db.filter(x => x.id === mode);
+        current.sort(() => Math.random() - 0.5);
+        qIdx = 0;
+        document.getElementById('menu').classList.add('hidden');
+        document.getElementById('play').classList.remove('hidden');
+        render();
+    }
+
+    function render() {
+        const q = current[qIdx];
+        document.getElementById('label').innerText = q.t;
+        document.getElementById('idx').innerText = qIdx + 1;
+        document.getElementById('total').innerText = current.length;
+        document.getElementById('question').innerText = q.q;
+        
+        // 處理原文 Highlight
+        let sourceHtml = sources[q.id];
+        q.kw.forEach(word => {
+            const regex = new RegExp(word, "g");
+            sourceHtml = sourceHtml.replace(regex, `<span class="highlight">${word}</span>`);
+        });
+        document.getElementById('source-display').innerHTML = sourceHtml;
+
+        const optBox = document.getElementById('options');
+        optBox.innerHTML = '';
+        const opts = [...q.o].sort(() => Math.random() - 0.5);
+        
+        opts.forEach(o => {
+            const btn = document.createElement('button');
+            btn.className = 'opt-btn';
+            btn.innerText = o;
+            btn.onclick = () => check(btn, o, q.a);
+            optBox.appendChild(btn);
+        });
+        
+        document.getElementById('hint').classList.add('hidden');
+        document.getElementById('nextBtn').classList.add('hidden');
+    }
+
+    function check(btn, sel, ans) {
+        const all = document.querySelectorAll('.opt-btn');
+        all.forEach(b => b.disabled = true);
+        const hint = document.getElementById('hint');
+        hint.classList.remove('hidden');
+
+        if (sel === ans) {
+            btn.classList.add('correct');
+            hint.innerText = "✅ 正確！非常好！";
+            hint.style.color = "var(--success)";
+        } else {
+            btn.classList.add('wrong');
+            hint.innerText = `❌ 錯誤！正確答案是：${ans}`;
+            hint.style.color = "var(--error)";
+            all.forEach(b => { if(b.innerText === ans) b.classList.add('correct'); });
+        }
+        document.getElementById('nextBtn').classList.remove('hidden');
+    }
+
+    function goNext() {
+        qIdx++;
+        if (qIdx < current.length) render();
+        else {
+            document.getElementById('play').classList.add('hidden');
+            document.getElementById('result').classList.remove('hidden');
+        }
+    }
+
+    function speak() {
+        const utter = new SpeechSynthesisUtterance(document.getElementById('question').innerText);
+        utter.lang = 'zh-HK';
+        window.speechSynthesis.speak(utter);
+    }
+</script>
+
+</body>
+</html>
