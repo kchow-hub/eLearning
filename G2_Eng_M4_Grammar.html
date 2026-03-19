@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>G2 English M4 Grammar✨</title>
+    <style>
+        :root {
+            --pink-light: #FFD1DC;
+            --pink-dark: #FF85A1;
+            --purple: #B19CD9;
+            --mint: #B2F2BB;
+            --white: #ffffff;
+            --text: #5D5D5D;
+            --highlight: #FFFF00;
+            --rule-from: #4A90E2; 
+            --rule-to: #e60000;    
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            background: linear-gradient(135deg, var(--pink-light) 0%, #FFF5F7 100%);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        #game-container { width: 100%; max-width: 500px; padding: 20px; box-sizing: border-box; }
+        .header { text-align: center; padding: 10px 0; }
+        h1 { color: var(--pink-dark); font-size: 1.8rem; text-shadow: 2px 2px white; margin: 0; }
+
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 25px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(255, 133, 161, 0.2);
+            border: 3px solid var(--white);
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            padding: 18px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.1);
+        }
+
+        .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
+        .btn-pink { background: var(--pink-dark); }
+        .btn-purple { background: var(--purple); }
+        .btn-mint { background: #40c057; }
+
+        .btn-audio {
+            background: white;
+            border: 3px solid var(--pink-dark);
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            margin: 0 auto 10px auto;
+            display: block;
+        }
+
+        .question-text { font-size: 1.4rem; text-align: center; margin: 15px 0; color: #444; min-height: 60px; }
+        .options-grid { display: grid; gap: 10px; }
+        .option-btn { background: var(--white); color: var(--pink-dark); border: 2px solid var(--pink-light); padding: 12px; border-radius: 15px; }
+
+        .rule-text b.from { color: var(--rule-from); }
+        .rule-text b.to { color: var(--rule-to); }
+
+        .sharp-highlight { background-color: var(--highlight); color: #FF0000; padding: 2px 8px; border-radius: 5px; font-weight: 900; border: 2px solid #FF0000; }
+
+        #message-overlay, #result-screen { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 350px; z-index: 100; text-align: center; }
+        .hidden { display: none !important; }
+
+        .progress-container { width: 100%; background: #eee; border-radius: 10px; height: 10px; margin-bottom: 5px; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--pink-dark); width: 0%; transition: width 0.3s; }
+
+        .result-stat { font-size: 1.2rem; margin: 10px 0; font-weight: bold; }
+        .result-score { font-size: 2.5rem; color: var(--pink-dark); margin: 15px 0; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div class="header"><h1>✨G2 English M4 Grammar✨</h1></div>
+
+    <div id="menu-screen">
+        <div class="card" style="text-align: center;">
+            <h3 style="color: var(--pink-dark);">Ready, Hailey? ❤️</h3>
+            <button class="btn btn-pink" style="width: 100%; margin-bottom: 15px;" onclick="initGame(1)">🌸 LV1: From Quiz PDF</button>
+            <button class="btn btn-purple" style="width: 100%;" onclick="initGame(2)">⭐ LV2: 20 Random Challenges</button>
+        </div>
+        
+        <div class="card">
+            <h4 style="margin-top: 0; color: var(--purple);">Grammar Rules:</h4>
+            <div class="rule-text" style="font-size: 0.95rem; line-height: 1.6;">
+                • <b class="from">He / She / It</b> ➔ <b class="to">+s / +es</b><br>
+                • <b class="from">o, x, ch, sh, ss</b> ➔ <b class="to">+es</b><br>
+                • <b class="from">y</b> ➔ <b class="to">ies</b> (e.g. tidies)<br>
+                • <b class="from">have</b> ➔ <b class="to">has</b>
+            </div>
+        </div>
+    </div>
+
+    <div id="quiz-screen" class="hidden">
+        <div class="progress-container"><div id="pb" class="progress-bar"></div></div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 8px; font-weight: bold;">
+            <span id="stat-progress">Progress: 0/0</span>
+            <span id="stat-lv">LV1</span>
+        </div>
+        <div class="card">
+            <button class="btn-audio" onclick="speakCurrent()">🔊</button>
+            <div id="question-text" class="question-text"></div>
+            <div id="options-grid" class="options-grid"></div>
+        </div>
+        <button class="btn btn-mint" style="width: 100%; font-size: 0.9rem; padding: 10px;" onclick="goHome()">🏠 Home</button>
+    </div>
+
+    <div id="message-overlay" class="card">
+        <h2 id="msg-title" style="margin-top: 0;"></h2>
+        <div id="msg-body" style="font-size: 1.1rem; margin-bottom: 15px;"></div>
+        <button class="btn btn-pink" style="width: 100%;" onclick="closeMessage()">Next! ✨</button>
+    </div>
+
+    <div id="result-screen" class="card">
+        <h2 style="color: var(--purple);">Game Over! 🎉</h2>
+        <div class="result-score" id="res-score">100%</div>
+        <div class="result-stat" style="color: #40c057;">✅ Correct: <span id="res-correct">0</span></div>
+        <div class="result-stat" style="color: var(--pink-dark);">❌ Mistakes: <span id="res-wrong">0</span></div>
+        <p id="res-comment" style="font-style: italic; margin-bottom: 20px;"></p>
+        <button class="btn btn-pink" style="width: 100%;" onclick="goHome()">Play Again! ❤️</button>
+    </div>
+</div>
+
+<script>
+    // Audio Context Setup
+    let audioCtx = null;
+
+    function playSound(type) {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'correct') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+            osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1); // To A5
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        } else {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.4);
+        }
+    }
+
+    const lv1Data = [
+        { q: "He (help) his mother.", a: "helps", opts: ["help", "helps", "helpies"], tip: "He needs an 's'!" },
+        { q: "She (visit) her grandma.", a: "visits", opts: ["visit", "visits", "visites"], tip: "She needs an 's'!" },
+        { q: "Pigs (have) four legs.", a: "have", opts: ["has", "have", "haves"], tip: "Pigs = They" },
+        { q: "It (have) four legs.", a: "has", opts: ["have", "has", "haves"], tip: "It needs 'has'!" },
+        { q: "He (play) with the ball.", a: "plays", opts: ["play", "plays", "plaies"], tip: "Just add 's'!" },
+        { q: "She (read) a book.", a: "reads", opts: ["read", "reads", "reades"], tip: "Add 's'!" },
+        { q: "He (wash) the dishes.", a: "washes", opts: ["wash", "washes", "washs"], tip: "sh ➔ es" },
+        { q: "She (get) up early.", a: "gets", opts: ["get", "gets", "getes"], tip: "Add 's'!" },
+        { q: "He (go) to school.", a: "goes", opts: ["go", "goes", "goies"], tip: "o ➔ es" },
+        { q: "She (tidy) the room.", a: "tidies", opts: ["tidy", "tidies", "tidys"], tip: "y ➔ ies" },
+        { q: "He (dry) the dishes.", a: "dries", opts: ["dry", "dries", "drys"], tip: "y ➔ ies" },
+        { q: "She (watch) TV.", a: "watches", opts: ["watch", "watches", "watchs"], tip: "ch ➔ es" },
+        { q: "He (mix) the food.", a: "mixes", opts: ["mix", "mixes", "mixs"], tip: "x ➔ es" },
+        { q: "She (miss) her friend.", a: "misses", opts: ["miss", "misses", "misss"], tip: "ss ➔ es" },
+        { q: "He (do) his homework.", a: "does", opts: ["do", "does", "dos"], tip: "o ➔ es" },
+        { q: "I (be) happy.", a: "am", opts: ["am", "is", "are"], tip: "I am" },
+        { q: "The children (be) tidy.", a: "are", opts: ["am", "is", "are"], tip: "Children = They" },
+        { q: "Tom (be) polite.", a: "is", opts: ["am", "is", "are"], tip: "Tom = He" }
+    ];
+
+    const subjects = ["He", "She", "It", "My cat", "Dad", "The dog", "Lily", "Peter", "The robot"];
+    const esVerbs = ["brush", "teach", "catch", "push", "fix", "box", "toss", "kiss", "buzz", "crunch", "splash", "match"];
+    const yVerbs = ["cry", "fly", "fry", "copy", "carry", "marry", "study", "try", "worry"];
+    const sVerbs = ["kick", "jump", "cook", "sing", "drink", "climb", "eat", "paint", "draw", "walk", "sleep", "run"];
+    const beSubjects = [{s:"I", a:"am"}, {s:"You", a:"are"}, {s:"We", a:"are"}, {s:"They", a:"are"}, {s:"Birds", a:"are"}, {s:"The girls", a:"are"}];
+
+    let lv2Pool = [];
+    for(let i=0; i<30; i++) {
+        let v = esVerbs[i % esVerbs.length]; let s = subjects[i % subjects.length];
+        lv2Pool.push({q: `${s} (${v}) every day.`, a: v+"es", opts: [v, v+"es", v+"s"], tip: "Ends in o, x, ch, sh, ss ➔ es"});
+    }
+    for(let i=0; i<30; i++) {
+        let v = yVerbs[i % yVerbs.length]; let s = subjects[i % subjects.length];
+        lv2Pool.push({q: `${s} (${v}) a lot.`, a: v.slice(0,-1)+"ies", opts: [v, v.slice(0,-1)+"ies", v+"s"], tip: "Change y ➔ ies"});
+    }
+    for(let i=0; i<30; i++) {
+        let v = sVerbs[i % sVerbs.length]; let s = subjects[i % subjects.length];
+        lv2Pool.push({q: `${s} (${v}) in the room.`, a: v+"s", opts: [v, v+"s", v+"es"], tip: "Just add 's'!"});
+    }
+    for(let i=0; i<10; i++) {
+        let pair = beSubjects[i % beSubjects.length];
+        lv2Pool.push({q: `${pair.s} (be) very happy.`, a: pair.a, opts: ["am", "is", "are"], tip: `Check the subject: ${pair.s}`});
+    }
+
+    let currentQuestions = [];
+    let qIdx = 0;
+    let wrongCountPerQuestion = 0;
+    let totalCorrectFirstTry = 0;
+    let totalMistakes = 0;
+
+    function initGame(lv) {
+        if (lv === 1) {
+            currentQuestions = [...lv1Data].sort(() => Math.random() - 0.5);
+        } else {
+            currentQuestions = [...lv2Pool].sort(() => Math.random() - 0.5).slice(0, 20);
+        }
+        qIdx = 0;
+        totalCorrectFirstTry = 0;
+        totalMistakes = 0;
+        document.getElementById('stat-lv').innerText = "Level " + lv;
+        document.getElementById('menu-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
+        document.getElementById('result-screen').style.display = 'none';
+        loadQuestion();
+    }
+
+    function goHome() {
+        document.getElementById('menu-screen').classList.remove('hidden');
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('result-screen').style.display = 'none';
+    }
+
+    function loadQuestion() {
+        wrongCountPerQuestion = 0;
+        const data = currentQuestions[qIdx];
+        document.getElementById('stat-progress').innerText = `Progress: ${qIdx + 1}/${currentQuestions.length}`;
+        document.getElementById('pb').style.width = ((qIdx + 1) / currentQuestions.length * 100) + "%";
+        document.getElementById('question-text').innerHTML = data.q.replace(/\((.*?)\)/, `<span style="color:var(--pink-dark); border-bottom: 2px dashed;">($1)</span>`);
+        const grid = document.getElementById('options-grid');
+        grid.innerHTML = '';
+        [...data.opts].sort(() => Math.random() - 0.5).forEach(o => {
+            const b = document.createElement('button');
+            b.className = 'btn option-btn';
+            b.innerText = o;
+            b.onclick = () => checkAns(o);
+            grid.appendChild(b);
+        });
+        setTimeout(speakCurrent, 600);
+    }
+
+    function checkAns(val) {
+        const data = currentQuestions[qIdx];
+        if (val === data.a) {
+            playSound('correct');
+            if (wrongCountPerQuestion === 0) totalCorrectFirstTry++;
+            showPopup("Correct! 🌟", "Great job, Hailey!", true);
+        } else {
+            playSound('wrong');
+            wrongCountPerQuestion++;
+            totalMistakes++;
+            if (wrongCountPerQuestion === 1) {
+                showPopup("Try Again! 💪", "TIP: " + data.tip, false);
+            } else {
+                showPopup("Oops!", `The answer is: <br><span class="sharp-highlight">${data.a}</span>`, false);
+            }
+        }
+    }
+
+    function showPopup(title, body, isCorrect) {
+        document.getElementById('msg-title').innerText = title;
+        document.getElementById('msg-title').style.color = isCorrect ? "#40c057" : "var(--pink-dark)";
+        document.getElementById('msg-body').innerHTML = body;
+        document.getElementById('message-overlay').style.display = 'block';
+        if (isCorrect || wrongCountPerQuestion >= 2) {
+            window.nextAction = () => {
+                qIdx++;
+                if (qIdx < currentQuestions.length) loadQuestion();
+                else showFinalResult();
+            };
+        } else { window.nextAction = null; }
+    }
+
+    function showFinalResult() {
+        document.getElementById('quiz-screen').classList.add('hidden');
+        const resScreen = document.getElementById('result-screen');
+        resScreen.style.display = 'block';
+        const scorePerc = Math.round((totalCorrectFirstTry / currentQuestions.length) * 100);
+        document.getElementById('res-score').innerText = scorePerc + "%";
+        document.getElementById('res-correct').innerText = totalCorrectFirstTry + " / " + currentQuestions.length;
+        document.getElementById('res-wrong').innerText = totalMistakes;
+        let comment = scorePerc === 100 ? "Perfect! You are a Grammar Queen! 👑" : scorePerc >= 80 ? "Excellent! Hailey is so smart! ✨" : scorePerc >= 60 ? "Good try! Let's practice again! 💪" : "Keep going, Hailey! You can do it! ❤️";
+        document.getElementById('res-comment').innerText = comment;
+    }
+
+    function closeMessage() {
+        document.getElementById('message-overlay').style.display = 'none';
+        if (window.nextAction) { window.nextAction(); window.nextAction = null; }
+    }
+
+    function speakCurrent() {
+        const text = currentQuestions[qIdx].q.replace('(', '').replace(')', '');
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'en-US';
+        msg.rate = 0.8;
+        window.speechSynthesis.speak(msg);
+    }
+</script>
+</body>
+</html>
