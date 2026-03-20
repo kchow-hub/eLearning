@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>F1中文 單元五《風雪中的北平》 & 單元六《生物的「睡眠」》 </title>
+    <style>
+        :root { --primary: #4a90e2; --secondary: #9b59b6; --success: #4caf50; --error: #f44336; --bg: #f2f5f9; }
+        body { font-family: -apple-system, "微軟正黑體", sans-serif; background: var(--bg); margin: 0; padding: 0; display: flex; justify-content: center; overflow-x: hidden; }
+        #app { width: 100%; max-width: 600px; min-height: 100vh; background: white; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        header { background: var(--primary); color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; }
+        .screen { display: none; padding: 20px; flex-grow: 1; flex-direction: column; box-sizing: border-box; }
+        .active { display: flex; }
+        .btn { background: white; border: 2px solid var(--primary); color: var(--primary); padding: 18px; margin-bottom: 12px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; -webkit-tap-highlight-color: transparent; text-align: center; }
+        .btn:active { background: var(--primary); color: white; transform: scale(0.98); }
+        .btn-back { border-color: #888; color: #888; margin-top: auto; }
+        .stats-bar { display: flex; justify-content: space-between; background: #eee; padding: 8px 15px; font-size: 0.9rem; border-radius: 8px; margin-bottom: 15px; }
+        .paragraph-card { background: #fdfdfd; border: 1px solid #e0e6ed; border-radius: 15px; padding: 20px; line-height: 2.3; font-size: 1.2rem; margin-bottom: 20px; }
+        .blank { display: inline-flex; align-items: center; justify-content: center; min-width: 60px; height: 32px; border-bottom: 2px solid var(--primary); margin: 0 4px; cursor: pointer; color: var(--primary); font-weight: bold; vertical-align: middle; background: #f0f7ff; border-radius: 4px; }
+        .blank.active-blank { background: #fff9c4; border-bottom: 3px solid #fbc02d; box-shadow: 0 0 8px rgba(251, 192, 45, 0.5); }
+        .blank.filled { background: transparent; border-bottom: 2px solid #ccc; color: var(--secondary); }
+        .inline-input { border: none; border-bottom: 2px solid var(--primary); min-width: 80px; font-size: 1.1rem; text-align: center; outline: none; background: #fffde7; margin: 0 4px; padding: 2px; border-radius: 4px; }
+        .inline-input.wrong-input { border-bottom: 2px solid var(--error); background: #ffebee; }
+        .options-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .opt-btn { background: #fff; border: 1px solid #dcdfe6; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .speaker-box { margin-bottom: 10px; font-size: 2rem; cursor: pointer; width: fit-content; }
+        #feedback { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); width: 75%; padding: 25px; border-radius: 20px; color: white; text-align: center; font-size: 1.3rem; font-weight: bold; display: none; z-index: 200; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <header>
+        <div id="header-title" style="font-weight:bold; font-size:1.2rem;">F1中文 單元五《風雪中的北平》 & 單元六《生物的「睡眠」》</div>
+        <div id="header-subtitle" style="font-size:0.8rem; opacity:0.9">請選擇單元</div>
+    </header>
+
+    <div id="home-screen" class="screen active">
+        <h2 style="text-align:center">單元列表</h2>
+        <button class="btn" onclick="selectUnit('u5', '單元五《風雪中的北平》')">單元五《風雪中的北平》</button>
+        <button class="btn" onclick="selectUnit('u6', '單元六《生物的「睡眠」》')">單元六《生物的「睡眠」》</button>
+    </div>
+
+    <div id="level-screen" class="screen">
+        <h2 style="text-align:center">選擇模式</h2>
+        <button class="btn" onclick="setMode(1)">Level 1: 點選模式 (識字)</button>
+        <button class="btn" onclick="setMode(2)">Level 2: 填充模式 (默寫)</button>
+        <button class="btn btn-back" onclick="navTo('home-screen')">返回單元選擇</button>
+    </div>
+
+    <div id="section-screen" class="screen">
+        <h2 style="text-align:center">溫習範疇</h2>
+        <button class="btn" onclick="startQuiz('一、主旨')">一、主旨 *[考試重點]</button>
+        <button class="btn" onclick="startQuiz('二、段落層次')">二、段落層次</button>
+        <button class="btn" onclick="startQuiz('三、內容分析')">三、內容分析 *</button>
+        <button class="btn" onclick="startQuiz('四、寫作手法')">四、寫作手法 *</button>
+        <button class="btn btn-back" onclick="navTo('level-screen')">返回模式選擇</button>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="stats-bar">
+            <span id="stat-progress">已完成: 0/0</span>
+            <span id="stat-left">餘下: 0 題</span>
+        </div>
+        <div class="speaker-box" onclick="speakParagraph()">🔊</div>
+        <div id="question-content" class="paragraph-card"></div>
+        <div id="control-area"></div>
+        <button class="btn btn-back" onclick="confirmExit()">退出</button>
+    </div>
+
+    <div id="feedback"></div>
+</div>
+
+<script>
+    const allUnitsData = {
+        'u5': {
+            "一、主旨": [{ text: "本文寫作者記憶中的____風雪，通過對「風」的描寫和跟風的____，以及對「雪」的描寫和登高____，抒發了作者對北平的____和____。", ans: ["北平", "頑強抗鬥", "眺望雪景", "懷念", "留戀"] }],
+            "二、段落層次": [{ text: "第1段：寫作者留戀北平，對當地的____印象難忘。<br>第2段：____。<br>第3段：記述作者在第二天早上發現____，從描寫____過渡至描寫____。<br>第4段：____。", ans: ["風雪", "記述作者與大風搏鬥的情景，突出北平的風的猛烈", "大雪下滿院子", "大風", "大雪", "記述作者登上高處觀賞大雪過後的景色，表現北平雪景之美"] }],
+            "三、內容分析": [
+                { text: "第一天早上：太陽已____，作者往城南____。<br>第一天下午：北風____，街上____。作者逆著風走，走上三步便____，而____則往臉上打。作者感到____。作者運用____和模仿____，才苦苦奪路到家。", ans: ["有些發毛", "拜訪朋友", "一陣緊似一陣的颳着", "沒有車和行人", "倒退兩步", "泥塊和細沙", "又疼又冷", "沉着應戰的方略", "縴夫的走法"] },
+                { text: "第一天晚上：____不聲不響地落下。<br>第二天早上：作者家的院子____。作者到____眺望。看見北平內城被____，天地變得____。五龍亭、漪瀾堂一帶變成____，他感到____。", ans: ["大雪", "鋪滿大雪", "白塔", "白雪覆蓋", "空無一點塵", "瓊樓玉宇", "高處不勝寒"] }
+            ],
+            "四、寫作手法": [
+                { text: "動態描寫：描寫大風捲起____，夾著____，以及打往作者的____的情景。<br>靜態描寫：描寫北平內城被____的雪覆蓋著，建築物變成____。", ans: ["泥塊", "細沙", "眼睛、鼻子、耳朵、嘴巴和牙齒縫兒裏", "光明、皎潔和靜默", "瓊樓玉宇"] },
+                { text: "多感官描寫：<br>觸覺：臉上著了____，又是____，又是____。越冷就越____。<br>____：一覺醒來，風聲沒有了。<br>視覺：四周____，大雪在一個晚上把院子____起來。", ans: ["風帶著的泥塊", "疼", "冷", "疼", "聽覺", "大放晴光", "粉妝玉琢"] },
+                { text: "多角度描寫：<br>____：作者捲起窗簾觀看院子。<br>____：作者在白塔把____收在眼底。<br>俯瞰：作者俯視____。", ans: ["平視", "遠眺", "整個北京內城", "足下的五龍亭和漪瀾堂一帶"] }
+            ]
+        },
+        'u6': {
+            "一、主旨": [{ text: "本文以不同生物的____為例，說明生物會為了____而睡眠，展現了____。", ans: ["睡眠現象", "求存", "生物世界的奧妙"] }],
+            "二、段落層次": [
+                { text: "第一部分（1-3段）：說明蝙蝠冬眠的____，帶出____的主題。<br>第二部分（____段）：說明____。<br>第三部分（8段）：說明蝸牛長時間休眠的原因。", ans: ["原因和特點", "動物睡眠不全是為了休息", "4至7", "海參夏眠的原因和特點"] },
+                { text: "第四部分（9-10段）：以癩蛤蟆和青蛙為例，說明____。<br>第五部分（____段）：____。", ans: ["動物的睡眠可長達一兩百萬年以上", "11至13", "說明植物的睡眠現象"] }
+            ],
+            "三、內容分析": [
+                { text: "生物睡眠不全是為了____，而是為了____。動物以睡眠____：冬天沒有____等昆蟲吃，蝙蝠能____，冬眠____。", ans: ["休息", "生存", "應付絕糧", "蚊子、夜蛾", "躲避風寒", "四五個月"] },
+                { text: "海參因為____便會睡眠，這稱為「夏眠」，冬天來到，海參這才____。蝸牛在____的日子會夏眠，若遇上____，便睡到下雨為止。", ans: ["沒有食物", "醒來", "夏天下不雨", "乾旱"] },
+                { text: "美國科學家在法國發現____，裏面有已睡了一百萬年以上的癩蛤蟆。外國地質學家在墨西哥發現一隻埋在____裡的青蛙，已睡了兩百多萬年。", ans: ["一塊石灰岩", "礦層"] },
+                { text: "植物以睡眠避過____：蓮子經過____，只要沒受傷害，埋入泥土仍能____。", ans: ["不利的生存環境", "曬乾揚淨", "發芽生長"] }
+            ],
+            "四、寫作手法": [
+                { text: "引用說明：舉出____發現沉睡癩蛤蟆和地質學家發現沉睡____的例子，說明____，使事理____。", ans: ["美國科學家富蘭克林", "青蛙", "生物睡眠可長達一兩百萬年", "具體易明"] },
+                { text: "數據說明：列舉生物的沉睡時間，如蝙蝠和海參可以睡眠____、蝸牛可睡眠____等，使資料更____。", ans: ["四五個月", "二十個月", "準確和更可信"] },
+                { text: "定義說明：為事物下準確的____，如指出海參睡眠的季節是在夏天，所以叫做「____」。", ans: ["定義", "夏眠"] },
+                { text: "舉例說明：舉出從地下掘出的____，經過處理後會____為例子，說明植物也會____。", ans: ["古代蓮子", "生根發芽", "睡眠"] }
+            ]
+        }
+    };
+
+    let currentUnit = 'u5';
+    let mode = 1, currentPool = [], qIdx = 0, selectedBlankIdx = -1, errorCountMap = {};
+
+    function navTo(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+    
+    function selectUnit(u, title) {
+        currentUnit = u;
+        document.getElementById('header-subtitle').innerText = title;
+        navTo('level-screen');
+    }
+
+    function setMode(m) { mode = m; navTo('section-screen'); }
+    
+    function startQuiz(sec) { 
+        currentPool = JSON.parse(JSON.stringify(allUnitsData[currentUnit][sec])); 
+        qIdx = 0; 
+        navTo('quiz-screen'); 
+        renderQuestion(); 
+    }
+
+    function renderQuestion() {
+        const item = currentPool[qIdx];
+        const qContent = document.getElementById('question-content');
+        const ctrl = document.getElementById('control-area');
+        document.getElementById('stat-progress').innerText = `已完成: ${qIdx}/${currentPool.length}`;
+        document.getElementById('stat-left').innerText = `餘下: ${currentPool.length - qIdx}`;
+        errorCountMap = {};
+
+        let html = item.text;
+        if (mode === 1) {
+            item.ans.forEach((_, i) => html = html.replace("____", `<span class="blank" id="blank-${i}" onclick="selectBlank(${i})">?</span>`));
+            qContent.innerHTML = html;
+            let options = [...item.ans].sort(() => Math.random() - 0.5);
+            ctrl.innerHTML = `<div class="options-container"></div>`;
+            options.forEach(o => {
+                const b = document.createElement('button'); b.className = 'opt-btn'; b.innerText = o;
+                b.onclick = () => fillAnswer(o); ctrl.querySelector('.options-container').appendChild(b);
+            });
+            selectBlank(0);
+        } else {
+            item.ans.forEach((_, i) => html = html.replace("____", `<input type="text" class="inline-input" id="input-${i}" placeholder="填入">`));
+            qContent.innerHTML = html;
+            ctrl.innerHTML = `<button class="btn" style="background:var(--primary);color:white;width:100%" onclick="checkL2()">核對答案</button>`;
+        }
+        setTimeout(speakParagraph, 500);
+    }
+
+    function selectBlank(idx) { 
+        selectedBlankIdx = idx; 
+        document.querySelectorAll('.blank').forEach(b => b.classList.remove('active-blank')); 
+        const t = document.getElementById(`blank-${idx}`); 
+        if(t) t.classList.add('active-blank'); 
+    }
+
+    function fillAnswer(val) {
+        if (selectedBlankIdx === -1) return;
+        const correct = currentPool[qIdx].ans[selectedBlankIdx];
+        const el = document.getElementById(`blank-${selectedBlankIdx}`);
+        if (val === correct) {
+            el.innerText = val; el.classList.remove('active-blank'); el.classList.add('filled');
+            let next = Array.from(document.querySelectorAll('.blank')).findIndex(b => b.innerText === "?");
+            if (next !== -1) selectBlank(next);
+            else { showFeedback(true); setTimeout(() => { qIdx++; renderQuestion(); }, 1200); }
+        } else { showFeedback(false, `正確應為「${correct}」`); }
+    }
+
+    function checkL2() {
+        const item = currentPool[qIdx];
+        let allCorrect = true;
+        item.ans.forEach((a, i) => {
+            const input = document.getElementById(`input-${i}`);
+            const val = input.value.trim();
+            if (val !== a) {
+                allCorrect = false;
+                errorCountMap[i] = (errorCountMap[i] || 0) + 1;
+                if (errorCountMap[i] >= 2) {
+                    input.value = a; input.style.color = "var(--success)"; input.disabled = true;
+                } else {
+                    input.classList.add('wrong-input');
+                    showFeedback(false, `提示：${a}`);
+                }
+            } else {
+                input.classList.remove('wrong-input');
+                input.style.borderColor = "var(--success)";
+            }
+        });
+        if (allCorrect || item.ans.every((a, i) => document.getElementById(`input-${i}`).value.trim() === a)) {
+            showFeedback(true); setTimeout(() => { qIdx++; renderQuestion(); }, 1200);
+        }
+    }
+
+    function showFeedback(isOk, msg = "") {
+        const fb = document.getElementById('feedback'); fb.style.display = 'block';
+        fb.style.background = isOk ? 'rgba(76, 175, 80, 0.95)' : 'rgba(244, 67, 54, 0.95)';
+        fb.innerHTML = isOk ? "非常正確！🌟" : msg;
+        setTimeout(() => fb.style.display = 'none', isOk ? 1000 : 2000);
+    }
+
+    function speakParagraph() {
+        const item = currentPool[qIdx];
+        const text = item.text.replace(/____|<br>|<div>|<\/div>/g, " ").replace(/<\/?[^>]+(>|$)/g, "");
+        const utter = new SpeechSynthesisUtterance(text); utter.lang = 'zh-HK';
+        window.speechSynthesis.cancel(); window.speechSynthesis.speak(utter);
+    }
+
+    function confirmExit() { if(confirm("確定退出目前的練習？")) navTo('section-screen'); }
+</script>
+</body>
+</html>
