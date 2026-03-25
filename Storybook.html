@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小公主中文夢幻冒險</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --pink-light: #fff0f3;
+            --pink-main: #ff85a1;
+            --pink-dark: #ff4d6d;
+            --purple-main: #a29bfe;
+            --correct: #7bed9f;
+            --wrong: #ff6b6b;
+            --gold: #f1c40f;
+        }
+
+        body {
+            font-family: "PingFang HK", "Heiti TC", sans-serif;
+            background: linear-gradient(135deg, #fff5f7 0%, #f3e5f5 100%);
+            margin: 0; display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; color: #4a4a4a; user-select: none; overflow-x: hidden;
+        }
+
+        /* 導航列 */
+        #nav-bar {
+            width: 100%; padding: 15px 20px; display: flex; justify-content: space-between;
+            align-items: center; box-sizing: border-box; z-index: 100;
+        }
+        .back-btn {
+            background: white; border: 2px solid var(--pink-main); color: var(--pink-main);
+            padding: 10px 18px; border-radius: 25px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(255, 133, 161, 0.2); transition: 0.2s;
+        }
+        .back-btn:active { transform: scale(0.9); }
+
+        .container { width: 90%; max-width: 500px; text-align: center; margin-top: 10px; }
+        .card {
+            background: rgba(255, 255, 255, 0.9); padding: 30px 20px; border-radius: 40px;
+            box-shadow: 0 20px 40px rgba(255, 133, 161, 0.15); border: 2px solid white;
+        }
+
+        /* 章節與等級選單 */
+        .menu-item {
+            background: white; border-radius: 25px; padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.05); cursor: pointer; border: 2px solid transparent;
+            transition: 0.3s;
+        }
+        .menu-item:hover { border-color: var(--pink-main); }
+        .lv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .lv-btn {
+            padding: 15px; border-radius: 20px; border: none; font-weight: bold; font-size: 18px;
+            cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .lv1-btn { background: var(--pink-main); color: white; }
+        .lv2-btn { background: var(--purple-main); color: white; }
+
+        /* Lv2 點讀模式樣式 */
+        .read-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; }
+        .read-item {
+            background: white; padding: 15px 5px; border-radius: 15px; font-size: 22px;
+            font-weight: bold; color: #555; box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            cursor: pointer; border: 2px solid #f0f0f0; transition: 0.2s;
+        }
+        .read-item:active { transform: scale(0.95); background: var(--pink-light); }
+
+        /* Lv1 遊戲模式樣式 (沿用) */
+        #stamp-bar { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; min-height: 25px; margin-bottom: 10px; }
+        .stamp { font-size: 18px; animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        
+        #audio-btn {
+            background: linear-gradient(to bottom, var(--pink-main), var(--pink-dark));
+            border: none; border-radius: 50%; width: 90px; height: 90px;
+            margin: 0 auto 25px; cursor: pointer; box-shadow: 0 8px 15px rgba(255, 77, 109, 0.3);
+            display: flex; align-items: center; justify-content: center;
+        }
+        #audio-btn svg { fill: white; width: 50px; height: 50px; }
+
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .option-btn {
+            background: white; border: 3px solid #f0f0f0; border-radius: 22px;
+            padding: 18px 5px; font-size: 22px; font-weight: bold; color: #555;
+            min-height: 80px; transition: 0.2s; box-shadow: 0 5px 0 #eee;
+        }
+        .option-btn.correct { background: var(--correct) !important; color: white; border-color: #5ad68a; box-shadow: 0 5px 0 #4dbd79; }
+        .option-btn.wrong { background: var(--wrong) !important; color: white; border-color: #ee5253; box-shadow: 0 5px 0 #d63031; }
+
+        .hidden { display: none !important; }
+        @keyframes rotateIn { 0% { transform: scale(0) rotate(-180deg); } 100% { transform: scale(1) rotate(0deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="nav-bar">
+        <button class="back-btn hidden" id="global-back" onclick="showMainMenu()">◀ 返回</button>
+        <div id="live-counter" class="hidden" style="font-weight:bold;">
+            ✅ <span id="count-right">0</span> ❌ <span id="count-wrong">0</span>
+        </div>
+    </div>
+
+    <div id="menu-screen" class="container">
+        <h1 style="color: var(--pink-main); text-shadow: 2px 2px white; font-size: 32px; margin-bottom: 30px;">🌸 夢幻中文章節 🌸</h1>
+        <div id="chapter-list">
+            </div>
+    </div>
+
+    <div id="read-screen" class="container hidden">
+        <h2 id="read-title" style="color: var(--purple-main); margin-bottom: 20px;">點讀模式</h2>
+        <div class="card">
+            <p style="font-size: 14px; color: #999; margin-bottom: 20px;">點擊字詞聽聽讀音吧！✨</p>
+            <div id="read-grid" class="read-grid"></div>
+        </div>
+    </div>
+
+    <div id="game-screen" class="container hidden">
+        <div id="stamp-bar"></div>
+        <div class="card">
+            <div style="color: var(--purple-main); font-weight:bold; margin-bottom:15px; font-size: 14px;" id="progress-val"></div>
+            <button id="audio-btn"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg></button>
+            <div class="options-grid" id="options-container"></div>
+            <div id="feedback-text" style="margin-top:20px; font-weight:bold;"></div>
+        </div>
+    </div>
+
+    <div id="finish-screen" class="container hidden">
+        <div class="card">
+            <div style="font-size:80px; animation: rotateIn 0.8s ease-out;">👑</div>
+            <h2 style="color:var(--pink-main);">挑戰成功！</h2>
+            <div id="stat-final-msg" style="margin: 20px 0; line-height: 1.6;"></div>
+            <button class="back-btn" style="padding: 15px 40px;" onclick="showMainMenu()">回選單</button>
+        </div>
+    </div>
+
+    <script>
+        /** * [生字題庫管理] 
+         * 妳可以在這裡隨時加入新的章節，格式如下：
+         * "章節名稱": ["字1", "字2", ...]
+         */
+        const allChapters = {
+            "(1) 小狐狸的神奇手套": [
+                "覺", "無聊", "火災", "甚麼", "變", "消失", "清理", "你", "趕走", "還", "比", "所有", "偷", "手套", "願", "哎喲", "爬", "結果", "忘", "離", "開", "好", "像", "綿", "羊",
+                "覺得", "無聊了", "烏龜爺爺", "老花眼鏡", "滾地球", "發生", "野草裹", "愛說謊", "小壞蛋", "雞媽媽", "點頭", "小兔子", "趕出去", "好人", "趕走他", "生氣", "魔法", "喜歡捉弄", "動起來", "怎麼辦到", "告訴你", "魔法手套", "搶走手套", "臉上", "逃跑", "離開後", "好痛", "爛手套", "爬起來", "差點", "摀住嘴巴", "不敢", "忘了哭", "點點頭", "魔術一樣", "脫下來", "高興"
+            ],
+            // 範例：妳未來可以取消下面這行的註解來加入第2章
+            // "(2) 另一個故事": ["蘋果", "香蕉", "西瓜"]
+        };
+
+        let currentChapterName = "";
+        let currentQueue = [];
+        let currentIndex = 0;
+        let correctTotal = 0, wrongTotal = 0;
+        let isLocked = false, hasTurnError = false;
+        const synth = window.speechSynthesis;
+
+        // 初始化選單
+        function initMenu() {
+            const list = document.getElementById('chapter-list');
+            list.innerHTML = "";
+            for (let name in allChapters) {
+                const div = document.createElement('div');
+                div.className = 'menu-item';
+                div.innerHTML = `
+                    <h3 style="margin:0; color:var(--pink-dark);">${name}</h3>
+                    <div class="lv-grid">
+                        <button class="lv-btn lv1-btn" onclick="startLv1('${name}')">Lv1 挑戰</button>
+                        <button class="lv-btn lv2-btn" onclick="startLv2('${name}')">Lv2 點讀</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            }
+        }
+
+        // --- Lv2 點讀模式 ---
+        function startLv2(name) {
+            currentChapterName = name;
+            toggleScreen('read');
+            document.getElementById('read-title').innerText = name + " - 點讀模式";
+            const grid = document.getElementById('read-grid');
+            grid.innerHTML = "";
+            allChapters[name].forEach(word => {
+                const item = document.createElement('div');
+                item.className = 'read-item';
+                item.innerText = word;
+                item.onclick = () => speak(word);
+                grid.appendChild(item);
+            });
+            speak("進入點讀模式");
+        }
+
+        // --- Lv1 遊戲模式 ---
+        function startLv1(name) {
+            currentChapterName = name;
+            currentQueue = [...allChapters[name]].sort(() => Math.random() - 0.5);
+            currentIndex = 0; correctTotal = 0; wrongTotal = 0;
+            document.getElementById('stamp-bar').innerHTML = "";
+            updateCounter();
+            toggleScreen('game');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            isLocked = false; hasTurnError = false;
+            const target = currentQueue[currentIndex];
+            document.getElementById('progress-val').innerText = `第 ${currentIndex + 1} / ${currentQueue.length} 題`;
+            document.getElementById('feedback-text').innerText = "";
+
+            let choices = [target, ...[...allChapters[currentChapterName]].filter(w => w !== target).sort(() => Math.random() - 0.5).slice(0, 3)].sort(() => Math.random() - 0.5);
+            
+            const container = document.getElementById('options-container');
+            container.innerHTML = "";
+            choices.forEach(text => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = text;
+                btn.onclick = () => checkLv1(text, btn);
+                container.appendChild(btn);
+            });
+            setTimeout(() => speak(target), 400);
+        }
+
+        function checkLv1(selected, btn) {
+            if (isLocked) return;
+            const target = currentQueue[currentIndex];
+            if (selected === target) {
+                isLocked = true;
+                if (!hasTurnError) { correctTotal++; addStamp(); }
+                btn.classList.add('correct');
+                updateCounter();
+                playTone(600, 0.1);
+                setTimeout(() => {
+                    currentIndex++;
+                    if (currentIndex < currentQueue.length) loadQuestion();
+                    else showResult();
+                }, 1000);
+            } else {
+                if (!hasTurnError) { wrongTotal++; updateCounter(); hasTurnError = true; }
+                btn.classList.add('wrong');
+                playTone(150, 0.2); 
+                document.getElementById('feedback-text').innerText = `是要選「${target}」喔！`;
+                speak(`${selected}。不對喔，這題是要選 ${target} 喔`);
+                document.querySelectorAll('.option-btn').forEach(b => { if(b.innerText === target) b.classList.add('correct'); });
+            }
+        }
+
+        // 公用功能
+        function addStamp() {
+            const bar = document.getElementById('stamp-bar');
+            const s = document.createElement('span'); s.className = 'stamp'; s.innerText = "👑";
+            bar.appendChild(s);
+        }
+
+        function updateCounter() {
+            document.getElementById('count-right').innerText = correctTotal;
+            document.getElementById('count-wrong').innerText = wrongTotal;
+        }
+
+        function showResult() {
+            toggleScreen('finish');
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#ff85a1', '#a29bfe'] });
+            document.getElementById('stat-final-msg').innerHTML = `妳收集了 <strong>${correctTotal}</strong> 個皇冠印章！<br>妳好棒呀！👸`;
+            speak(`挑戰成功！妳收集了${correctTotal}個印章！`);
+        }
+
+        function toggleScreen(scr) {
+            document.getElementById('menu-screen').classList.toggle('hidden', scr !== 'menu');
+            document.getElementById('game-screen').classList.toggle('hidden', scr !== 'game');
+            document.getElementById('read-screen').classList.toggle('hidden', scr !== 'read');
+            document.getElementById('finish-screen').classList.toggle('hidden', scr !== 'finish');
+            document.getElementById('global-back').classList.toggle('hidden', scr === 'menu');
+            document.getElementById('live-counter').classList.toggle('hidden', scr !== 'game');
+        }
+
+        function showMainMenu() { synth.cancel(); toggleScreen('menu'); }
+        function speak(t) { synth.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang = 'zh-HK'; u.rate = 0.85; synth.speak(u); }
+        function playTone(f, d) {
+            try {
+                const c = new (window.AudioContext || window.webkitAudioContext)();
+                const o = c.createOscillator(), g = c.createGain();
+                o.connect(g); g.connect(c.destination); o.frequency.value = f;
+                g.gain.setValueAtTime(0.1, c.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + d);
+                o.start(); o.stop(c.currentTime + d);
+            } catch(e) {}
+        }
+
+        document.getElementById('audio-btn').onclick = () => speak(currentQueue[currentIndex]);
+        window.onload = initMenu;
+    </script>
+</body>
+</html>
