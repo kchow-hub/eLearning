@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ICQM G2 音樂欣賞 - Hailey 專屬版</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #fff5f8 0%, #ffeef2 100%);
+            --card-bg: #ffffff;
+            --primary-color: #ff69b4;
+            --primary-hover: #ff1493;
+            --primary-light: #fff0f5;
+            --text-color: #4a4a4a;
+            --sub-text: #8c969e;
+            --correct-color: #2ecc71;
+            --wrong-color: #e74c3c;
+            --yt-red: #FF0000;
+        }
+        .boy-theme {
+            --bg-gradient: linear-gradient(135deg, #f0faff 0%, #e6f7ff 100%);
+            --primary-color: #0288d1;
+            --primary-hover: #01579b;
+            --primary-light: #e1f5fe;
+        }
+        * { box-sizing: border-box; font-family: 'PingFang HK', 'Heiti TC', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg-gradient); color: var(--text-color); margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .game-container { width: 100%; max-width: 550px; text-align: center; }
+        h1 { font-size: 22px; color: var(--primary-color); margin-bottom: 15px; }
+        .ui-card { background: var(--card-bg); border-radius: 20px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: left; }
+        
+        .setup-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        input[type="text"] { width: 100px; padding: 6px; border: 1px solid #ddd; border-radius: 8px; text-align: center; }
+        
+        /* Switch 開關 */
+        .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* 選單卡片 */
+        .menu-item-box { background: white; border: 1px solid #f0f0f0; border-radius: 15px; margin-bottom: 12px; display: flex; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+        .menu-content { flex: 1; padding: 15px; cursor: pointer; }
+        .yt-btn { width: 60px; background: var(--yt-red); display: flex; justify-content: center; align-items: center; cursor: pointer; color: white; font-size: 20px; text-decoration: none; }
+        .menu-btn-title { font-size: 15px; font-weight: bold; display: block; color: var(--primary-color); }
+        .menu-btn-sub { font-size: 11px; color: var(--sub-text); margin-top: 3px; display: block; }
+
+        .header-box { font-size: 11px; color: var(--sub-text); border-bottom: 2px solid var(--primary-light); padding-bottom: 10px; margin-bottom: 15px; line-height: 1.4; }
+        .question-box { font-size: 18px; font-weight: bold; line-height: 1.5; padding: 15px; border-left: 5px solid var(--primary-color); background: #fafafa; margin-bottom: 15px; }
+        .option-btn { width: 100%; background: white; border: 1px solid #eee; border-radius: 12px; padding: 14px; margin-bottom: 8px; font-weight: bold; cursor: pointer; font-size: 15px; }
+        .option-btn.correct { border-color: var(--correct-color); background: #e8f8f5; color: var(--correct-color); transform: scale(1.02); }
+        .option-btn.wrong { border-color: var(--wrong-color); background: #fdedec; color: var(--wrong-color); opacity: 0.7; }
+
+        .history-item { display: grid; grid-template-columns: 0.8fr 0.8fr 1.2fr 0.8fr 0.4fr; gap: 4px; padding: 8px 0; border-bottom: 1px solid #f9f9f9; font-size: 11px; align-items: center; }
+        .hidden { display: none !important; }
+        .icon-btn { background:#95a5a6; color:white; border:none; border-radius:12px; width:50px; cursor:pointer; font-size: 20px; display: flex; justify-content: center; align-items: center; }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div id="main-menu">
+            <h1 id="menu-title">你好，Hailey！🧸</h1>
+            
+            <div class="ui-card">
+                <div class="setup-row">
+                    <label>👤 名字：</label>
+                    <input type="text" id="name-input" value="Hailey" oninput="updateName()">
+                </div>
+                <div class="setup-row">
+                    <label>🎭 主題：</label>
+                    <div style="display:flex; gap:5px;">
+                        <button onclick="setTheme('girl')" id="girl-btn" style="padding:4px 10px; border-radius:12px; border:none; cursor:pointer;">🧸 女</button>
+                        <button onclick="setTheme('boy')" id="boy-btn" style="padding:4px 10px; border-radius:12px; border:none; cursor:pointer;">🚗 男</button>
+                    </div>
+                </div>
+                <div class="setup-row" style="margin-top:5px;">
+                    <label>📢 自動朗讀題目：</label>
+                    <label class="switch">
+                        <input type="checkbox" id="auto-read-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="menu-item-box">
+                <div class="menu-content" onclick="startLesson('lesson5')">
+                    <span class="menu-btn-title">第五課：《漫步》</span>
+                    <span class="menu-btn-sub">Mussorgsky • 5/4 & 6/4 拍 • 銅管排序</span>
+                </div>
+                <a href="https://www.youtube.com/watch?v=_5r8sa863Ts" target="_blank" class="yt-btn">▶️</a>
+            </div>
+
+            <div class="menu-item-box">
+                <div class="menu-content" onclick="startLesson('lesson6')">
+                    <span class="menu-btn-title">第六課：《雛雞之舞》</span>
+                    <span class="menu-btn-sub">木管家族 • 跳音 • 聖經金句</span>
+                </div>
+                <a href="https://youtu.be/VWwGK2x4_v0?si=9cqn1AiTF0Gq15Jw" target="_blank" class="yt-btn">▶️</a>
+            </div>
+
+            <div class="ui-card">
+                <div style="font-size:12px; font-weight:bold; margin-bottom:8px; display:flex; justify-content:space-between;">
+                    <span>📊 溫習紀錄 (日期 | 名字 | 課題 | 分數)</span>
+                    <button onclick="clearHistory()" style="color:red; background:none; border:none; cursor:pointer;">🗑️</button>
+                </div>
+                <div id="history-list"></div>
+            </div>
+        </div>
+
+        <div id="game-play" class="hidden ui-card">
+            <div id="lesson-header" class="header-box"></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:13px; font-weight:bold;">
+                <span id="progress-text">0 / 0</span>
+                <div style="color:#f39c12">⭐ <span id="star-count">0</span></div>
+            </div>
+            <div class="question-box" id="question-text"></div>
+            <div id="options-grid"></div>
+            <div id="error-hint" style="display:none; color:red; font-size:13px; background:#fff0f0; padding:10px; border-radius:10px; margin-bottom:10px;">
+                💡 正確答案：<span id="correct-ans-hint"></span>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button class="icon-btn" onclick="goBack()" title="返回主頁">🏠</button>
+                <button class="icon-btn" onclick="speakCurrent()" style="background:#f39c12;" title="朗讀題目">📢</button>
+                <button id="next-btn" onclick="nextQuestion()" disabled style="flex:1; background:var(--primary-color); color:white; border:none; border-radius:12px; padding:12px; font-weight:bold; cursor:pointer;">下一題 👉</button>
+            </div>
+        </div>
+
+        <div id="game-over" class="hidden ui-card" style="text-align:center;">
+            <div id="medal-emoji" style="font-size:60px;">🏆</div>
+            <h2 id="medal-title">做得好！</h2>
+            <button onclick="goBack()" style="width:100%; background:var(--primary-color); color:white; border:none; border-radius:12px; padding:12px; font-weight:bold; cursor:pointer;">返回主選單</button>
+        </div>
+    </div>
+
+<script>
+    // 音效合成器
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(type) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        if(type === 'correct') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+            osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+        } else {
+            osc.type = 'square'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+        }
+    }
+
+    const questionBank = {
+        "lesson5": {
+            "header": "【第五課：《圖畫展覽會．漫步》】 穆索斯基(1839-1881)<br>Pictures at an Exhibition, Promenade<br>Modest Petrovich Mussorgsky",
+            "title": "漫步",
+            "questions": [
+				{ "q": "《圖畫展覽會．漫步》的作曲家是 ____？", "options": ["穆索斯基", "拉威爾", "巴哈"], "ans": "穆索斯基" },
+				{ "q": "作曲家穆索斯基出生於哪一個國家？", "options": ["俄國", "法國", "德國"], "ans": "俄國" },
+				{ "q": "穆索斯基從幾歲開始跟母親學習鋼琴？", "options": ["六歲", "八歲", "十歲"], "ans": "六歲" },
+				{ "q": "穆索斯基曾遵從父母意思入讀 ____ 並加入軍隊。", "options": ["軍校", "音樂學院", "醫學院"], "ans": "軍校" },
+				{ "q": "《圖畫展覽會》是穆索斯基為了懷念好友 ____ 而創作的。", "options": ["哈德曼", "拉威爾", "舒曼"], "ans": "哈德曼" },
+				{ "q": "哈德曼的職業是一名工程師兼 ____。", "options": ["畫家", "鋼琴家", "指揮家"], "ans": "畫家" },
+				{ "q": "《圖畫展覽會》原是一套甚麼類型的作品？", "options": ["鋼琴組曲", "管弦樂曲", "合唱樂曲"], "ans": "鋼琴組曲" },
+				{ "q": "後來由法國作曲家 ____ 將這套作品改編成 ____。", "options": ["拉威爾, 管弦樂曲", "穆索斯基, 進行曲", "貝多芬, 協奏曲"], "ans": "拉威爾, 管弦樂曲" },
+				{ "q": "《圖畫展覽會．漫步》是一套 ____ 的鋼琴組曲。", "options": ["十首", "五首", "十二首"], "ans": "十首" },
+				{ "q": "《漫步》的主題旋律主要是由哪種樂器奏出？", "options": ["小號", "長號", "法國號"], "ans": "小號" },
+				{ "q": "小號屬於哪一個樂器組別？", "options": ["銅管樂器", "木管樂器", "弦樂器"], "ans": "銅管樂器" },
+				{ "q": "銅管樂器由「高音至低音」的正確排列是：", "options": ["小號 > 法國號 > 長號 > 大號", "大號 > 長號 > 法國號 > 小號", "小號 > 長號 > 法國號 > 大號"], "ans": "小號 > 法國號 > 長號 > 大號" },
+				{ "q": "樂曲中的速度記號「Allegro」的意思是 ____。", "options": ["快板", "行板", "慢板"], "ans": "快板" },
+				{ "q": "樂曲開始時出現的強弱記號「f」代表 ____。", "options": ["強音", "弱音", "極弱音"], "ans": "強音" },
+				{ "q": "在《漫步》中，伴奏樂器表達了參觀者 ____ 的情景。", "options": ["從一幅又一幅圖畫前走過", "在展覽館跳舞", "雛雞在蛋殼中跳舞"], "ans": "從一幅又一幅圖畫前走過" },
+				{ "q": "以下哪一項是愛人如己的表現？", "options": ["為人代禱", "粗言穢語", "打架傷人"], "ans": "為人代禱" },
+				{ "q": "箴言 17:17 提到：「朋友乃時常親愛，____ 為患難而生。」", "options": ["弟兄", "父母", "老師"], "ans": "弟兄" }
+            ]
+        },
+        "lesson6": {
+            "header": "【第六課：《圖畫展覽會．雛雞之舞》】 穆索斯基(1839-1881)<br>Pictures at an Exhibition, Ballet of the Unhatched Chicks<br>Modest Petrovich Mussorgsky",
+            "title": "雛雞之舞",
+            "questions": [
+				{ "q": "《雛雞之舞》描寫舞者扮演還未完全孵出的雛雞在 ____ 中跳舞。", "options": ["蛋殼", "草地", "池塘"], "ans": "蛋殼" },
+				{ "q": "雛雞在跳舞時，一邊旋轉，一邊用 ____ 敲著蛋殼。", "options": ["小喙", "小翅膀", "小腳"], "ans": "小喙" },
+				{ "q": "《雛雞之舞》的主題旋律是由哪兩種樂器交替奏出？", "options": ["長笛及巴松管", "小號及長號", "小提琴及大提琴"], "ans": "長笛及巴松管" },
+				{ "q": "長笛及巴松管屬於哪一個樂器組別？", "options": ["木管樂器", "銅管樂器", "弦樂器"], "ans": "木管樂器" },
+				{ "q": "穆索斯基運用了 ____ (staccato) 來表達雛雞輕快的步履。", "options": ["跳音", "連音", "強音"], "ans": "跳音" },
+				{ "q": "樂曲中出現的強弱記號「pp」代表 ____。", "options": ["極弱", "極強", "弱音"], "ans": "極弱" },
+				{ "q": "以下哪一種木管樂器的音域最高？", "options": ["短笛", "長笛", "巴松管"], "ans": "短笛" },
+				{ "q": "木管樂器由「高音至低音」排列正確的是：", "options": ["短笛 > 長笛 > 巴松管", "巴松管 > 長笛 > 短笛", "長笛 > 短笛 > 巴松管"], "ans": "短笛 > 長笛 > 巴松管" },
+				{ "q": "根據林後 5:17，「新生命」的獲得是因為誰為我們釘十字架？", "options": ["耶穌", "阿當", "挪亞"], "ans": "耶穌" },
+				{ "q": "樂譜記號「Andante」的意思是 ____。", "options": ["行板", "快板", "漸強"], "ans": "行板" },
+				{ "q": "樂譜上的「<」記號代表 ____。", "options": ["漸強", "漸弱", "強音"], "ans": "漸強" },
+				{ "q": "屬於「弦樂器」組別的是：", "options": ["小提琴、中提琴、大提琴", "長笛、單簧管、巴松管", "小號、法國號、大號"], "ans": "小提琴、中提琴、大提琴" }
+            ]
+        }
+    };
+
+    let currentQList = [], currentIndex = 0, stars = 0, childName = "Hailey", currentKey = "";
+    let history = JSON.parse(localStorage.getItem('mu_v10_hist') || "[]");
+
+    window.onload = () => {
+        const n = localStorage.getItem('mu_name'); if(n) { childName = n; document.getElementById('name-input').value = n; }
+        setTheme(localStorage.getItem('mu_theme') || 'girl');
+        renderHistory();
+    };
+
+    function updateName() { childName = document.getElementById('name-input').value || "Hailey"; localStorage.setItem('mu_name', childName); updateTitle(); }
+    function setTheme(t) {
+        document.body.className = t === 'boy' ? 'boy-theme' : '';
+        localStorage.setItem('mu_theme', t); updateTitle();
+        document.getElementById('girl-btn').style.background = (t==='girl') ? '#ff69b4' : '#eee';
+        document.getElementById('girl-btn').style.color = (t==='girl') ? 'white' : '#4a4a4a';
+        document.getElementById('boy-btn').style.background = (t==='boy') ? '#0288d1' : '#eee';
+        document.getElementById('boy-btn').style.color = (t==='boy') ? 'white' : '#4a4a4a';
+    }
+    function updateTitle() { const icon = document.body.classList.contains('boy-theme') ? "🚗" : "🧸"; document.getElementById('menu-title').innerText = `你好，${childName}！${icon}`; }
+
+    function startLesson(key) {
+        currentKey = key;
+        currentQList = [...questionBank[key].questions].sort(() => Math.random() - 0.5);
+        currentIndex = 0; stars = 0;
+        document.getElementById('lesson-header').innerHTML = questionBank[key].header;
+        document.getElementById('main-menu').classList.add('hidden');
+        document.getElementById('game-play').classList.remove('hidden');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const q = currentQList[currentIndex];
+        document.getElementById('progress-text').innerText = `${currentIndex + 1} / ${currentQList.length}`;
+        document.getElementById('star-count').innerText = stars;
+        document.getElementById('question-text').innerText = q.q;
+        document.getElementById('next-btn').disabled = true;
+        document.getElementById('error-hint').style.display = 'none';
+        const grid = document.getElementById('options-grid'); grid.innerHTML = '';
+        
+        [...q.options].sort(() => Math.random() - 0.5).forEach(opt => {
+            const btn = document.createElement('button'); btn.className = 'option-btn'; btn.innerText = opt;
+            btn.onclick = () => {
+                if (opt === q.ans) {
+                    btn.classList.add('correct'); stars++; 
+                    playSound('correct');
+                    document.getElementById('next-btn').disabled = false; 
+                    Array.from(grid.children).forEach(b => b.onclick = null);
+                } else {
+                    btn.classList.add('wrong');
+                    playSound('wrong');
+                    document.getElementById('correct-ans-hint').innerText = q.ans;
+                    document.getElementById('error-hint').style.display = 'block';
+                    speakText(`不對喔，正確答案是：${q.ans}`);
+                }
+            };
+            grid.appendChild(btn);
+        });
+        if(document.getElementById('auto-read-toggle').checked) { setTimeout(speakCurrent, 600); }
+    }
+
+    function speakCurrent() { 
+        let text = currentQList[currentIndex].q.replace(/____/g, "什麼什麼");
+        speakText(text);
+    }
+
+    function speakText(msg) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(msg);
+        u.lang = 'zh-HK';
+        window.speechSynthesis.speak(u);
+    }
+    
+    function nextQuestion() { 
+        currentIndex++; 
+        if (currentIndex < currentQList.length) loadQuestion(); 
+        else showEnd(); 
+    }
+
+    function showEnd() {
+        document.getElementById('game-play').classList.add('hidden');
+        document.getElementById('game-over').classList.remove('hidden');
+        const ratio = stars / currentQList.length;
+        const medal = ratio === 1 ? "🏆" : ratio >= 0.8 ? "🥇" : "🥈";
+        document.getElementById('medal-emoji').innerText = medal;
+        document.getElementById('medal-title').innerText = `${childName} 得到 ${stars} 顆星！`;
+        
+        const now = new Date();
+        history.unshift({ date: `${now.getMonth()+1}/${now.getDate()}`, name: childName, lesson: questionBank[currentKey].title, score: `${stars}/${currentQList.length}`, medal: medal });
+        localStorage.setItem('mu_v10_hist', JSON.stringify(history.slice(0, 10)));
+        renderHistory();
+    }
+
+    function renderHistory() {
+        const list = document.getElementById('history-list');
+        list.innerHTML = history.map(h => `<div class="history-item"><span>${h.date}</span><span style="font-weight:bold;color:var(--primary-color)">${h.name}</span><span>${h.lesson}</span><span style="color:#f39c12;font-weight:bold">${h.score}</span><span>${h.medal}</span></div>`).join('');
+    }
+    function clearHistory() { if(confirm("清除紀錄？")) { history = []; localStorage.removeItem('mu_v10_hist'); renderHistory(); } }
+    function goBack() { window.speechSynthesis.cancel(); document.getElementById('game-play').classList.add('hidden'); document.getElementById('game-over').classList.add('hidden'); document.getElementById('main-menu').classList.remove('hidden'); }
+</script>
+</body>
+</html>
