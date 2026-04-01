@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>G2下學期-中文評估 單元10-11</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --bg-color: #f0f8ff;
+            --text-color: #333;
+            --btn-bg: #fff;
+            --btn-border: #4CAF50;
+            --accent-color: #ff9800;
+        }
+
+        body.theme-girl {
+            --primary-color: #e91e63;
+            --bg-color: #fce4ec;
+            --btn-border: #e91e63;
+            --accent-color: #9c27b0;
+        }
+
+        * { box-sizing: border-box; font-family: 'PingFang HK', 'Heiti TC', 'Microsoft JhengHei', sans-serif; }
+        body { margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.3s; }
+        
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; text-align: center; }
+        .hidden { display: none !important; }
+
+        /* Typography */
+        h1 { font-size: 28px; color: var(--primary-color); text-shadow: 1px 1px 2px rgba(0,0,0,0.1); margin-bottom: 10px;}
+        h2 { font-size: 24px; margin-bottom: 20px; }
+        
+        /* User Settings (Name) */
+        .user-settings { margin-bottom: 20px; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .user-settings label { font-size: 20px; font-weight: bold; }
+        .user-settings input { font-size: 20px; padding: 8px 15px; border-radius: 15px; border: 3px solid var(--primary-color); width: 180px; text-align: center; outline: none; font-weight: bold; color: var(--text-color);}
+        
+        /* Buttons */
+        button {
+            background-color: var(--btn-bg); color: var(--text-color); border: 3px solid var(--btn-border);
+            border-radius: 15px; padding: 15px 20px; font-size: 20px; font-weight: bold;
+            margin: 10px; cursor: pointer; transition: transform 0.1s, box-shadow 0.1s, background-color 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); touch-action: manipulation;
+        }
+        button:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; border-color: #ccc; }
+        button.btn-primary { background-color: var(--primary-color); color: white; border: none; }
+        button.btn-accent { background-color: var(--accent-color); color: white; border: none; }
+        button.btn-special { background-color: #00bcd4; color: white; border: none; }
+        
+        /* Nav & Settings */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .home-btn { font-size: 24px; text-decoration: none; cursor: pointer; background: none; border: none; box-shadow: none; padding: 5px;}
+        .settings-panel { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; flex-wrap: wrap;}
+        .toggle-btn { padding: 10px 20px; border-radius: 20px; font-size: 16px; margin: 5px;}
+        .toggle-btn.active { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
+
+        /* Menu */
+        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
+        @media (min-width: 600px) { .menu-grid { grid-template-columns: 1fr 1fr; } }
+        
+        /* Improved Chapter Selection Layout */
+        .chapter-select { display: grid; grid-template-columns: 1fr; gap: 15px; margin: 0 auto 30px auto; max-width: 700px; }
+        @media (min-width: 600px) { .chapter-select { grid-template-columns: 1fr 1fr; } }
+        .chapter-btn { font-size: 20px; padding: 20px 15px; width: 100%; margin: 0; border-radius: 20px; display: flex; align-items: center; justify-content: center; background-color: var(--btn-bg); }
+        .chapter-btn.selected { background-color: var(--primary-color); color: white; border-color: var(--primary-color); box-shadow: 0 0 10px rgba(0,0,0,0.2) inset;}
+
+        /* Game UI */
+        .status-bar { font-size: 18px; font-weight: bold; background: white; padding: 10px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .question-box { background: white; padding: 40px 20px; border-radius: 20px; font-size: 28px; line-height: 1.6; margin-bottom: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: relative; }
+        .speaker-icon { position: absolute; top: 10px; right: 15px; font-size: 30px; cursor: pointer; background: none; border: none; box-shadow:none; padding: 0;}
+        .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        @media (min-width: 600px) { .options-grid { grid-template-columns: repeat(4, 1fr); } }
+
+        /* Animations */
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
+        .wrong-anim { animation: shake 0.4s; background-color: #ffcdd2 !important; border-color: #f44336 !important; color: #d32f2f !important; }
+        .correct-anim { background-color: #c8e6c9 !important; border-color: #4CAF50 !important; color: #2e7d32 !important; }
+
+        /* Input for LV9 */
+        .text-input { font-size: 24px; padding: 15px; width: 80%; max-width: 300px; text-align: center; border: 3px solid var(--primary-color); border-radius: 15px; margin-bottom: 20px; outline: none; }
+
+        /* Leaderboard */
+        .leaderboard-table { width: 100%; max-width: 700px; margin: 0 auto 20px auto; border-collapse: collapse; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .leaderboard-table th { background-color: var(--primary-color); color: white; padding: 12px 10px; font-size: 16px; }
+        .leaderboard-table td { padding: 10px; font-size: 15px; border-bottom: 1px solid #eee; }
+        .leaderboard-table tr:last-child td { border-bottom: none; }
+        .leaderboard-table tr:nth-child(even) { background-color: #f9f9f9; }
+        .rank-icon { font-size: 20px; }
+
+        /* Modal */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 40px; border-radius: 20px; text-align: center; font-size: 26px; font-weight: bold; color: #f44336; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body class="theme-girl"> 
+
+<div class="container">
+    <div class="top-bar">
+        <button class="home-btn" onclick="goHome()">🏠 主目錄</button>
+        <div id="score-display" class="hidden" style="font-size: 20px; font-weight: bold; color: var(--accent-color); background: white; padding: 5px 15px; border-radius: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">🏆 分數: <span id="current-score">0</span></div>
+    </div>
+
+    <div id="view-home">
+        <h1>🌟 中文溫習小挑戰 🌟</h1>
+        <h2>G2下學期 單元10-11</h2>
+        
+        <div class="user-settings">
+            <label for="player-name">👤 玩家名字：</label>
+            <input type="text" id="player-name" value="Hailey" onchange="saveNameSetting()">
+        </div>
+
+        <div class="settings-panel">
+            <button class="toggle-btn active" id="btn-theme" onclick="toggleTheme()">👧 女孩風格</button>
+            <button class="toggle-btn active" id="btn-audio" onclick="toggleAudio()">🔊 自動朗讀: ON</button>
+        </div>
+
+        <div class="menu-grid">
+            <button class="btn-primary" onclick="openChapterSelect('LV1')">🗣️ LV1 - 跟讀 (顯示詞語)</button>
+            <button class="btn-special" onclick="openChapterSelect('LV2')">🎧 LV2 - 朗讀 (聽音選詞)</button>
+            <button class="btn-primary" onclick="openChapterSelect('LV3')">✏️ LV3 - 供詞填充 (單元)</button>
+            <button class="btn-primary" onclick="openChapterSelect('LV4')">🎲 LV4 - 綜合挑戰 (20題)</button>
+            <button class="btn-primary" style="background-color:#9c27b0; grid-column: 1 / -1; margin-top: 5px;" onclick="openChapterSelect('LV9')">🔥 LV9 - 默寫填空 (進階)</button>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button class="btn-accent" style="width: 80%; max-width: 400px;" onclick="showLeaderboard()">🏆 遊戲排行榜</button>
+        </div>
+    </div>
+
+    <div id="view-chapter-select" class="hidden">
+        <h2 id="cs-title">請選擇單元 (可多選)</h2>
+        <div class="chapter-select" id="cs-buttons">
+            </div>
+        <button class="btn-accent" style="width: 80%; max-width: 300px; font-size: 22px; padding: 15px;" onclick="startGame()">開始遊戲 🚀</button>
+    </div>
+
+    <div id="view-game" class="hidden">
+        <div class="status-bar">
+            已完成: <span id="progress-done">0</span> / <span id="progress-total">10</span> | 餘下: <span id="progress-left">10</span> 題
+        </div>
+        
+        <div class="question-box">
+            <button class="speaker-icon" onclick="readQuestion()">📢</button>
+            <div id="question-text" style="margin-top: 10px;">載入中...</div>
+            
+            <div id="input-area" class="hidden" style="margin-top: 30px;">
+                <input type="text" id="answer-input" class="text-input" placeholder="請輸入答案" autocomplete="off">
+                <br>
+                <button class="btn-accent" onclick="checkInputAnswer()">確定 ✅</button>
+            </div>
+        </div>
+
+        <div class="options-grid" id="options-area">
+            </div>
+    </div>
+
+    <div id="view-results" class="hidden">
+        <h1>🎉 完成啦！太棒了！ 🎉</h1>
+        <h2 id="result-name" style="color: var(--primary-color);"></h2>
+        <h2>你的得分: <span id="final-score" style="color: var(--accent-color); font-size: 42px;">100</span></h2>
+        <p style="font-size: 20px;">成績已記錄到排行榜！</p>
+        <div style="margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+            <button class="btn-accent" style="width: 80%; max-width: 300px;" onclick="showLeaderboard()">🏆 查看排行榜</button>
+            <button class="btn-primary" style="width: 80%; max-width: 300px;" onclick="goHome()">🏠 回主目錄</button>
+        </div>
+    </div>
+
+    <div id="view-leaderboard" class="hidden">
+        <h1 style="color: var(--accent-color);">🏆 遊戲排行榜 🏆</h1>
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>排名</th>
+                    <th>玩家</th>
+                    <th>模式</th>
+                    <th>單元</th>
+                    <th>分數</th>
+                    <th>日期</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                </tbody>
+        </table>
+        <button class="btn-primary" onclick="goHome()">🏠 回主目錄</button>
+    </div>
+</div>
+
+<div id="wrong-modal" class="modal hidden">
+    <div class="modal-content">
+        <div style="font-size: 60px; margin-bottom: 15px;">❌</div>
+        <div id="wrong-msg">哎呀，答錯了！<br>正確答案是：<br><span id="correct-ans" style="color:var(--primary-color); font-size: 36px; display: inline-block; margin-top: 10px;"></span></div>
+        <button id="wrong-modal-btn" class="btn-primary" style="margin-top: 25px; width: 150px;" onclick="closeModal()">繼續</button>
+    </div>
+</div>
+
+<script>
+    // --- DATASET ---
+    const DB = [
+        {
+            id: 'u10_1', title: '單元十《讓座》',
+            words: [
+                { w: '需要', q: ['弟弟生病了，____好好休息。', '這些花草____每天澆水。', '婆婆提着很多東西，____我們的幫助。'] },
+                { w: '讓座', q: ['在巴士上，我們應該主動____給有需要的人。', '小明看到孕婦上車，立刻____。', '媽媽教我要懂得____給長輩。'] },
+                { w: '長者', q: ['巴士上有專為____而設的關愛座。', '過馬路時，我們要扶助有需要的____。', '社區中心舉辦了敬老活動，邀請了很多____參加。'] },
+                { w: '沉甸甸', q: ['樹上掛滿了____的果實。', '爸爸的背包裝滿了石頭，感覺____的。', '書包裏裝滿了書本，____的，真重！'] },
+                { w: '跌倒', q: ['妹妹在公園跑步時不小心____了。', '下雨天路滑，走路要小心，以免____。', '弟弟____了，痛得哭了起來。'] },
+                { w: '道謝', q: ['收到別人的禮物，我們應該馬上____。', '婆婆笑着向讓座的小男孩____。', '同學幫我撿起掉在地上的筆，我連忙向他____。'] },
+                { w: '緩慢', q: ['烏龜爬行的速度非常____。', '爺爺年紀大了，走路的步伐很____。', '蝸牛____地在樹葉上移動。'] },
+                { w: '心滿意足', q: ['吃過美味的晚餐後，大家都____地笑了。', '看到自己種的花開了，她____地笑了。', '得到老師的稱讚，小明感到____。'] }
+            ]
+        },
+        {
+            id: 'u10_2', title: '單元十《牆角的果皮》',
+            words: [
+                { w: '人來人往', q: ['假日的商場裏____，非常熱鬧。', '這條街道____，非常擁擠。', '車站裏____，大家行色匆匆。'] },
+                { w: '留意', q: ['過馬路時，我們要____交通燈的變化。', '老師講課時，同學們都很____聽。', '你有____到今天天氣有甚麼不同嗎？'] },
+                { w: '自言自語', q: ['爺爺看着舊照片，忍不住____起來。', '妹妹兩手拿着洋娃娃，還____地說故事。', '他一邊走一邊____，不知道在想甚麼。'] },
+                { w: '若無其事', q: ['他明明做錯了事，卻裝作____的樣子。', '即使被人批評，他依然____地繼續工作。', '貓咪打碎了花瓶，卻____地走開了。'] },
+                { w: '厭惡', q: ['大家都對這種亂丟垃圾的行為感到____。', '弟弟非常____吃青椒。', '看到地上的髒水，她露出____的表情。'] },
+                { w: '皺着眉頭', q: ['遇到難題時，哥哥總是____思考。', '媽媽____說：「你怎麼又忘記做功課了？」', '看到滿地垃圾，清潔工人不禁____。'] },
+                { w: '一聲不響', q: ['受到老師的批評，他____地低下了頭。', '小貓____地跳上了梳化。', '弟弟生氣了，躲在角落裏____。'] },
+                { w: '討厭', q: ['蚊子整天嗡嗡叫，真令人____。', '我最____別人對我說謊。', '下雨天不能出去玩，真____。'] }
+            ]
+        },
+        {
+            id: 'u12_1', title: '單元十二《這裏真是個好地方》',
+            words: [
+                { w: '遠離', q: ['我們應該____危險的地方。', '郊外空氣清新，____了城市的喧囂。', '為了身體健康，我們要____垃圾食物。'] },
+                { w: '郊遊', q: ['週末，我們一家人去郊野公園____。', '秋高氣爽，正是去____的好時候。', '學校舉辦了秋季____活動，同學們都很開心。'] },
+                { w: '清澈', q: ['山上的溪水非常____，連水底的石頭都看得見。', '這裏的湖水____見底，非常美麗。', '____的河水裏有許多小魚在游來游去。'] },
+                { w: '晶瑩', q: ['荷葉上的露珠____剔透，像珍珠一樣。', '妹妹的眼睛____閃亮，非常可愛。', '草地上的水珠在陽光下閃閃發光，十分____。'] },
+                { w: '粗壯', q: ['公園裏有一棵____的大樹。', '大象有四條____的腿。', '這棵老榕樹的樹幹非常____。'] },
+                { w: '挺拔', q: ['操場旁邊種了一排____的松樹。', '士兵們站得筆直____。', '山頂上的樹木長得十分____。'] },
+                { w: '蔚藍', q: ['今天天氣真好，天空一片____。', '抬頭望去，____的天空飄着幾朵白雲。', '船隻在____的大海上航行。'] },
+                { w: '綠油油', q: ['春天來了，草地變得____的。', '田野裏長滿了____的麥苗。', '遠處的山坡上一片____的，真好看。'] }
+            ]
+        },
+        {
+            id: 'u12_2', title: '單元十二《弟弟看風景》',
+            words: [
+                { w: '野餐', q: ['天氣晴朗，我們一家人到公園____。', '媽媽準備了很多美味的食物去____。', '同學們坐在草地上，開心地____。'] },
+                { w: '聊天', q: ['休息時間，同學們在操場上開心地____。', '嫲嫲喜歡和鄰居坐在樹下____。', '晚飯後，我們一家人圍在一起____。'] },
+                { w: '風景', q: ['太平山頂的____非常優美。', '我們沿着海濱長廊散步，欣賞美麗的____。', '這裏的____如畫，吸引了很多遊客。'] },
+                { w: '迫不及待', q: ['聽到放學的鐘聲，同學們____地跑出課室。', '收到生日禮物，妹妹____地打開它。', '看到桌上的美食，弟弟____地吃了起來。'] },
+                { w: '彈奏', q: ['姐姐在台上____了一首優美的鋼琴曲。', '哥哥正在房間裏____結他。', '音樂會上，音樂家____出動人的旋律。'] },
+                { w: '歡迎', q: ['老師微笑着____新同學的加入。', '學校大門前掛着「____來到新學年」的橫幅。', '大家熱烈鼓掌，____校長上台致辭。'] },
+                { w: '人煙稀少', q: ['這裏是一片____的荒漠。', '夜深了，街道上____。', '山區裏____，環境非常清幽。'] },
+                { w: '彎彎曲曲', q: ['我們沿着____的小路走上了山頂。', '一條____的河流穿過美麗的村莊。', '這條山路____，開車要非常小心。'] }
+            ]
+        }
+    ];
+
+    // --- STATE ---
+    let currentMode = '';
+    let selectedChapters = [];
+    let isAutoAudio = true;
+    let isGirlTheme = true;
+    let playerName = localStorage.getItem('hk_g2_playername') || 'Hailey';
+    
+    let gameQueue = [];
+    let currentQuestion = null;
+    let score = 0;
+    let totalQ = 0;
+    let currentQIndex = 0;
+    let currentWrongAttempts = 0; 
+
+    // --- SOUND EFFECTS ---
+    const synth = window.speechSynthesis;
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playBeep(isCorrect) {
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        if(isCorrect) {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+            osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        } else {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+    }
+
+    function speakText(text) {
+        if(synth.speaking) synth.cancel();
+        let utterThis = new SpeechSynthesisUtterance(text);
+        utterThis.lang = 'zh-HK';
+        utterThis.rate = 0.9;
+        synth.speak(utterThis);
+    }
+
+    // --- UI & INIT LOGIC ---
+    window.onload = function() {
+        document.getElementById('player-name').value = playerName;
+        if(!isGirlTheme) {
+            document.body.classList.remove('theme-girl');
+            document.getElementById('btn-theme').innerText = '👦 男孩風格';
+            document.getElementById('btn-theme').classList.remove('active');
+        }
+    };
+
+    function saveNameSetting() {
+        playerName = document.getElementById('player-name').value.trim() || 'Hailey';
+        localStorage.setItem('hk_g2_playername', playerName);
+    }
+
+    function toggleTheme() {
+        isGirlTheme = !isGirlTheme;
+        const btn = document.getElementById('btn-theme');
+        if(isGirlTheme) {
+            document.body.classList.add('theme-girl');
+            btn.innerText = '👧 女孩風格';
+            btn.classList.add('active');
+        } else {
+            document.body.classList.remove('theme-girl');
+            btn.innerText = '👦 男孩風格';
+            btn.classList.remove('active');
+        }
+    }
+
+    function toggleAudio() {
+        isAutoAudio = !isAutoAudio;
+        const btn = document.getElementById('btn-audio');
+        if(isAutoAudio) {
+            btn.classList.add('active');
+            btn.innerText = '🔊 自動朗讀: ON';
+        } else {
+            btn.classList.remove('active');
+            btn.innerText = '🔇 自動朗讀: OFF';
+        }
+    }
+
+    function showView(viewId) {
+        ['view-home', 'view-chapter-select', 'view-game', 'view-results', 'view-leaderboard'].forEach(id => {
+            document.getElementById(id).classList.add('hidden');
+        });
+        document.getElementById(viewId).classList.remove('hidden');
+    }
+
+    function goHome() {
+        if(synth.speaking) synth.cancel();
+        showView('view-home');
+        document.getElementById('score-display').classList.add('hidden');
+    }
+
+    // --- LEADERBOARD LOGIC ---
+    function saveScore() {
+        if (currentMode === 'LV1') return; // 朗讀模式不計分
+
+        let records = JSON.parse(localStorage.getItem('hk_g2_leaderboard') || '[]');
+        let dateStr = new Date().toLocaleDateString('zh-HK');
+        
+        let modeName = '';
+        if(currentMode === 'LV2') modeName = '聽音選詞';
+        if(currentMode === 'LV3') modeName = '單元填充';
+        if(currentMode === 'LV4') modeName = '綜合20題';
+        if(currentMode === 'LV9') modeName = '進階默寫';
+
+        // 整理單元名稱，只保留「U10讓座」之類的簡稱，避免表格太長
+        let chapterNames = selectedChapters.map(id => {
+            let ch = DB.find(c => c.id === id);
+            return ch ? ch.title.replace('單元', 'U').replace('《', '').replace('》', '') : id;
+        }).join(', ');
+
+        records.push({ name: playerName, score: score, mode: modeName, chapters: chapterNames, date: dateStr });
+        
+        // Sort by score descending
+        records.sort((a, b) => b.score - a.score);
+        // Keep top 15
+        records = records.slice(0, 15);
+        
+        localStorage.setItem('hk_g2_leaderboard', JSON.stringify(records));
+    }
+
+    function showLeaderboard() {
+        const tbody = document.getElementById('leaderboard-body');
+        tbody.innerHTML = '';
+        let records = JSON.parse(localStorage.getItem('hk_g2_leaderboard') || '[]');
+        
+        if(records.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">暫無紀錄，快來挑戰吧！</td></tr>';
+        } else {
+            records.forEach((rec, index) => {
+                let rankStr = (index + 1) + '';
+                if(index === 0) rankStr = '🥇';
+                if(index === 1) rankStr = '🥈';
+                if(index === 2) rankStr = '🥉';
+
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="rank-icon">${rankStr}</td>
+                    <td style="font-weight:bold;">${rec.name}</td>
+                    <td>${rec.mode}</td>
+                    <td style="font-size: 13px; color: #555;">${rec.chapters || '-'}</td>
+                    <td style="color:var(--accent-color); font-weight:bold;">${rec.score}</td>
+                    <td style="font-size: 14px;">${rec.date}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        showView('view-leaderboard');
+    }
+
+    // --- GAME PREPARATION ---
+    function openChapterSelect(mode) {
+        currentMode = mode;
+        selectedChapters = [];
+        const csButtons = document.getElementById('cs-buttons');
+        csButtons.innerHTML = '';
+
+        let displayDB = DB;
+        if (mode === 'LV9') {
+            displayDB = DB.filter(ch => ch.id === 'u12_1'); // Only 《這裏真是個好地方》
+            document.getElementById('cs-title').innerText = 'LV9 默寫 (只限《這裏真是個好地方》)';
+        } else if (mode === 'LV4') {
+            document.getElementById('cs-title').innerText = '請選擇單元 (可多選)';
+        } else {
+            document.getElementById('cs-title').innerText = '請選擇單元 (單選)';
+        }
+
+        displayDB.forEach(ch => {
+            let btn = document.createElement('button');
+            btn.className = 'chapter-btn';
+            btn.innerText = ch.title;
+            btn.onclick = () => {
+                if(mode === 'LV1' || mode === 'LV2' || mode === 'LV3' || mode === 'LV9') {
+                    // Single select
+                    document.querySelectorAll('.chapter-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedChapters = [ch.id];
+                } else {
+                    // Multi select for LV4
+                    btn.classList.toggle('selected');
+                    if(btn.classList.contains('selected')) {
+                        selectedChapters.push(ch.id);
+                    } else {
+                        selectedChapters = selectedChapters.filter(id => id !== ch.id);
+                    }
+                }
+            };
+            csButtons.appendChild(btn);
+        });
+
+        // Default select first for single mode
+        if(mode !== 'LV4' && displayDB.length > 0) {
+            csButtons.firstChild.click();
+        }
+
+        showView('view-chapter-select');
+    }
+
+    function shuffle(array) {
+        let currentIndex = array.length,  randomIndex;
+        while (currentIndex > 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    function startGame() {
+        if(selectedChapters.length === 0) {
+            alert('請至少選擇一個單元！');
+            return;
+        }
+        
+        saveNameSetting(); 
+
+        gameQueue = [];
+        score = 0;
+        document.getElementById('current-score').innerText = score;
+        
+        if(currentMode !== 'LV1') {
+            document.getElementById('score-display').classList.remove('hidden');
+        } else {
+            document.getElementById('score-display').classList.add('hidden');
+        }
+
+        let allWordsSelected = [];
+        selectedChapters.forEach(chId => {
+            const ch = DB.find(c => c.id === chId);
+            if(ch) allWordsSelected = allWordsSelected.concat(ch.words);
+        });
+
+        if (currentMode === 'LV1') {
+            gameQueue = allWordsSelected.map(w => ({ type: 'read', word: w.w }));
+        } else if (currentMode === 'LV2') {
+            allWordsSelected.forEach(w => {
+                gameQueue.push({ type: 'listen', ans: w.w, options: allWordsSelected.map(x=>x.w) });
+            });
+            shuffle(gameQueue);
+        } else if (currentMode === 'LV3') {
+            allWordsSelected.forEach(w => {
+                let qText = w.q[Math.floor(Math.random() * w.q.length)];
+                gameQueue.push({ type: 'fill', ans: w.w, q: qText, options: allWordsSelected.map(x=>x.w) });
+            });
+            shuffle(gameQueue);
+        } else if (currentMode === 'LV4') {
+            let tempQueue = [];
+            allWordsSelected.forEach(w => {
+                w.q.forEach(qText => {
+                    tempQueue.push({ type: 'fill', ans: w.w, q: qText, options: allWordsSelected.map(x=>x.w) });
+                });
+            });
+            shuffle(tempQueue);
+            gameQueue = tempQueue.slice(0, 20); 
+        } else if (currentMode === 'LV9') {
+            allWordsSelected.forEach(w => {
+                let qText = w.q[Math.floor(Math.random() * w.q.length)];
+                gameQueue.push({ type: 'input', ans: w.w, q: qText });
+            });
+            shuffle(gameQueue);
+        }
+
+        totalQ = gameQueue.length;
+        currentQIndex = 0;
+        showView('view-game');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        if (currentQIndex >= totalQ) {
+            showResults();
+            return;
+        }
+
+        currentQuestion = gameQueue[currentQIndex];
+        currentWrongAttempts = 0; 
+        
+        document.getElementById('progress-done').innerText = currentQIndex;
+        document.getElementById('progress-total').innerText = totalQ;
+        document.getElementById('progress-left').innerText = totalQ - currentQIndex;
+
+        const qBox = document.getElementById('question-text');
+        const optArea = document.getElementById('options-area');
+        const inputArea = document.getElementById('input-area');
+        
+        optArea.innerHTML = '';
+        inputArea.classList.add('hidden');
+
+        if (currentQuestion.type === 'read') {
+            qBox.innerText = currentQuestion.word;
+            qBox.style.fontSize = '56px';
+            qBox.style.color = 'var(--primary-color)';
+            optArea.innerHTML = `<button onclick="nextQuestion(true)" class="btn-primary" style="grid-column: 1 / -1; padding: 20px; font-size: 24px;">下一詞 ➡️</button>`;
+        } else if (currentQuestion.type === 'listen') {
+            qBox.innerText = '🎧 請聆聽讀音並選出正確詞語';
+            qBox.style.fontSize = '32px';
+            qBox.style.color = 'var(--accent-color)';
+            
+            let opts = [...currentQuestion.options];
+            shuffle(opts);
+            opts.forEach(opt => {
+                let btn = document.createElement('button');
+                btn.innerText = opt;
+                btn.onclick = () => checkOptionAnswer(opt, btn);
+                optArea.appendChild(btn);
+            });
+        } else {
+            qBox.style.fontSize = '32px';
+            qBox.style.color = 'var(--text-color)';
+            qBox.innerText = currentQuestion.q;
+            
+            if (currentQuestion.type === 'fill') {
+                let opts = [...currentQuestion.options];
+                shuffle(opts);
+                opts.slice(0, 8).forEach(opt => {
+                    if(!opts.slice(0,8).includes(currentQuestion.ans)) {
+                        opts[0] = currentQuestion.ans;
+                        shuffle(opts);
+                    }
+                });
+
+                opts.slice(0, 8).forEach(opt => {
+                    let btn = document.createElement('button');
+                    btn.innerText = opt;
+                    btn.onclick = () => checkOptionAnswer(opt, btn);
+                    optArea.appendChild(btn);
+                });
+            } else if (currentQuestion.type === 'input') {
+                inputArea.classList.remove('hidden');
+                document.getElementById('answer-input').value = '';
+                document.getElementById('answer-input').focus();
+            }
+        }
+
+        if(isAutoAudio) readQuestion();
+    }
+
+    function readQuestion() {
+        if(!currentQuestion) return;
+        let textToRead = '';
+        if (currentQuestion.type === 'read') textToRead = currentQuestion.word;
+        else if (currentQuestion.type === 'listen') textToRead = currentQuestion.ans; 
+        else textToRead = currentQuestion.q.replace('____', '什麼');
+        
+        speakText(textToRead);
+    }
+
+    function checkOptionAnswer(selected, btnElement) {
+        if(selected === currentQuestion.ans) {
+            playBeep(true);
+            btnElement.classList.add('correct-anim');
+            
+            // 根據錯誤次數給分
+            let pointsEarned = 10;
+            if (currentWrongAttempts === 1) pointsEarned = 5;
+            if (currentWrongAttempts > 1) pointsEarned = 0;
+
+            score += pointsEarned; 
+            document.getElementById('current-score').innerText = score;
+            
+            // 答對後自動進入下一題
+            setTimeout(() => nextQuestion(), 500);
+        } else {
+            playBeep(false);
+            btnElement.classList.add('wrong-anim');
+            btnElement.disabled = true; // 答錯後按鈕變灰且不可再按
+            
+            setTimeout(() => btnElement.classList.remove('wrong-anim'), 400); 
+            
+            currentWrongAttempts++;
+            
+            if (currentMode === 'LV2') {
+                if (currentWrongAttempts >= 2) {
+                    showWrongModal(currentQuestion.ans);
+                } else {
+                    if(isAutoAudio) speakText('不對哦，再聽一次。' + currentQuestion.ans);
+                }
+            } else {
+                showWrongModal(currentQuestion.ans);
+            }
+        }
+    }
+
+    function checkInputAnswer() {
+        const val = document.getElementById('answer-input').value.trim();
+        if(val === currentQuestion.ans) {
+            playBeep(true);
+            score += 15; 
+            document.getElementById('current-score').innerText = score;
+            nextQuestion();
+        } else {
+            playBeep(false);
+            showWrongModal(currentQuestion.ans);
+        }
+    }
+
+    function showWrongModal(ans) {
+        document.getElementById('correct-ans').innerText = ans;
+        document.getElementById('wrong-modal').classList.remove('hidden');
+        
+        // 如果是LV3或LV4，強制要求關閉視窗後重選
+        if (currentMode === 'LV3' || currentMode === 'LV4') {
+            document.getElementById('wrong-modal-btn').innerText = '重試 (親自選出答案)';
+        } else {
+            document.getElementById('wrong-modal-btn').innerText = '繼續';
+        }
+        
+        if(isAutoAudio) speakText('答錯了，正確答案是 ' + ans);
+    }
+
+    function closeModal() {
+        document.getElementById('wrong-modal').classList.add('hidden');
+        
+        // LV3 和 LV4 關閉 Modal 後，停留原地等待玩家重新選擇正確答案
+        if (currentMode === 'LV3' || currentMode === 'LV4') {
+            // Do nothing, wait for user to click the correct button.
+        } else {
+            // 其他模式直接跳下一題
+            nextQuestion();
+        }
+    }
+
+    function nextQuestion(skipScore = false) {
+        currentQIndex++;
+        loadQuestion();
+    }
+
+    function showResults() {
+        showView('view-results');
+        document.getElementById('result-name').innerText = `好厲害啊，${playerName}！`;
+        document.getElementById('final-score').innerText = score;
+        
+        saveScore(); 
+        
+        if(isAutoAudio) speakText(`太棒了${playerName}，你完成了所有題目！得分是 ` + score + '分');
+        document.getElementById('score-display').classList.add('hidden');
+    }
+
+    // Initialize Audio Context on first interaction
+    document.body.addEventListener('click', () => {
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+    }, {once:true});
+
+</script>
+</body>
+</html>
