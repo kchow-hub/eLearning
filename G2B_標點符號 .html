@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>標點符號隨機大挑戰 (20題挑戰版)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700&display=swap');
+        * { touch-action: none; -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        body { font-family: 'Noto Sans TC', sans-serif; background: #E8F5E9; margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        
+        .game-card { background: white; width: 95%; max-width: 900px; height: 95vh; padding: 25px; border-radius: 40px; box-shadow: 0 15px 0 #43A047; border: 8px solid #81C784; text-align: center; display: flex; flex-direction: column; position: relative; overflow-y: auto; }
+        
+        /* 頂部資訊列 (進度條與計時器) */
+        .header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; color: #2E7D32; font-size: 1.2rem; }
+        .progress-wrapper { flex-grow: 1; margin-right: 15px; }
+        .progress-container { width: 100%; height: 20px; background: #eee; border-radius: 20px; overflow: hidden; }
+        #progress-bar { width: 0%; height: 100%; background: #4CAF50; transition: width 0.3s; }
+        #timer-display { min-width: 80px; text-align: right; color: #E65100; font-size: 1.4rem; }
+
+        .sentence-area { flex-grow: 1; font-size: 2.2rem; line-height: 2.8; margin: 15px 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; background: #F1F8E9; border-radius: 25px; padding: 25px; border: 2px solid #C8E6C9; }
+        
+        /* 一般標點符號空格 */
+        .drop-zone { display: inline-block; width: 60px; height: 60px; border: 4px dashed #A5D6A7; border-radius: 12px; margin: 0 8px; vertical-align: middle; background: #fff; line-height: 52px; transition: all 0.2s; }
+        
+        /* 專名號專用容器與樣式 */
+        .proper-noun-wrapper { display: inline-flex; flex-direction: column; align-items: center; position: relative; line-height: 1.2; margin: 0 4px; }
+        .drop-zone.under-line { width: 100%; height: 12px; border: none; border-bottom: 6px solid #A5D6A7; border-radius: 0; margin: 5px 0 0 0; background: transparent; }
+        .drop-zone.under-line.filled { border-bottom-style: solid; border-bottom-color: #2E7D32; border-bottom-width: 8px; }
+
+        .drop-zone.hover { transform: scale(1.1); border-color: #4CAF50; background: #E8F5E9; }
+        .drop-zone.filled { border-style: solid; border-color: #4CAF50; color: #2E7D32; }
+        .drop-zone.wrong { border-color: #C62828 !important; color: #C62828 !important; }
+
+        /* 符號區改用 Flex 確保自適應不跑版 */
+        .symbols-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding: 15px; background: #C8E6C9; border-radius: 25px; }
+        .symbol-card { width: 65px; height: 65px; background: white; border-radius: 15px; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: bold; color: #2E7D32; box-shadow: 0 5px 0 #A5D6A7; border: 2px solid #A5D6A7; cursor: grab; }
+        
+        #next-btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 30px 60px; font-size: 2rem; background: #FF9800; color: white; border-radius: 60px; border: none; box-shadow: 0 10px 0 #E65100; display: none; z-index: 100; cursor: pointer; }
+        
+        /* 排行榜與結算畫面 */
+        .win-screen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+        .input-group { margin: 20px 0; }
+        .input-group input { padding: 12px; font-size: 1.5rem; border: 3px solid #4CAF50; border-radius: 15px; text-align: center; width: 200px; outline: none; }
+        .input-group button { padding: 12px 25px; font-size: 1.5rem; background: #4CAF50; color: white; border: none; border-radius: 15px; cursor: pointer; font-weight: bold; margin-left: 10px; }
+        .leaderboard { width: 100%; max-width: 400px; background: #F1F8E9; border-radius: 20px; padding: 20px; margin-top: 15px; border: 2px solid #C8E6C9; }
+        .leaderboard h3 { margin-top: 0; color: #2E7D32; font-size: 1.8rem; }
+        .leaderboard ul { list-style: none; padding: 0; margin: 0; font-size: 1.4rem; }
+        .leaderboard li { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 2px dashed #C8E6C9; color: #333; }
+        .leaderboard li:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <div class="game-card">
+        <div id="quiz-ui">
+            <div class="header-info">
+                <div class="progress-wrapper">
+                    <div class="progress-container"><div id="progress-bar"></div></div>
+                </div>
+                <div id="q-count">1 / 20</div>
+                <div id="timer-display">⏱ 0s</div>
+            </div>
+            
+            <div class="sentence-area" id="sentence-box"></div>
+            
+            <div class="symbols-container">
+                <div class="symbol-card" onpointerdown="dragStart(event)">，</div>
+                <div class="symbol-card" onpointerdown="dragStart(event)">。</div>
+                <div class="symbol-card" onpointerdown="dragStart(event)">？</div>
+                <div class="symbol-card" onpointerdown="dragStart(event)">！</div>
+                <div class="symbol-card" onpointerdown="dragStart(event)">：</div>
+                <div class="symbol-card" onpointerdown="dragStart(event)">「</div>
+                <div class="symbol-card" onpointerdown="dragStart(event)">」</div>
+                <div class="symbol-card" onpointerdown="dragStart(event)">《</div>
+                <div class="symbol-card" onpointerdown="dragStart(event)">》</div>
+                <div class="symbol-card" onpointerdown="dragStart(event)">、</div>
+                <div class="symbol-card" onpointerdown="dragStart(event)">＿＿</div>
+            </div>
+            <button id="next-btn" onclick="goToNext()">答對了！下一題 ➔</button>
+        </div>
+
+        <div class="win-screen" id="win-ui">
+            <h2 style="font-size: 3.5rem; color: #2E7D32; margin-bottom: 10px;">🌟 挑戰完成！🌟</h2>
+            <p style="font-size: 1.8rem; margin: 5px;">你成功完成了 20 題！</p>
+            <p style="font-size: 1.8rem; color: #E65100; font-weight: bold; margin: 5px;">總耗時：<span id="final-time">0</span> 秒</p>
+            
+            <div class="input-group" id="name-input-section">
+                <input type="text" id="player-name" placeholder="輸入大名" maxlength="8">
+                <button onclick="saveScore()">送出成績</button>
+            </div>
+
+            <div class="leaderboard" id="leaderboard-section" style="display: none;">
+                <h3>🏆 英雄榜 (Top 5) 🏆</h3>
+                <ul id="leaderboard-list"></ul>
+            </div>
+            
+            <button onclick="location.reload()" style="padding:15px 40px; font-size:1.5rem; border-radius:30px; background:#FF9800; color:white; border:none; cursor:pointer; margin-top: 20px; font-weight: bold;">🔄 再挑戰一次</button>
+        </div>
+    </div>
+
+    <audio id="snd-pick" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+    <audio id="snd-drop" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+    <audio id="snd-correct" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
+    <audio id="snd-win" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
+
+    <script>
+        // 題目庫 (包含專名號與常見標點)
+        const allData = [
+            { text: "今天天氣真好[s1]我們去公園玩吧[s2]", ans: {s1: "，", s2: "。"} },
+            { text: "妳知道這本書是誰的嗎[s1]", ans: {s1: "？"} },
+            { text: "哇[s1]這份禮物多麼漂亮呀[s2]", ans: {s1: "！", s2: "！"} },
+            { text: "老師說[s1][s2]大家要保持安靜[s3][s4]", ans: {s1: "：", s2: "「", s3: "。", s4: "」"} },
+            { text: "我最愛看故事書[s1]格林童話[s2]", ans: {s1: "《", s2: "》"} },
+            { text: "桌上有蘋果[s1]香蕉和西瓜[s2]", ans: {s1: "、", s2: "。"} },
+            { text: "快看[s1]流星飛過去了[s2]", ans: {s1: "！", s2: "！"} },
+            { text: "媽媽問[s1][s2]妳肚子餓不餓呢[s3][s4]", ans: {s1: "：", s2: "「", s3: "？", s4: "」"} },
+            { text: "今天我學會了游泳[s1]心裏真高興[s2]", ans: {s1: "，", s2: "。"} },
+            { text: "這朵花真香呀[s1]", ans: {s1: "！"} },
+            { text: "這就是我的好朋友<div class='proper-noun-wrapper'>小明<div class='drop-zone under-line' id='s1'></div></div>[s2]", ans: {s1: "＿＿", s2: "。"} },
+            { text: "<div class='proper-noun-wrapper'>李白<div class='drop-zone under-line' id='s1'></div></div>是唐代著名的詩人[s2]", ans: {s1: "＿＿", s2: "。"} },
+            { text: "醫生叮囑我[s1][s2]要多喝開水[s3][s4]", ans: {s1: "：", s2: "「", s3: "。", s4: "」"} },
+            { text: "妳喜歡畫畫還是唱歌呢[s1]", ans: {s1: "？"} },
+            { text: "早晨[s1]太陽從東方升起[s2]", ans: {s1: "，", s2: "。"} },
+            { text: "小貓[s1]小狗和小兔都是我的好朋友[s2]", ans: {s1: "、", s2: "。"} },
+            { text: "這首歌真動聽呀[s1]", ans: {s1: "！"} },
+            { text: "妳看過[s1]成語故事[s2]這本書嗎[s3]", ans: {s1: "《", s2: "》", s3: "？"} },
+            { text: "操場上[s1]同學們正在跑步[s2]", ans: {s1: "，", s2: "。"} },
+            { text: "哎呀[s1]我不小心打破了花瓶[s2]", ans: {s1: "！", s2: "！"} },
+            { text: "春天來了[s1]花兒開了[s2]草兒綠了[s3]", ans: {s1: "，", s2: "，", s3: "。"} },
+            { text: "哥哥大聲喊[s1][s2]快跑呀[s3][s4]", ans: {s1: "：", s2: "「", s3: "！", s4: "」"} },
+            { text: "妳知道地球是圓的嗎[s1]", ans: {s1: "？"} },
+            { text: "這是我最喜歡的[s1]十萬個為什麼[s2]", ans: {s1: "《", s2: "》"} },
+            { text: "星期天[s1]我和家人去爬山[s2]", ans: {s1: "，", s2: "。"} },
+            { text: "多麼美麗的彩虹呀[s1]", ans: {s1: "！"} },
+            { text: "媽媽說[s1][s2]晚安[s3]寶貝[s4][s5]", ans: {s1: "：", s2: "「", s3: "，", s4: "。", s5: "」"} },
+            { text: "妳會寫[s1]山[s2]這個字嗎[s3]", ans: {s1: "「", s2: "」", s3: "？"} },
+            { text: "我買了[s1]西遊記[s2]和[s3]水滸傳[s4]", ans: {s1: "《", s2: "》", s3: "《", s4: "》"} }
+        ];
+
+        let quizQuestions = [];
+        let currentIdx = 0;
+        let dragElem = null;
+        const totalQuestions = 20;
+        
+        // 計時器變數
+        let timeElapsed = 0;
+        let timerInterval;
+
+        function playSnd(id) {
+            const s = document.getElementById(id);
+            if(s) {
+                s.currentTime = 0; 
+                s.play().catch(()=>{});
+            }
+        }
+
+        function startTimer() {
+            timeElapsed = 0;
+            document.getElementById('timer-display').innerText = `⏱ 0s`;
+            timerInterval = setInterval(() => {
+                timeElapsed++;
+                document.getElementById('timer-display').innerText = `⏱ ${timeElapsed}s`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function shuffleAndPick() {
+            quizQuestions = [...allData].sort(() => 0.5 - Math.random()).slice(0, totalQuestions);
+            startTimer();
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = quizQuestions[currentIdx];
+            document.getElementById('q-count').innerText = `${currentIdx + 1} / ${totalQuestions}`;
+            document.getElementById('progress-bar').style.width = ((currentIdx + 1) / totalQuestions * 100) + "%";
+            
+            let html = q.text.replace(/\[(s\d+)\]/g, (m, id) => `<div class="drop-zone" id="${id}"></div>`);
+            document.getElementById('sentence-box').innerHTML = html;
+            document.getElementById('next-btn').style.display = 'none';
+        }
+
+        function dragStart(e) {
+            playSnd('snd-pick');
+            dragElem = e.target.cloneNode(true);
+            dragElem.style.position = 'fixed'; 
+            dragElem.style.zIndex = '1000';
+            dragElem.style.pointerEvents = 'none'; 
+            dragElem.style.opacity = '0.9';
+            document.body.appendChild(dragElem);
+            
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+            updatePos(clientX, clientY);
+
+            const moveHandler = (ev) => {
+                const x = ev.clientX || (ev.touches && ev.touches[0].clientX);
+                const y = ev.clientY || (ev.touches && ev.touches[0].clientY);
+                updatePos(x, y);
+            };
+
+            const upHandler = (ev) => {
+                window.removeEventListener('pointermove', moveHandler);
+                window.removeEventListener('pointerup', upHandler);
+                const x = ev.clientX || (ev.changedTouches && ev.changedTouches[0].clientX);
+                const y = ev.clientY || (ev.changedTouches && ev.changedTouches[0].clientY);
+                dragEnd(x, y);
+            };
+
+            window.addEventListener('pointermove', moveHandler);
+            window.addEventListener('pointerup', upHandler);
+        }
+
+        function updatePos(x, y) {
+            if (!dragElem) return;
+            dragElem.style.left = (x - 30) + 'px'; 
+            dragElem.style.top = (y - 30) + 'px';
+            
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                const r = zone.getBoundingClientRect();
+                if (x > r.left && x < r.right && y > r.top && y < r.bottom) zone.classList.add('hover');
+                else zone.classList.remove('hover');
+            });
+        }
+
+        function dragEnd(x, y) {
+            const zones = document.querySelectorAll('.drop-zone');
+            let dropped = false;
+
+            zones.forEach(zone => {
+                const r = zone.getBoundingClientRect();
+                if (x > r.left && x < r.right && y > r.top && y < r.bottom) {
+                    if (zone.classList.contains('under-line')) {
+                        zone.innerText = ""; 
+                    } else {
+                        zone.innerText = dragElem.innerText;
+                    }
+                    zone.dataset.value = dragElem.innerText; 
+                    zone.classList.add('filled');
+                    zone.classList.remove('wrong');
+                    dropped = true;
+                    playSnd('snd-drop');
+                    checkAnswers();
+                }
+                zone.classList.remove('hover');
+            });
+            
+            if(dragElem) document.body.removeChild(dragElem);
+            dragElem = null;
+        }
+
+        function checkAnswers() {
+            const q = quizQuestions[currentIdx];
+            const zones = document.querySelectorAll('.drop-zone');
+            let correctCount = 0;
+
+            zones.forEach(z => {
+                const val = z.dataset.value;
+                if (val) {
+                    if (val === q.ans[z.id]) {
+                        correctCount++;
+                        z.classList.remove('wrong');
+                    } else {
+                        z.classList.add('wrong');
+                    }
+                }
+            });
+
+            if(correctCount === Object.keys(q.ans).length) {
+                playSnd('snd-correct');
+                document.getElementById('next-btn').style.display = 'block';
+            }
+        }
+
+        function goToNext() {
+            currentIdx++;
+            if (currentIdx < totalQuestions) {
+                loadQuestion();
+            } else {
+                stopTimer();
+                playSnd('snd-win');
+                document.getElementById('quiz-ui').style.display = 'none';
+                document.getElementById('win-ui').style.display = 'flex';
+                document.getElementById('final-time').innerText = timeElapsed;
+            }
+        }
+
+        // 排行榜儲存邏輯
+        function saveScore() {
+            let nameInput = document.getElementById('player-name').value.trim();
+            let name = nameInput !== "" ? nameInput : "無名英雄";
+            
+            // 讀取本地儲存
+            let board = JSON.parse(localStorage.getItem('g2_punctuation_leaderboard')) || [];
+            
+            // 加入新成績並排序 (由快到慢)
+            board.push({ name: name, time: timeElapsed });
+            board.sort((a, b) => a.time - b.time);
+            
+            // 只保留前五名
+            board = board.slice(0, 5);
+            localStorage.setItem('g2_punctuation_leaderboard', JSON.stringify(board));
+            
+            // 隱藏輸入框，顯示排行榜
+            document.getElementById('name-input-section').style.display = 'none';
+            renderLeaderboard(board);
+        }
+
+        function renderLeaderboard(board) {
+            let list = document.getElementById('leaderboard-list');
+            list.innerHTML = '';
+            board.forEach((entry, idx) => {
+                let li = document.createElement('li');
+                let medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '🎖';
+                li.innerHTML = `<span>${medal} ${entry.name}</span> <span>${entry.time}s</span>`;
+                list.appendChild(li);
+            });
+            document.getElementById('leaderboard-section').style.display = 'block';
+        }
+
+        // 啟動遊戲
+        shuffleAndPick();
+    </script>
+</body>
+</html>
