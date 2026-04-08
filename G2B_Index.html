@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hailey G2下學期的學習小天地 ✨</title>
+    <style>
+        /* 基礎設定 */
+        body {
+            font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+            background: linear-gradient(135deg, #fff5f8 0%, #eef1ff 100%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 標題區域 */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: bounceIn 1s;
+        }
+
+        h1 {
+            color: #ff6b9d;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #7d8cc4;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        /* 連結容器 */
+        .container {
+            width: 100%;
+            max-width: 500px;
+            display: grid;
+            gap: 20px;
+        }
+
+        /* 卡片式按鈕設計 */
+        .study-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 15px rgba(255, 182, 193, 0.3);
+            border: 3px solid transparent;
+        }
+
+        .study-card:hover {
+            transform: scale(1.05);
+            border-color: #ffb6c1;
+            box-shadow: 0 12px 20px rgba(255, 182, 193, 0.5);
+        }
+
+        /* 不同的圖標顏色 */
+        .icon {
+            font-size: 2rem;
+            margin-right: 15px;
+            background: #fff0f5;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .card-text {
+            flex-grow: 1;
+        }
+
+        .card-title {
+            color: #555;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .card-desc {
+            color: #aaa;
+            font-size: 0.85rem;
+        }
+
+        /* 箭頭指示 */
+        .arrow {
+            color: #ffb6c1;
+            font-size: 1.5rem;
+        }
+
+        /* 動畫 */
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); opacity: 1; }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        footer {
+            margin-top: 50px;
+            color: #999;
+            font-size: 0.8rem;
+        }
+
+        /* 手機適應 */
+        @media (max-width: 480px) {
+            h1 { font-size: 1.8rem; }
+            .study-card { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>✨Hailey G2下學期的學習小天地✨</h1>
+    <p class="subtitle">加油！今天也要進步一點點哦 🌸</p>
+</header>
+
+<main class="container">
+    <a href="https://kchow-hub.github.io/eLearning/G2B_MUA_U5&amp;U6.html" class="study-card">
+        <div class="icon">🎨</div>
+        <div class="card-text">
+            <span class="card-title">音樂與藝術</span>
+            <span class="card-desc">G2B MUA Unit 5 &amp; 6</span>
+        </div>
+        <div class="arrow">➜</div>
+    </a>
+
+    <a href="https://kchow-hub.github.io/eLearning/G2B_中文詞語_U10-11.html" class="study-card">
+        <div class="icon">✍️</div>
+        <div class="card-text">
+            <span class="card-title">中文詞語好有趣</span>
+            <span class="card-desc">第 10 至 11 單元</span>
+        </div>
+        <div class="arrow">➜</div>
+    </a>
+
+    <a href="https://kchow-hub.github.io/eLearning/G2B_古詩1&amp;2.html" class="study-card">
+        <div class="icon">📜</div>
+        <div class="card-text">
+            <span class="card-title">優美古詩朗讀</span>
+            <span class="card-desc">古詩 (1 &amp; 2)</span>
+        </div>
+        <div class="arrow">➜</div>
+    </a>
+
+    <a href="https://kchow-hub.github.io/eLearning/G2B_標點符號.html" class="study-card">
+        <div class="icon">❓</div>
+        <div class="card-text">
+            <span class="card-title">標點符號小高手</span>
+            <span class="card-desc">學習正確使用符號</span>
+        </div>
+        <div class="arrow">➜</div>
+    </a>
+</main>
+
+<footer>
+    <p>💖 祝你有愉快的一天 💖</p>
+</footer>
+
+</body>
+</html>
