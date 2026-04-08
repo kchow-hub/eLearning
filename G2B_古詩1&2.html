@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>二年級下學期古詩溫習</title>
+<style>
+    :root {
+        --primary: #FFB6C1; /* 女孩粉 */
+        --primary-dark: #FF69B4;
+        --secondary: #FFF0F5;
+        --text: #4A4A4A;
+        --correct: #4CAF50;
+        --wrong: #F44336;
+        --bg: #FAFAFA;
+        --white: #FFFFFF;
+        --shadow: rgba(0, 0, 0, 0.1);
+    }
+
+    body.theme-boy {
+        --primary: #8FBC8F; /* 男孩綠 */
+        --primary-dark: #2E8B57;
+        --secondary: #F0FFF0;
+    }
+
+    * { box-sizing: border-box; font-family: 'Comic Sans MS', 'Microsoft JhengHei', sans-serif; }
+    
+    body {
+        margin: 0; padding: 0; background-color: var(--bg); color: var(--text);
+        display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+    }
+
+    /* 頂部導航列 */
+    header {
+        width: 100%; background-color: var(--primary); padding: 15px 20px;
+        display: flex; justify-content: space-between; align-items: center;
+        box-shadow: 0 4px 6px var(--shadow); color: var(--white); font-size: 1.2rem;
+        font-weight: bold; position: sticky; top: 0; z-index: 10;
+    }
+
+    .btn {
+        background-color: var(--white); color: var(--primary-dark);
+        border: 2px solid var(--primary-dark); padding: 10px 20px;
+        border-radius: 20px; font-size: 1.1rem; font-weight: bold; cursor: pointer;
+        transition: transform 0.1s, background-color 0.2s;
+        box-shadow: 0 4px 0 var(--primary-dark);
+        margin: 5px; text-align: center;
+    }
+    
+    .btn:active { transform: translateY(4px); box-shadow: none; }
+    .btn:disabled { background-color: #ddd; color: #888; border-color: #aaa; box-shadow: 0 4px 0 #aaa; cursor: not-allowed; }
+    
+    /* 多選題選中狀態 */
+    .btn.multi-selected { background-color: var(--primary) !important; color: white !important; border-color: var(--primary-dark) !important; box-shadow: 0 4px 0 var(--primary-dark) !important; }
+    
+    .btn.correct { background-color: var(--correct) !important; color: white !important; border-color: #388E3C !important; box-shadow: 0 4px 0 #388E3C !important; animation: pop 0.3s ease; }
+    .btn.wrong { background-color: var(--wrong) !important; color: white !important; border-color: #D32F2F !important; box-shadow: 0 4px 0 #D32F2F !important; animation: shake 0.4s ease; pointer-events: none; opacity: 0.6; }
+
+    .btn-icon {
+        padding: 10px; width: 50px; flex-shrink: 0; font-size: 1.2rem; display: flex; justify-content: center; align-items: center;
+    }
+
+    /* 容器 */
+    .container { width: 100%; max-width: 800px; padding: 20px; display: none; flex-direction: column; align-items: center; }
+    .container.active { display: flex; animation: fadeIn 0.5s; }
+
+    /* 設定區 & 首頁 */
+    .title-box { background: var(--secondary); padding: 30px; border-radius: 20px; text-align: center; width: 100%; margin-bottom: 20px; border: 3px dashed var(--primary-dark); }
+    .title-box h1 { margin: 0 0 10px 0; color: var(--primary-dark); font-size: 2rem; }
+    
+    .input-group { margin: 15px 0; width: 100%; max-width: 300px; }
+    .input-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .input-group input[type="text"] { width: 100%; padding: 12px; border-radius: 10px; border: 2px solid var(--primary); font-size: 1.2rem; text-align: center; }
+    
+    /* 關卡選擇 */
+    .level-grid, .chapter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; width: 100%; }
+    .card { background: white; border: 2px solid var(--primary); border-radius: 15px; padding: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px var(--shadow); transition: transform 0.2s; }
+    .card:hover { transform: translateY(-5px); }
+    .card h2 { color: var(--primary-dark); margin-top: 0; }
+    .card.selected { background-color: var(--primary); color: white; }
+    .card.selected h2 { color: white; }
+
+    /* 遊戲畫面與導航列 */
+    .game-nav { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    
+    .progress-bar { width: 100%; height: 20px; background: #ddd; border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--primary-dark); width: 0%; transition: width 0.3s; }
+    
+    .poem-display { background: #fffde7; padding: 15px; border-radius: 10px; border-left: 5px solid #fbc02d; margin-bottom: 20px; width: 100%; font-size: 1.2rem; line-height: 1.8; text-align: center; white-space: pre-line; position: relative; }
+    .read-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5rem; cursor: pointer; box-shadow: none; padding: 0; }
+    
+    .question-area { width: 100%; text-align: center; }
+    .question-text-container { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .question-text { font-size: 1.5rem; font-weight: bold; color: var(--primary-dark); text-align: left; }
+    
+    .options-grid { display: flex; flex-direction: column; gap: 15px; width: 100%; }
+    .option-row { display: flex; width: 100%; gap: 10px; align-items: center; }
+    
+    /* 排序遊戲專用 */
+    .sort-slots { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; width: 100%; }
+    .sort-slot { border: 2px dashed #aaa; background: #f9f9f9; padding: 15px; border-radius: 10px; min-height: 60px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; }
+    .sort-slot.filled { border-style: solid; border-color: var(--primary); background: var(--secondary); font-weight: bold; }
+    
+    .word-bank { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; padding: 15px; background: var(--secondary); border-radius: 10px; margin-bottom: 20px; }
+    .word-item { display: flex; align-items: center; gap: 8px; background: white; border: 2px solid var(--primary-dark); padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; font-weight: bold; }
+    
+    .hint-box { display: none; background: #ffebee; color: #c62828; padding: 15px; border-radius: 10px; border: 2px solid #ef5350; margin: 15px 0; font-weight: bold; font-size: 1.2rem; }
+
+    /* LV0 朗讀專用樣式 */
+    .reading-box { text-align: center; width: 100%; background: white; padding: 20px; border-radius: 15px; border: 2px solid var(--primary); margin-bottom: 20px; }
+    .reading-line { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 15px 0; flex-wrap: wrap; }
+    .char { font-size: 2.2rem; padding: 5px; cursor: pointer; border-radius: 5px; transition: background 0.2s; }
+    .char:hover { background: var(--secondary); color: var(--primary-dark); font-weight: bold; }
+    .line-read-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0 10px; }
+    
+    .annotations-box { background: #fff8e1; border-left: 5px solid #ffca28; padding: 15px; border-radius: 8px; width: 100%; text-align: left; }
+    .annotations-box h3 { margin-top: 0; color: #f57f17; }
+    .annotations-box ul { padding-left: 20px; font-size: 1.1rem; line-height: 1.6; }
+
+    /* 排行榜 */
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; box-shadow: 0 4px 8px var(--shadow); border-radius: 10px; overflow: hidden; }
+    th, td { padding: 12px 15px; text-align: center; border-bottom: 1px solid #ddd; }
+    th { background-color: var(--primary); color: white; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+
+    /* 動畫 */
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
+    @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+</style>
+</head>
+<body>
+
+<header>
+    <div id="user-display">哈囉, Hailey!</div>
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <span style="font-size: 1rem;">語音:</span>
+        <label class="switch">
+            <input type="checkbox" id="auto-read-toggle" checked>
+            <span class="slider">ON</span>
+        </label>
+        <button onclick="toggleTheme()" class="btn" style="padding: 5px 10px; font-size: 0.9rem; margin:0;">切換主題</button>
+    </div>
+</header>
+
+<div id="home-screen" class="container active">
+    <div class="title-box">
+        <h1>古詩大挑戰 🚀</h1>
+        <p>準備好溫習工作紙了嗎？</p>
+    </div>
+    <div class="input-group">
+        <label for="player-name">你的名字：</label>
+        <input type="text" id="player-name" value="Hailey">
+    </div>
+    <button class="btn" onclick="saveNameAndGo('level-select-screen')" style="width: 200px; font-size: 1.3rem;">開始遊戲</button>
+    <button class="btn" onclick="showLeaderboard()" style="width: 200px; background-color: #eee;">排行榜</button>
+</div>
+
+<div id="level-select-screen" class="container">
+    <h2>請選擇遊戲模式</h2>
+    <div class="level-grid">
+        <div class="card" onclick="selectLevel(0)" style="background: #e3f2fd; border-color: #2196f3;">
+            <h2 style="color: #1565c0;">LV 0 - 朗讀與註釋</h2>
+            <p>不用測驗！可以點單字、聽發音，還有工作紙註釋幫助理解！</p>
+        </div>
+        <div class="card" onclick="selectLevel(1)">
+            <h2>LV 1 - 古詩排序</h2>
+            <p>將打亂的古詩句子按順序排好！</p>
+        </div>
+        <div class="card" onclick="selectLevel(2)">
+            <h2>LV 2 - 古詩問答</h2>
+            <p>根據古詩內容回答問題！</p>
+        </div>
+        <div class="card" onclick="selectLevel(3)">
+            <h2>LV 3 - 綜合挑戰</h2>
+            <p>排序 + 問答大混合！</p>
+        </div>
+    </div>
+    <br><button class="btn" onclick="showScreen('home-screen')">返回</button>
+</div>
+
+<div id="chapter-select-screen" class="container">
+    <h2>請選擇單元 (可多選)</h2>
+    <div id="chapter-list" class="chapter-grid"></div>
+    <br>
+    <button class="btn" id="start-game-btn" onclick="startGame()" style="width: 200px; font-size: 1.3rem; margin-bottom: 10px;">開始！</button>
+    <button class="btn" onclick="showScreen('level-select-screen')">返回</button>
+</div>
+
+<div id="reading-screen" class="container">
+    <div class="game-nav">
+        <button class="btn" onclick="confirmExitGame()" style="padding: 5px 15px; font-size: 0.9rem; background: #ffebee; border-color: #e53935; color: #d32f2f;">🏠 回主目錄</button>
+    </div>
+    <h1 id="reading-title" style="color: var(--primary-dark);"></h1>
+    <button class="btn" onclick="readAloud(currentReadingFullText, true)" style="margin-bottom: 15px; font-size: 1.2rem;">▶️ 全段朗讀</button>
+    
+    <div id="reading-content" class="reading-box"></div>
+    
+    <div class="annotations-box">
+        <h3>📝 註釋</h3>
+        <ul id="reading-annotations"></ul>
+    </div>
+    
+    <div style="margin-top: 20px; display: flex; gap: 15px;">
+        <button class="btn" id="prev-reading-btn" onclick="changeReading(-1)">⬅️ 上一首</button>
+        <button class="btn" id="next-reading-btn" onclick="changeReading(1)">下一首 ➡️</button>
+    </div>
+</div>
+
+<div id="game-screen" class="container">
+    <div class="game-nav">
+        <button class="btn" onclick="confirmExitGame()" style="padding: 5px 15px; font-size: 0.9rem; background: #ffebee; border-color: #e53935; color: #d32f2f;">🏠 回主目錄</button>
+        <div style="font-weight: bold; font-size: 1.1rem;">分數: <span id="score-display">0</span></div>
+        <div style="font-weight: bold;" id="progress-text">1 / 10</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    
+    <div id="poem-container" class="poem-display" style="display: none;">
+        <button class="read-btn" onclick="readAloud(currentPoemText, true)">🔊</button>
+        <div id="poem-text-content"></div>
+    </div>
+
+    <div class="question-area">
+        <div class="question-text-container">
+            <div id="question-text" class="question-text"></div>
+            <button class="btn btn-icon" id="read-question-btn">🔊</button>
+        </div>
+        <div id="hint-box" class="hint-box"></div>
+        
+        <div id="options-area" class="options-grid" style="display: none;"></div>
+        
+        <div id="sort-area" style="display: none; width: 100%;">
+            <div id="sort-slots" class="sort-slots"></div>
+            <div id="word-bank" class="word-bank"></div>
+            <button id="submit-sort-btn" class="btn" onclick="checkSortAnswer()" style="width: 100%; display: none;">提交答案</button>
+        </div>
+    </div>
+</div>
+
+<div id="result-screen" class="container">
+    <div class="title-box">
+        <h1>挑戰完成！ 🎉</h1>
+        <h2 id="final-score-text" style="font-size: 2.5rem; color: #FF9800; margin: 10px 0;"></h2>
+        <p id="praise-text" style="font-size: 1.3rem; font-weight: bold;"></p>
+    </div>
+    <button class="btn" onclick="showScreen('home-screen')" style="width: 200px;">回主目錄</button>
+    <button class="btn" onclick="showLeaderboard()" style="width: 200px;">查看排行榜</button>
+</div>
+
+<div id="leaderboard-screen" class="container">
+    <h2>🏆 英雄榜 🏆</h2>
+    <div style="width: 100%; overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>排名</th>
+                    <th>玩家</th>
+                    <th>模式</th>
+                    <th>分數</th>
+                    <th>日期</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body"></tbody>
+        </table>
+    </div>
+    <br><button class="btn" onclick="showScreen('home-screen')">返回</button>
+</div>
+
+<script>
+    // --- 題庫資料 (Dataset) 加入注釋問答題 ---
+    const dataset = [
+        {
+            id: 'u1',
+            title: '《清明》杜牧',
+            text: '清明時節雨紛紛，\n路上行人欲斷魂。\n借問酒家何處有？\n牧童遙指杏花村。',
+            lines: ['清明時節雨紛紛，', '路上行人欲斷魂。', '借問酒家何處有？', '牧童遙指杏花村。'],
+            annotations: [
+                '雨紛紛：細雨紛飛。',
+                '斷魂：悲哀、傷心，好像失去魂魄的樣子。',
+                '酒家：賣酒的店鋪。',
+                '杏花村：杏花深處的村莊。'
+            ],
+            mcq: [
+                // 原有題目
+                { q: '詩歌第一句描寫的是甚麼樣的天氣？', options: ['晴天', '陰天', '雨天'], ans: 2 },
+                { q: '詩歌首兩句展現了怎麼樣的氣氛？', options: ['歡樂高興', '傷心(欲斷魂)', '悠閒自在'], ans: 1 },
+                { type: 'multi-select', q: '詩歌哪兩句寫的是人物之間的「一問一答」？(請點擊選出兩句)', options: ['清明時節雨紛紛', '路上行人欲斷魂', '借問酒家何處有', '牧童遙指杏花村'], ans: [2, 3] },
+                // 新增的注釋題目
+                { q: '詩句中「雨紛紛」的意思是甚麼？', options: ['大雨滂沱', '細雨紛飛', '不曾下雨'], ans: 1 },
+                { q: '詩句中「斷魂」的意思是甚麼？', options: ['生氣發怒', '悠閒自在', '悲哀、傷心，好像失去魂魄的樣子'], ans: 2 },
+                { q: '詩句中「酒家」是指甚麼？', options: ['賣酒的店鋪', '喝酒的人', '吃飯的餐廳'], ans: 0 },
+                { q: '詩句中「杏花村」是指甚麼地方？', options: ['種滿櫻花的地方', '賣水果的村莊', '杏花深處的村莊'], ans: 2 }
+            ]
+        },
+        {
+            id: 'u2',
+            title: '《春曉》孟浩然',
+            text: '春眠不覺曉，\n處處聞啼鳥。\n夜來風雨聲，\n花落知多少？',
+            lines: ['春眠不覺曉，', '處處聞啼鳥。', '夜來風雨聲，', '花落知多少？'],
+            annotations: [
+                '曉：天明，早晨。',
+                '啼鳥：鳥鳴，鳥叫聲。',
+                '夜來：昨天夜裏。'
+            ],
+            mcq: [
+                // 原有題目
+                { q: '「花落知多少」一句表達了詩人怎樣的心情？', options: ['生氣', '惋惜', '期待', '高興'], ans: 1 },
+                { q: '根據詩歌內容，以下哪一項陳述正確？', options: ['詩人描寫的都是他親眼看到的景色', '詩人在清晨時分被鳥鳴聲叫醒'], ans: 1 },
+                { q: '詩中「沒有」描寫以下哪一種聲音？', options: ['風聲', '鳥叫聲', '雨聲', '花朵落到地上的聲音'], ans: 3 },
+                // 新增的注釋題目
+                { q: '詩句中「曉」的解釋是甚麼？', options: ['晚上', '中午', '天明，早晨'], ans: 2 },
+                { q: '詩句中「啼鳥」的意思是甚麼？', options: ['睡覺的鳥', '鳥鳴，鳥叫聲', '飛翔的鳥'], ans: 1 },
+                { q: '詩句中「夜來」是指甚麼時候？', options: ['明天晚上', '今天晚上', '昨天夜裏'], ans: 2 }
+            ]
+        }
+    ];
+
+    // --- 狀態變數 ---
+    let playerName = "Hailey";
+    let isThemeBoy = false;
+    let selectedLevel = 1;
+    let selectedChapterIds = [];
+    
+    let gameQueue = [];
+    let currentIndex = 0;
+    let score = 0;
+    let currentMistakes = 0;
+    let currentPoemText = "";
+    let currentSortCorrect = [];
+    let userSortState = []; 
+
+    let readingQueue = [];
+    let currentReadingIndex = 0;
+    let currentReadingFullText = "";
+
+    // --- 語音及音效 ---
+    const synth = window.speechSynthesis;
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
+
+    function playBeep(isCorrect) {
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        osc.type = 'sine';
+        if (isCorrect) {
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+        } else {
+            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.2);
+        }
+        
+        gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+    }
+
+    function readAloud(text, force = false, onEndCallback = null) {
+        if (!force && !document.getElementById('auto-read-toggle').checked) {
+            if (onEndCallback) setTimeout(onEndCallback, 500); 
+            return;
+        }
+        synth.cancel(); 
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'zh-HK';
+        utterance.rate = 0.85; 
+        
+        if (onEndCallback) {
+            utterance.onend = onEndCallback;
+            utterance.onerror = onEndCallback; 
+        }
+        
+        synth.speak(utterance);
+    }
+
+    // --- 初始化與設定 ---
+    window.onload = () => {
+        const savedName = localStorage.getItem('poemPlayerName');
+        if (savedName) {
+            playerName = savedName;
+            document.getElementById('player-name').value = playerName;
+        }
+        updateUserDisplay();
+    };
+
+    function saveNameAndGo(targetScreen) {
+        const nameInput = document.getElementById('player-name').value.trim();
+        if (nameInput) {
+            playerName = nameInput;
+            localStorage.setItem('poemPlayerName', playerName);
+            updateUserDisplay();
+        }
+        showScreen(targetScreen);
+    }
+
+    function updateUserDisplay() {
+        document.getElementById('user-display').innerText = `哈囉, ${playerName}!`;
+    }
+
+    function toggleTheme() {
+        isThemeBoy = !isThemeBoy;
+        if (isThemeBoy) document.body.classList.add('theme-boy');
+        else document.body.classList.remove('theme-boy');
+    }
+
+    function showScreen(screenId) {
+        synth.cancel(); 
+        document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        if (screenId === 'chapter-select-screen') renderChapterSelection();
+    }
+
+    function confirmExitGame() {
+        if (confirm("確定要放棄這次的挑戰並回到主目錄嗎？")) {
+            showScreen('home-screen');
+        }
+    }
+
+    // --- 遊戲準備 ---
+    function selectLevel(lvl) {
+        selectedLevel = lvl;
+        selectedChapterIds = [];
+        showScreen('chapter-select-screen');
+    }
+
+    function renderChapterSelection() {
+        const grid = document.getElementById('chapter-list');
+        grid.innerHTML = '';
+        dataset.forEach(ch => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `<h2>${ch.title}</h2>`;
+            card.onclick = () => {
+                if (selectedChapterIds.includes(ch.id)) {
+                    selectedChapterIds = selectedChapterIds.filter(id => id !== ch.id);
+                    card.classList.remove('selected');
+                } else {
+                    selectedChapterIds.push(ch.id);
+                    card.classList.add('selected');
+                }
+                document.getElementById('start-game-btn').disabled = selectedChapterIds.length === 0;
+            };
+            grid.appendChild(card);
+        });
+        document.getElementById('start-game-btn').disabled = true;
+    }
+
+    function startGame() {
+        let selectedData = dataset.filter(ch => selectedChapterIds.includes(ch.id));
+
+        if (selectedLevel === 0) {
+            readingQueue = selectedData;
+            currentReadingIndex = 0;
+            showScreen('reading-screen');
+            loadReading();
+        } else {
+            gameQueue = [];
+            score = 0;
+            currentIndex = 0;
+            
+            selectedData.forEach(ch => {
+                if (selectedLevel === 1 || selectedLevel === 3) {
+                    gameQueue.push({ type: 'sort', poemTitle: ch.title, lines: ch.lines, fullText: ch.text });
+                }
+                if (selectedLevel === 2 || selectedLevel === 3) {
+                    ch.mcq.forEach(q => {
+                        let qType = q.type ? q.type : 'mcq';
+                        gameQueue.push({ type: qType, poemTitle: ch.title, fullText: ch.text, q: q.q, options: q.options, ans: q.ans });
+                    });
+                }
+            });
+
+            // 隨機打亂所有題目
+            gameQueue.sort(() => Math.random() - 0.5);
+            if (selectedLevel === 3 && gameQueue.length > 20) gameQueue = gameQueue.slice(0, 20);
+
+            showScreen('game-screen');
+            loadQuestion();
+        }
+    }
+
+    // --- LV0 朗讀功能 ---
+    function loadReading() {
+        const data = readingQueue[currentReadingIndex];
+        document.getElementById('reading-title').innerText = data.title;
+        currentReadingFullText = data.title + "。 " + data.text.replace(/\n/g, ' ');
+
+        const contentDiv = document.getElementById('reading-content');
+        contentDiv.innerHTML = '';
+        
+        data.lines.forEach(line => {
+            const lineDiv = document.createElement('div');
+            lineDiv.className = 'reading-line';
+            
+            const lineBtn = document.createElement('button');
+            lineBtn.className = 'line-read-btn';
+            lineBtn.innerText = '🔊';
+            lineBtn.onclick = () => readAloud(line, true);
+            lineDiv.appendChild(lineBtn);
+            
+            for (let char of line) {
+                const charSpan = document.createElement('span');
+                charSpan.className = 'char';
+                charSpan.innerText = char;
+                if (/[，。！？]/.test(char)) {
+                    charSpan.style.cursor = 'default';
+                    charSpan.style.pointerEvents = 'none';
+                } else {
+                    charSpan.onclick = () => readAloud(char, true);
+                }
+                lineDiv.appendChild(charSpan);
+            }
+            contentDiv.appendChild(lineDiv);
+        });
+
+        const annoUl = document.getElementById('reading-annotations');
+        annoUl.innerHTML = '';
+        data.annotations.forEach(anno => {
+            const li = document.createElement('li');
+            li.innerText = anno;
+            annoUl.appendChild(li);
+        });
+
+        document.getElementById('prev-reading-btn').style.display = (currentReadingIndex > 0) ? 'block' : 'none';
+        document.getElementById('next-reading-btn').style.display = (currentReadingIndex < readingQueue.length - 1) ? 'block' : 'none';
+    }
+
+    function changeReading(dir) {
+        currentReadingIndex += dir;
+        loadReading();
+    }
+
+    // --- 測驗渲染題目 ---
+    function loadQuestion() {
+        if (currentIndex >= gameQueue.length) {
+            endGame();
+            return;
+        }
+
+        currentMistakes = 0;
+        const qData = gameQueue[currentIndex];
+        document.getElementById('progress-text').innerText = `${currentIndex + 1} / ${gameQueue.length}`;
+        document.getElementById('progress-fill').style.width = `${((currentIndex) / gameQueue.length) * 100}%`;
+        document.getElementById('score-display').innerText = score;
+        document.getElementById('hint-box').style.display = 'none';
+
+        const poemContainer = document.getElementById('poem-container');
+        if (qData.type === 'mcq' || qData.type === 'multi-select') {
+            poemContainer.style.display = 'block';
+            document.getElementById('poem-text-content').innerHTML = `<strong>${qData.poemTitle}</strong><br>${qData.fullText}`;
+            currentPoemText = qData.poemTitle + "。 " + qData.fullText.replace(/\n/g, ' ');
+        } else {
+            poemContainer.style.display = 'none'; 
+        }
+
+        document.getElementById('options-area').style.display = 'none';
+        document.getElementById('sort-area').style.display = 'none';
+
+        if (qData.type === 'mcq') renderMCQ(qData);
+        else if (qData.type === 'multi-select') renderMultiSelect(qData);
+        else renderSort(qData);
+    }
+
+    // --- 單選題 (MCQ) ---
+    function renderMCQ(qData) {
+        document.getElementById('options-area').style.display = 'flex';
+        document.getElementById('question-text').innerText = qData.q;
+        document.getElementById('read-question-btn').onclick = () => readAloud(qData.q, true);
+        readAloud(qData.q);
+
+        const optionsArea = document.getElementById('options-area');
+        optionsArea.innerHTML = '';
+        
+        qData.options.forEach((opt, idx) => {
+            const row = document.createElement('div');
+            row.className = 'option-row';
+            
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.style.flexGrow = '1';
+            btn.innerText = opt;
+            btn.onclick = () => handleMCQAnswer(btn, idx, qData.ans);
+            
+            const readBtn = document.createElement('button');
+            readBtn.className = 'btn btn-icon';
+            readBtn.innerText = '🔊';
+            readBtn.onclick = () => readAloud(opt, true);
+            
+            row.appendChild(btn);
+            row.appendChild(readBtn);
+            optionsArea.appendChild(row);
+        });
+    }
+
+    function handleMCQAnswer(btn, selectedIdx, correctIdx) {
+        if (selectedIdx === correctIdx) {
+            playBeep(true);
+            btn.classList.add('correct');
+            disableAllOptions();
+            
+            if (currentMistakes === 0) score += 10;
+            else if (currentMistakes === 1) score += 5;
+            document.getElementById('score-display').innerText = score;
+
+            readAloud("答對了！答案是：" + gameQueue[currentIndex].options[correctIdx], true, () => {
+                currentIndex++; 
+                loadQuestion();
+            });
+            
+        } else {
+            playBeep(false);
+            btn.classList.add('wrong');
+            currentMistakes++;
+            
+            if (currentMistakes >= 2) {
+                const hint = document.getElementById('hint-box');
+                hint.style.display = 'block';
+                hint.innerHTML = `正確答案是：<br><strong>${gameQueue[currentIndex].options[correctIdx]}</strong><br>請點擊正確答案繼續。`;
+            }
+        }
+    }
+
+    function disableAllOptions() {
+        const btns = document.getElementById('options-area').querySelectorAll('button');
+        btns.forEach(b => b.disabled = true);
+    }
+
+    // --- 多選題 (Multi-Select) ---
+    function renderMultiSelect(qData) {
+        document.getElementById('options-area').style.display = 'flex';
+        document.getElementById('question-text').innerText = qData.q;
+        document.getElementById('read-question-btn').onclick = () => readAloud(qData.q, true);
+        readAloud(qData.q);
+
+        const optionsArea = document.getElementById('options-area');
+        optionsArea.innerHTML = '';
+
+        let selectedIndexes = new Set();
+        const requiredCount = qData.ans.length;
+
+        qData.options.forEach((opt, idx) => {
+            const row = document.createElement('div');
+            row.className = 'option-row';
+
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.style.flexGrow = '1';
+            btn.innerText = opt;
+            
+            btn.onclick = () => {
+                if (selectedIndexes.has(idx)) {
+                    // 取消選取
+                    selectedIndexes.delete(idx);
+                    btn.classList.remove('multi-selected');
+                } else {
+                    // 新增選取
+                    if (selectedIndexes.size < requiredCount) {
+                        selectedIndexes.add(idx);
+                        btn.classList.add('multi-selected');
+                    } else {
+                        alert(`這題只需要選 ${requiredCount} 句喔！請先取消其他選項。`);
+                        return;
+                    }
+                }
+                // 當選滿數量時顯示提交按鈕
+                submitBtn.style.display = (selectedIndexes.size === requiredCount) ? 'block' : 'none';
+            };
+
+            const readBtn = document.createElement('button');
+            readBtn.className = 'btn btn-icon';
+            readBtn.innerText = '🔊';
+            readBtn.onclick = () => readAloud(opt, true);
+
+            row.appendChild(btn);
+            row.appendChild(readBtn);
+            optionsArea.appendChild(row);
+        });
+
+        // 加入專屬的提交答案按鈕
+        const submitBtn = document.createElement('button');
+        submitBtn.className = 'btn';
+        submitBtn.innerText = '提交答案';
+        submitBtn.style.width = '100%';
+        submitBtn.style.display = 'none';
+        submitBtn.style.marginTop = '15px';
+        submitBtn.style.backgroundColor = '#e3f2fd';
+        submitBtn.onclick = () => checkMultiSelectAnswer(selectedIndexes, qData, submitBtn);
+        optionsArea.appendChild(submitBtn);
+    }
+
+    function checkMultiSelectAnswer(selectedIndexes, qData, submitBtn) {
+        let selectedArr = Array.from(selectedIndexes).sort();
+        let ansArr = [...qData.ans].sort();
+        let isCorrect = selectedArr.length === ansArr.length && selectedArr.every((val, index) => val === ansArr[index]);
+
+        if (isCorrect) {
+            playBeep(true);
+            submitBtn.classList.add('correct');
+            submitBtn.disabled = true;
+
+            const btns = document.getElementById('options-area').querySelectorAll('.option-row .btn:not(.btn-icon)');
+            btns.forEach((b, i) => { 
+                if(selectedIndexes.has(i)) {
+                    b.classList.remove('multi-selected');
+                    b.classList.add('correct'); 
+                }
+                b.disabled = true; 
+            });
+
+            if (currentMistakes === 0) score += 15;
+            else if (currentMistakes === 1) score += 5;
+            document.getElementById('score-display').innerText = score;
+
+            let correctText = ansArr.map(i => qData.options[i]).join('，還有，');
+            readAloud("答對了！答案是：" + correctText, true, () => {
+                currentIndex++;
+                loadQuestion();
+            });
+        } else {
+            playBeep(false);
+            submitBtn.classList.add('wrong');
+            setTimeout(() => submitBtn.classList.remove('wrong'), 500);
+            currentMistakes++;
+
+            if (currentMistakes >= 2) {
+                const hint = document.getElementById('hint-box');
+                hint.style.display = 'block';
+                let correctText = ansArr.map(i => `<strong>${qData.options[i]}</strong>`).join('<br>');
+                hint.innerHTML = `正確答案是：<br><div style="margin-top:10px">${correctText}</div><br>請重新選擇。`;
+            }
+            
+            selectedIndexes.clear();
+            const btns = document.getElementById('options-area').querySelectorAll('.option-row .btn:not(.btn-icon)');
+            btns.forEach(b => b.classList.remove('multi-selected', 'wrong'));
+            submitBtn.style.display = 'none';
+        }
+    }
+
+
+    // --- 排序題邏輯 ---
+    function renderSort(qData) {
+        document.getElementById('sort-area').style.display = 'block';
+        const qText = `請將《${qData.poemTitle}》的詩句排列正確：`;
+        document.getElementById('question-text').innerText = qText;
+        document.getElementById('read-question-btn').onclick = () => readAloud(qText, true);
+        readAloud(qText);
+        
+        currentSortCorrect = qData.lines;
+        let shuffled = [...qData.lines].sort(() => Math.random() - 0.5);
+        userSortState = new Array(qData.lines.length).fill(null);
+
+        const slotsContainer = document.getElementById('sort-slots');
+        const bankContainer = document.getElementById('word-bank');
+        slotsContainer.innerHTML = '';
+        bankContainer.innerHTML = '';
+        document.getElementById('submit-sort-btn').style.display = 'none';
+
+        for (let i = 0; i < qData.lines.length; i++) {
+            const slot = document.createElement('div');
+            slot.className = 'sort-slot';
+            slot.dataset.index = i;
+            slot.innerText = (i + 1) + ". (點擊下方句子填入)";
+            slot.onclick = () => removeSortItem(i);
+            slotsContainer.appendChild(slot);
+        }
+
+        shuffled.forEach((line, idx) => {
+            const item = document.createElement('div');
+            item.className = 'word-item';
+            
+            const textSpan = document.createElement('span');
+            textSpan.innerText = line;
+            
+            const readIcon = document.createElement('span');
+            readIcon.innerText = '🔊';
+            readIcon.style.fontSize = '1.3rem';
+            readIcon.style.padding = '0 5px';
+            readIcon.onclick = (e) => {
+                e.stopPropagation(); 
+                readAloud(line, true);
+            };
+
+            item.appendChild(textSpan);
+            item.appendChild(readIcon);
+
+            item.dataset.originalLine = line;
+            item.onclick = () => addSortItem(item);
+            bankContainer.appendChild(item);
+        });
+    }
+
+    function addSortItem(itemDiv) {
+        const emptySlotIdx = userSortState.findIndex(val => val === null);
+        if (emptySlotIdx !== -1) {
+            userSortState[emptySlotIdx] = itemDiv.dataset.originalLine;
+            updateSortUI();
+            itemDiv.style.display = 'none';
+        }
+    }
+
+    function removeSortItem(slotIdx) {
+        const val = userSortState[slotIdx];
+        if (val !== null) {
+            userSortState[slotIdx] = null;
+            updateSortUI();
+            const bankItems = document.getElementById('word-bank').querySelectorAll('.word-item');
+            bankItems.forEach(item => {
+                if (item.dataset.originalLine === val && item.style.display === 'none') {
+                    item.style.display = 'flex';
+                }
+            });
+        }
+    }
+
+    function updateSortUI() {
+        const slots = document.getElementById('sort-slots').children;
+        let allFilled = true;
+        for (let i = 0; i < slots.length; i++) {
+            if (userSortState[i] !== null) {
+                slots[i].innerText = userSortState[i];
+                slots[i].classList.add('filled');
+            } else {
+                slots[i].innerText = (i + 1) + ". (點擊下方句子填入)";
+                slots[i].classList.remove('filled');
+                allFilled = false;
+            }
+        }
+        document.getElementById('submit-sort-btn').style.display = allFilled ? 'block' : 'none';
+    }
+
+    function checkSortAnswer() {
+        let isCorrect = true;
+        for(let i=0; i<currentSortCorrect.length; i++){
+            if(userSortState[i] !== currentSortCorrect[i]) {
+                isCorrect = false; break;
+            }
+        }
+
+        if (isCorrect) {
+            playBeep(true);
+            const btn = document.getElementById('submit-sort-btn');
+            btn.classList.add('correct');
+            btn.disabled = true; 
+            
+            if (currentMistakes === 0) score += 15;
+            else if (currentMistakes === 1) score += 5;
+            document.getElementById('score-display').innerText = score;
+            
+            readAloud("答對了！" + currentSortCorrect.join(' '), true, () => {
+                btn.classList.remove('correct');
+                btn.disabled = false;
+                currentIndex++; 
+                loadQuestion(); 
+            });
+
+        } else {
+            playBeep(false);
+            const btn = document.getElementById('submit-sort-btn');
+            btn.classList.add('wrong');
+            setTimeout(() => btn.classList.remove('wrong'), 500);
+            
+            currentMistakes++;
+            if (currentMistakes >= 2) {
+                const hint = document.getElementById('hint-box');
+                hint.style.display = 'block';
+                hint.innerHTML = `正確順序應為：<br><div style="text-align:left; display:inline-block; margin-top:10px;">` + currentSortCorrect.map((l,i)=>`${i+1}. ${l}`).join('<br>') + `</div><br>請重新排列。`;
+            }
+            
+            for(let i=0; i<userSortState.length; i++) removeSortItem(i);
+        }
+    }
+
+    // --- 結束與排行榜 ---
+    function endGame() {
+        document.getElementById('final-score-text').innerText = score + " 分";
+        let praise = "";
+        if(score > gameQueue.length * 8) praise = "太棒了！古詩大師！🌟";
+        else if(score > gameQueue.length * 5) praise = "做得好！繼續努力！💪";
+        else praise = "多溫習幾次一定會更好！📚";
+        document.getElementById('praise-text').innerText = praise;
+        
+        saveToLeaderboard();
+        showScreen('result-screen');
+    }
+
+    function saveToLeaderboard() {
+        let lb = JSON.parse(localStorage.getItem('poemLeaderboard') || '[]');
+        const today = new Date();
+        const dateStr = `${today.getMonth()+1}/${today.getDate()} ${today.getHours()}:${String(today.getMinutes()).padStart(2,'0')}`;
+        
+        lb.push({
+            name: playerName,
+            level: `LV ${selectedLevel}`,
+            score: score,
+            date: dateStr
+        });
+        
+        lb.sort((a, b) => b.score - a.score);
+        lb = lb.slice(0, 10); 
+        localStorage.setItem('poemLeaderboard', JSON.stringify(lb));
+    }
+
+    function showLeaderboard() {
+        const tbody = document.getElementById('leaderboard-body');
+        tbody.innerHTML = '';
+        const lb = JSON.parse(localStorage.getItem('poemLeaderboard') || '[]');
+        
+        if(lb.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5">尚無紀錄</td></tr>';
+        } else {
+            lb.forEach((entry, idx) => {
+                let rankText = idx + 1;
+                if(idx === 0) rankText = '🥇';
+                if(idx === 1) rankText = '🥈';
+                if(idx === 2) rankText = '🥉';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${rankText}</td>
+                    <td>${entry.name}</td>
+                    <td>${entry.level}</td>
+                    <td>${entry.score}</td>
+                    <td>${entry.date}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        showScreen('leaderboard-screen');
+    }
+</script>
+</body>
+</html>
