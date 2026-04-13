@@ -67,7 +67,7 @@
             justify-content: center;
             min-width: 150px;
             min-height: 50px;
-            text-decoration: none; /* 給 <a> 標籤用的 */
+            text-decoration: none;
         }
         .btn:active { transform: scale(0.95); }
         .btn.secondary { background-color: var(--secondary-color); }
@@ -214,7 +214,7 @@
         </div>
         
         <div class="reading-area">
-            <h1>🎵一切都更新🎵</h1>
+            <h1>🎵一切都更新🎵 </h1>
             
             <div class="lyrics-container">
                 
@@ -279,12 +279,16 @@
         let isPlayingAll = false;
         let flatLinesData = [];
 
+        // 確保 iOS 預先載入語音包
+        window.speechSynthesis.onvoiceschanged = function() {
+            synth.getVoices();
+        };
+
         window.onload = () => { loadSettings(); updateWelcomeText(); };
 
         function loadSettings() {
             const name = localStorage.getItem('hailey_name') || 'Hailey';
             const theme = localStorage.getItem('hailey_theme') || 'girl';
-            // 預設關閉自動朗讀 (改為 === 'true'，沒設定過就是 false)
             const autoSpeak = localStorage.getItem('hailey_autoSpeak') === 'true';
             document.getElementById('player-name').value = name;
             document.getElementById('auto-speak').checked = autoSpeak;
@@ -312,6 +316,8 @@
         }
 
         function unlockAudioAndStart() {
+            // iOS 必須透過使用者點擊事件來觸發與解鎖發音 API
+            synth.getVoices();
             if (synth.getVoices().length === 0) synth.speak(new SpeechSynthesisUtterance(''));
             
             stopAllAudioPlayers();
@@ -344,12 +350,38 @@
             document.getElementById('piano-audio').pause();
         }
 
+        // ====== 核心修復：強制尋找國語(普通話)發音，避免 iOS 變廣東話 ======
+        function getMandarinVoice() {
+            const voices = synth.getVoices();
+            if (voices.length === 0) return null;
+
+            // 1. 優先找台灣國語 (zh-TW)
+            let voice = voices.find(v => v.lang === 'zh-TW' || v.lang === 'zh_TW' || v.lang === 'zh-TW-mac');
+            // 2. 如果沒有，找大陸普通話 (zh-CN)
+            if (!voice) {
+                voice = voices.find(v => v.lang === 'zh-CN' || v.lang === 'zh_CN');
+            }
+            // 3. 如果還是沒有，尋找任何包含 'zh' 但「不包含」 HK (廣東話) 的語音
+            if (!voice) {
+                voice = voices.find(v => v.lang.includes('zh') && !v.lang.includes('HK'));
+            }
+            return voice;
+        }
+
         function speakText(text, onEndCallback = null) {
             synth.cancel();
             stopAllAudioPlayers(); 
 
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'zh-TW'; utterance.rate = 0.8;
+            utterance.lang = 'zh-TW'; // 保底設定
+            
+            // 強制覆寫為國語發音包
+            const targetVoice = getMandarinVoice();
+            if (targetVoice) {
+                utterance.voice = targetVoice;
+            }
+
+            utterance.rate = 0.8;
             if (onEndCallback) utterance.onend = onEndCallback;
             synth.speak(utterance);
         }
@@ -426,7 +458,6 @@
                 });
             });
 
-            // 判斷是否開啟自動朗讀
             if (document.getElementById('auto-speak').checked) {
                 setTimeout(playAllLines, 800);
             }
@@ -458,7 +489,15 @@
                 let textToSpeak = flatLinesData[currentLine];
                 
                 let utterance = new SpeechSynthesisUtterance(textToSpeak);
-                utterance.lang = 'zh-TW'; utterance.rate = 0.8;
+                utterance.lang = 'zh-TW'; 
+
+                // 強制覆寫為國語發音包
+                const targetVoice = getMandarinVoice();
+                if (targetVoice) {
+                    utterance.voice = targetVoice;
+                }
+
+                utterance.rate = 0.8;
                 utterance.onend = () => { currentLine++; setTimeout(playNext, 400); };
                 synth.speak(utterance);
             }
