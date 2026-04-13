@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Hailey 歌詞">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>2下 合唱考試</title>
+    <title>Hailey 的歌詞點讀本</title>
     
     <style>
         /* ================= 變數與主題設定 ================= */
@@ -280,9 +280,9 @@
         let flatLinesData = [];
 
         // 確保 iOS 預先載入語音包
-        window.speechSynthesis.onvoiceschanged = function() {
-            synth.getVoices();
-        };
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = () => synth.getVoices();
+        }
 
         window.onload = () => { loadSettings(); updateWelcomeText(); };
 
@@ -316,9 +316,11 @@
         }
 
         function unlockAudioAndStart() {
-            // iOS 必須透過使用者點擊事件來觸發與解鎖發音 API
             synth.getVoices();
-            if (synth.getVoices().length === 0) synth.speak(new SpeechSynthesisUtterance(''));
+            if (synth.getVoices().length === 0) {
+                let u = new SpeechSynthesisUtterance('');
+                synth.speak(u);
+            }
             
             stopAllAudioPlayers();
             renderAllLyrics();
@@ -350,20 +352,27 @@
             document.getElementById('piano-audio').pause();
         }
 
-        // ====== 核心修復：強制尋找國語(普通話)發音，避免 iOS 變廣東話 ======
+        // ====== 強制鎖定國語/普通話 ======
         function getMandarinVoice() {
             const voices = synth.getVoices();
-            if (voices.length === 0) return null;
+            if (!voices || voices.length === 0) return null;
 
-            // 1. 優先找台灣國語 (zh-TW)
-            let voice = voices.find(v => v.lang === 'zh-TW' || v.lang === 'zh_TW' || v.lang === 'zh-TW-mac');
-            // 2. 如果沒有，找大陸普通話 (zh-CN)
+            // 1. 最優先：尋找明確的普通話/國語標籤 (完全排除 HK, MO, yue)
+            let voice = voices.find(v => {
+                const lang = v.lang.toLowerCase();
+                return lang.includes('zh') && 
+                       !lang.includes('hk') && 
+                       !lang.includes('mo') && 
+                       !lang.includes('yue') && 
+                       (lang.includes('cn') || lang.includes('tw') || lang.includes('hans'));
+            });
+
+            // 2. 次要保底：如果真的找不到，找任何是中文但「絕對不是」廣東話的聲音
             if (!voice) {
-                voice = voices.find(v => v.lang === 'zh-CN' || v.lang === 'zh_CN');
-            }
-            // 3. 如果還是沒有，尋找任何包含 'zh' 但「不包含」 HK (廣東話) 的語音
-            if (!voice) {
-                voice = voices.find(v => v.lang.includes('zh') && !v.lang.includes('HK'));
+                voice = voices.find(v => {
+                    const lang = v.lang.toLowerCase();
+                    return lang.includes('zh') && !lang.includes('hk') && !lang.includes('yue');
+                });
             }
             return voice;
         }
@@ -373,12 +382,14 @@
             stopAllAudioPlayers(); 
 
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'zh-TW'; // 保底設定
             
-            // 強制覆寫為國語發音包
+            // 強制預設為大陸普通話 (iOS 對 zh-CN 判斷最為嚴格，不易混淆)
+            utterance.lang = 'zh-CN'; 
+
             const targetVoice = getMandarinVoice();
             if (targetVoice) {
                 utterance.voice = targetVoice;
+                utterance.lang = targetVoice.lang; // 確保語言標籤與語音包一致
             }
 
             utterance.rate = 0.8;
@@ -489,12 +500,14 @@
                 let textToSpeak = flatLinesData[currentLine];
                 
                 let utterance = new SpeechSynthesisUtterance(textToSpeak);
-                utterance.lang = 'zh-TW'; 
+                
+                // 強制預設為大陸普通話
+                utterance.lang = 'zh-CN'; 
 
-                // 強制覆寫為國語發音包
                 const targetVoice = getMandarinVoice();
                 if (targetVoice) {
                     utterance.voice = targetVoice;
+                    utterance.lang = targetVoice.lang; 
                 }
 
                 utterance.rate = 0.8;
