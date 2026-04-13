@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Hailey 歌詞">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Hailey 的歌詞點讀本</title>
+    
+    <style>
+        /* ================= 變數與主題設定 ================= */
+        :root {
+            --primary-bg: #FFF0F5;
+            --primary-color: #FF69B4;
+            --secondary-color: #DDA0DD;
+            --text-color: #333333;
+            --card-bg: #FFFFFF;
+            --highlight-bg: #FFF59D;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            touch-action: pan-y;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        [data-theme="boy"] {
+            --primary-bg: #E0F7FA;
+            --primary-color: #00ACC1;
+            --secondary-color: #80DEEA;
+        }
+
+        /* ================= 全域排版 ================= */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            transition: background-color 0.3s;
+        }
+
+        .view { display: none; flex: 1; flex-direction: column; padding: 20px; }
+        .view.active { display: flex; }
+        
+        h1 { text-align: center; color: var(--primary-color); margin-bottom: 10px; font-size: 36px;}
+        h2 { text-align: center; color: var(--text-color); margin-bottom: 20px; font-weight: normal;}
+        
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            padding: 15px 30px;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.1s, background-color 0.3s;
+            margin: 10px auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 150px;
+            min-height: 50px;
+            text-decoration: none; /* 給 <a> 標籤用的 */
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn.secondary { background-color: var(--secondary-color); }
+        .btn.icon-btn { min-width: 50px; border-radius: 50%; padding: 10px; }
+
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        
+        /* 朗讀區塊與拼音排版 */
+        .reading-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            padding-bottom: 40px;
+        }
+        
+        .lyrics-container {
+            width: 100%;
+            max-width: 700px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        /* 音樂播放器與樂譜區塊 */
+        .audio-player-container {
+            width: 100%;
+            background-color: var(--primary-bg);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            text-align: center;
+            border: 2px dashed var(--secondary-color);
+        }
+        .audio-title {
+            font-weight: bold;
+            color: var(--text-color);
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        audio {
+            width: 100%;
+            height: 40px;
+            outline: none;
+            margin-bottom: 20px;
+        }
+        audio:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            color: var(--secondary-color);
+            font-size: 20px;
+            margin: 30px 0 15px 0;
+            border-bottom: 2px dashed var(--secondary-color);
+            padding-bottom: 5px;
+        }
+        .section-title:first-of-type { margin-top: 0; }
+
+        .lyric-line {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 12px;
+            transition: background-color 0.3s;
+        }
+        .lyric-line.active-read { background-color: var(--highlight-bg); }
+
+        .speaker-btn { 
+            font-size: 28px; background: none; border: none; box-shadow: none; 
+            color: var(--primary-color); margin-right: 15px; padding: 5px; 
+            cursor: pointer; flex-shrink: 0;
+        }
+        .speaker-btn:active { transform: scale(0.9); }
+
+        .text-content {
+            font-size: 34px; 
+            line-height: 2.2; 
+            letter-spacing: 2px;
+        }
+
+        .char { 
+            display: inline-block; 
+            padding: 2px 4px; 
+            cursor: pointer; 
+            border-radius: 8px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .char:active { background: var(--secondary-color); color: white; }
+
+        /* 拼音標籤樣式 */
+        ruby { ruby-position: over; }
+        rt { font-size: 15px; color: #666666; font-family: Arial, sans-serif; font-weight: normal; letter-spacing: 0; }
+
+        .setting-group { margin-bottom: 25px; font-size: 20px; text-align: center; }
+        .setting-group input[type="text"] { font-size: 20px; padding: 10px; border-radius: 10px; border: 2px solid var(--secondary-color); width: 100%; max-width: 300px; text-align: center;}
+    </style>
+</head>
+<body>
+
+    <div id="home-view" class="view active">
+        <div class="top-bar">
+            <div></div>
+            <button class="btn icon-btn secondary" onclick="switchView('settings-view')">⚙️</button>
+        </div>
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <h1 id="welcome-text">你好，Hailey！</h1>
+            <h2>一切都更新 - 歌詞點讀本</h2>
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🎵</text></svg>" width="120" style="margin-bottom:30px;">
+            <button class="btn" style="font-size: 28px; padding: 20px 50px;" onclick="unlockAudioAndStart()">開始溫習 🚀</button>
+        </div>
+    </div>
+
+    <div id="settings-view" class="view">
+        <div class="top-bar">
+            <button class="btn icon-btn" onclick="switchView('home-view')">⬅️</button>
+            <h1 style="font-size: 28px;">設定</h1>
+            <div></div>
+        </div>
+        <div style="max-width: 400px; margin: 0 auto; width: 100%;">
+            <div class="setting-group">
+                <label style="display:block; margin-bottom: 10px;">玩家名字：</label>
+                <input type="text" id="player-name" value="Hailey" onchange="saveSettings()">
+            </div>
+            <div class="setting-group">
+                <label style="display:block; margin-bottom: 10px;">風格主題：</label>
+                <button class="btn secondary" onclick="setTheme('girl')">👧 女孩 (粉紫)</button>
+                <button class="btn secondary" onclick="setTheme('boy')" style="background-color: #00ACC1;">👦 男孩 (藍綠)</button>
+            </div>
+            <div class="setting-group">
+                <label>開啟時自動朗讀：</label>
+                <input type="checkbox" id="auto-speak" onchange="saveSettings()" style="width: 25px; height: 25px; vertical-align: middle;">
+            </div>
+        </div>
+    </div>
+
+    <div id="reading-view" class="view">
+        <div class="top-bar">
+            <button class="btn icon-btn" onclick="stopMediaAndReturn()">⬅️</button>
+            <button class="btn icon-btn secondary" onclick="playAllLines()">▶️</button>
+        </div>
+        
+        <div class="reading-area">
+            <h1>🎵一切都更新🎵</h1>
+            
+            <div class="lyrics-container">
+                
+                <div class="audio-player-container">
+                    <p class="audio-title" style="margin-bottom: 5px;">🎼 樂譜</p>
+                    <a href="https://kchow-hub.github.io/eLearning/G2B_Choir_一切都更新.pdf" target="_blank" class="btn" style="background-color: var(--primary-color); font-size: 18px; padding: 10px 25px; margin-bottom: 25px; box-shadow: none;">📄 開啟樂譜 (PDF)</a>
+
+                    <p class="audio-title">🎤 伴唱版 (有唱歌)</p>
+                    <audio id="vocal-audio" controls controlsList="nodownload" onplay="handleAudioPlay('vocal-audio')">
+                        <source src="https://kchow-hub.github.io/eLearning/G.2_Practice_Track_%E4%B8%80%E5%88%87%E9%83%BD%E6%9B%B4%E6%96%B0.mp3" type="audio/mpeg">
+                        您的瀏覽器不支援音樂播放。
+                    </audio>
+
+                    <p class="audio-title" style="margin-top: 15px;">🎹 純音樂 (鋼琴伴奏)</p>
+                    <audio id="piano-audio" controls controlsList="nodownload" onplay="handleAudioPlay('piano-audio')">
+                        <source src="https://kchow-hub.github.io/eLearning/G.2_Piano_Track_%E4%B8%80%E5%88%87%E9%83%BD%E6%9B%B4%E6%96%B0.mp3" type="audio/mpeg">
+                        您的瀏覽器不支援音樂播放。
+                    </audio>
+                </div>
+
+                <div id="lyrics-content"></div>
+                
+            </div>
+            <button class="btn" style="margin-top: 30px; background-color: var(--secondary-color);" onclick="playAllLines()">🎵 依序朗讀全曲 🎵</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 歌詞與拼音資料庫 ---
+        const songData = [
+            {
+                title: "第一段",
+                lines: [
+                    "寒(hán)冬(dōng)將(jiāng)盡(jìn) 萬(wàn)物(wù)皆(jiē)肅(sù)靜(jìng)，",
+                    "滿(mǎn)心(xīn)期(qí)待(dài) 破(pò)曉(xiǎo)快(kuài)來(lái)臨(lín)。",
+                    "微(wēi)溫(wēn)濕(shī)氣(qì) 鑽(zuān)進(jìn)土(tǔ)壤(rǎng)裡(lǐ)，",
+                    "枯(kū)乾(gān)的(de)、沉(chén)睡(shuì)的(de)，快(kuài)要(yào)甦(sū)醒(xǐng)！",
+                    "枯(kū)乾(gān)的(de)、沉(chén)睡(shuì)的(de)，快(kuài)要(yào)甦(sū)醒(xǐng)！看(kàn)！"
+                ]
+            },
+            {
+                title: "第二段",
+                lines: [
+                    "一(yī)切(qiè)都(dōu)將(jiāng)更(gēng)新(xīn)，春(chūn)天(tiān)已(yǐ)來(lái)臨(lín)！",
+                    "萬(wàn)物(wù)歡(huān)欣(xīn)歌(gē)頌(sòng) 神(shén)創(chuàng)造(zào)驚(jīng)奇(qí)！",
+                    "祢(nǐ)造(zào)萬(wàn)物(wù)按(àn)其(qí)時(shí) 成(chéng)為(wéi)美(měi)好(hǎo)，",
+                    "讓(ràng)我(wǒ)們(men)知(zhī)道(dào) 每(měi)天(tiān)都(dōu)是(shì)恩(ēn)賜(cì)！"
+                ]
+            },
+            {
+                title: "第三段",
+                lines: [
+                    "一(yī)切(qiè)都(dōu)將(jiāng)更(gēng)新(xīn)，我(wǒ)得(dé)新(xīn)生(shēng)命(mìng)！",
+                    "祢(nǐ)寶(bǎo)血(xiě)將(jiāng)我(wǒ)罪(zuì) 全(quán)都(dōu)洗(xǐ)乾(gān)淨(jìng)！",
+                    "祢(nǐ)以(yǐ)愛(ài)稱(chēng)呼(hū)我(wǒ)們(men) 為(wéi)祢(nǐ)的(de)兒(ér)女(nǚ)，",
+                    "在(zài)耶(yē)穌(sū)裡(lǐ)，一(yī)切(qiè)都(dōu)更(gēng)新(xīn)。"
+                ]
+            }
+        ];
+
+        const synth = window.speechSynthesis;
+        let isPlayingAll = false;
+        let flatLinesData = [];
+
+        window.onload = () => { loadSettings(); updateWelcomeText(); };
+
+        function loadSettings() {
+            const name = localStorage.getItem('hailey_name') || 'Hailey';
+            const theme = localStorage.getItem('hailey_theme') || 'girl';
+            // 預設關閉自動朗讀 (改為 === 'true'，沒設定過就是 false)
+            const autoSpeak = localStorage.getItem('hailey_autoSpeak') === 'true';
+            document.getElementById('player-name').value = name;
+            document.getElementById('auto-speak').checked = autoSpeak;
+            setTheme(theme);
+        }
+
+        function saveSettings() {
+            localStorage.setItem('hailey_name', document.getElementById('player-name').value);
+            localStorage.setItem('hailey_autoSpeak', document.getElementById('auto-speak').checked);
+            updateWelcomeText();
+        }
+
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('hailey_theme', theme);
+        }
+
+        function updateWelcomeText() {
+            document.getElementById('welcome-text').innerText = `你好，${document.getElementById('player-name').value || '小朋友'}！`;
+        }
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        function unlockAudioAndStart() {
+            if (synth.getVoices().length === 0) synth.speak(new SpeechSynthesisUtterance(''));
+            
+            stopAllAudioPlayers();
+            renderAllLyrics();
+            switchView('reading-view');
+        }
+
+        function stopMediaAndReturn() {
+            synth.cancel(); 
+            isPlayingAll = false;
+            stopAllAudioPlayers();
+            document.querySelectorAll('.lyric-line').forEach(el => el.classList.remove('active-read'));
+            switchView('home-view');
+        }
+
+        function handleAudioPlay(currentAudioId) {
+            synth.cancel(); 
+            isPlayingAll = false;
+            
+            const audios = ['vocal-audio', 'piano-audio'];
+            audios.forEach(id => {
+                if (id !== currentAudioId) {
+                    document.getElementById(id).pause();
+                }
+            });
+        }
+
+        function stopAllAudioPlayers() {
+            document.getElementById('vocal-audio').pause();
+            document.getElementById('piano-audio').pause();
+        }
+
+        function speakText(text, onEndCallback = null) {
+            synth.cancel();
+            stopAllAudioPlayers(); 
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-TW'; utterance.rate = 0.8;
+            if (onEndCallback) utterance.onend = onEndCallback;
+            synth.speak(utterance);
+        }
+
+        function parsePinyinString(lineStr) {
+            const regex = /(.)\(([a-zA-Zāáǎàōóǒòēéěèīíǐìūúǔùǖǘǚǜü]+)\)|(.)/g;
+            let match;
+            const result = [];
+            while ((match = regex.exec(lineStr)) !== null) {
+                if (match[1]) result.push({ char: match[1], pinyin: match[2] }); 
+                else if (match[3]) result.push({ char: match[3], pinyin: '' });  
+            }
+            return result;
+        }
+
+        function renderAllLyrics() {
+            const container = document.getElementById('lyrics-content');
+            container.innerHTML = '';
+            flatLinesData = [];
+            let globalLineIndex = 0;
+
+            songData.forEach((section) => {
+                const secTitle = document.createElement('h3');
+                secTitle.className = 'section-title';
+                secTitle.innerText = section.title;
+                container.appendChild(secTitle);
+
+                section.lines.forEach((lineStr) => {
+                    const lineDiv = document.createElement('div');
+                    lineDiv.className = 'lyric-line';
+                    lineDiv.id = `line-${globalLineIndex}`;
+
+                    const rawLineStr = lineStr.replace(/\([a-zA-Zāáǎàōóǒòēéěèīíǐìūúǔùǖǘǚǜü]+\)/g, '');
+                    const textToSpeak = rawLineStr.replace(/[、，。！\s]/g, '');
+                    flatLinesData.push(textToSpeak);
+
+                    const currentIdx = globalLineIndex;
+                    const speakerBtn = document.createElement('button');
+                    speakerBtn.className = 'speaker-btn'; speakerBtn.innerText = '🔊';
+                    speakerBtn.onclick = () => { isPlayingAll = false; highlightLine(currentIdx); speakText(textToSpeak); };
+                    lineDiv.appendChild(speakerBtn);
+
+                    const textDiv = document.createElement('div');
+                    textDiv.className = 'text-content';
+                    
+                    const parsedItems = parsePinyinString(lineStr);
+                    parsedItems.forEach(item => {
+                        const span = document.createElement('span');
+                        if (/[、，。！\s]/.test(item.char)) {
+                            span.innerText = item.char;
+                        } else {
+                            span.className = 'char';
+                            const ruby = document.createElement('ruby');
+                            ruby.innerText = item.char;
+                            if(item.pinyin) {
+                                const rt = document.createElement('rt');
+                                rt.innerText = item.pinyin;
+                                ruby.appendChild(rt);
+                            }
+                            span.appendChild(ruby);
+
+                            span.onclick = () => {
+                                isPlayingAll = false;
+                                highlightLine(currentIdx);
+                                speakText(item.char);
+                            };
+                        }
+                        textDiv.appendChild(span);
+                    });
+
+                    lineDiv.appendChild(textDiv);
+                    container.appendChild(lineDiv);
+                    globalLineIndex++;
+                });
+            });
+
+            // 判斷是否開啟自動朗讀
+            if (document.getElementById('auto-speak').checked) {
+                setTimeout(playAllLines, 800);
+            }
+        }
+
+        function highlightLine(index) {
+            document.querySelectorAll('.lyric-line').forEach(el => el.classList.remove('active-read'));
+            if (index !== -1) {
+                const activeEl = document.getElementById(`line-${index}`);
+                if(activeEl) {
+                    activeEl.classList.add('active-read');
+                    activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+
+        function playAllLines() {
+            isPlayingAll = true; 
+            synth.cancel();
+            stopAllAudioPlayers(); 
+
+            let currentLine = 0;
+
+            function playNext() {
+                if (!isPlayingAll) return;
+                if (currentLine >= flatLinesData.length) { highlightLine(-1); isPlayingAll = false; return; }
+                
+                highlightLine(currentLine);
+                let textToSpeak = flatLinesData[currentLine];
+                
+                let utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.lang = 'zh-TW'; utterance.rate = 0.8;
+                utterance.onend = () => { currentLine++; setTimeout(playNext, 400); };
+                synth.speak(utterance);
+            }
+            playNext();
+        }
+    </script>
+</body>
+</html>
