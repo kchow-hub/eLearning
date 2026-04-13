@@ -28,6 +28,9 @@
     body {
         margin: 0; padding: 0; background-color: var(--bg); color: var(--text);
         display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        /* 防止 iOS 橡皮筋效應與文字誤選 */
+        -webkit-user-select: none;
+        user-select: none;
     }
 
     /* 頂部導航列 */
@@ -45,6 +48,9 @@
         transition: transform 0.1s, background-color 0.2s;
         box-shadow: 0 4px 0 var(--primary-dark);
         margin: 5px; text-align: center;
+        /* iOS 觸控優化：消除 300ms 點擊延遲與雙擊放大 */
+        touch-action: manipulation; 
+        -webkit-tap-highlight-color: transparent;
     }
     
     .btn:active { transform: translateY(4px); box-shadow: none; }
@@ -71,10 +77,12 @@
     .input-group { margin: 15px 0; width: 100%; max-width: 300px; }
     .input-group label { display: block; margin-bottom: 5px; font-weight: bold; }
     .input-group input[type="text"] { width: 100%; padding: 12px; border-radius: 10px; border: 2px solid var(--primary); font-size: 1.2rem; text-align: center; }
+    /* 允許輸入框可以選取文字 */
+    .input-group input { -webkit-user-select: text; user-select: text; }
     
     /* 關卡選擇 */
     .level-grid, .chapter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; width: 100%; }
-    .card { background: white; border: 2px solid var(--primary); border-radius: 15px; padding: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px var(--shadow); transition: transform 0.2s; }
+    .card { background: white; border: 2px solid var(--primary); border-radius: 15px; padding: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px var(--shadow); transition: transform 0.2s; touch-action: manipulation; }
     .card:hover { transform: translateY(-5px); }
     .card h2 { color: var(--primary-dark); margin-top: 0; }
     .card.selected { background-color: var(--primary); color: white; }
@@ -87,7 +95,7 @@
     .progress-fill { height: 100%; background: var(--primary-dark); width: 0%; transition: width 0.3s; }
     
     .poem-display { background: #fffde7; padding: 15px; border-radius: 10px; border-left: 5px solid #fbc02d; margin-bottom: 20px; width: 100%; font-size: 1.2rem; line-height: 1.8; text-align: center; white-space: pre-line; position: relative; }
-    .read-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5rem; cursor: pointer; box-shadow: none; padding: 0; }
+    .read-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5rem; cursor: pointer; box-shadow: none; padding: 0; touch-action: manipulation; }
     
     .question-area { width: 100%; text-align: center; }
     .question-text-container { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; }
@@ -98,20 +106,20 @@
     
     /* 排序遊戲專用 */
     .sort-slots { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; width: 100%; }
-    .sort-slot { border: 2px dashed #aaa; background: #f9f9f9; padding: 15px; border-radius: 10px; min-height: 60px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; }
+    .sort-slot { border: 2px dashed #aaa; background: #f9f9f9; padding: 15px; border-radius: 10px; min-height: 60px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; touch-action: manipulation; }
     .sort-slot.filled { border-style: solid; border-color: var(--primary); background: var(--secondary); font-weight: bold; }
     
     .word-bank { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; padding: 15px; background: var(--secondary); border-radius: 10px; margin-bottom: 20px; }
-    .word-item { display: flex; align-items: center; gap: 8px; background: white; border: 2px solid var(--primary-dark); padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; font-weight: bold; }
+    .word-item { display: flex; align-items: center; gap: 8px; background: white; border: 2px solid var(--primary-dark); padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; font-weight: bold; touch-action: manipulation; }
     
     .hint-box { display: none; background: #ffebee; color: #c62828; padding: 15px; border-radius: 10px; border: 2px solid #ef5350; margin: 15px 0; font-weight: bold; font-size: 1.2rem; }
 
     /* LV0 朗讀專用樣式 */
     .reading-box { text-align: center; width: 100%; background: white; padding: 20px; border-radius: 15px; border: 2px solid var(--primary); margin-bottom: 20px; }
     .reading-line { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 15px 0; flex-wrap: wrap; }
-    .char { font-size: 2.2rem; padding: 5px; cursor: pointer; border-radius: 5px; transition: background 0.2s; }
+    .char { font-size: 2.2rem; padding: 5px; cursor: pointer; border-radius: 5px; transition: background 0.2s; touch-action: manipulation; }
     .char:hover { background: var(--secondary); color: var(--primary-dark); font-weight: bold; }
-    .line-read-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0 10px; }
+    .line-read-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0 10px; touch-action: manipulation; }
     
     .annotations-box { background: #fff8e1; border-left: 5px solid #ffca28; padding: 15px; border-radius: 8px; width: 100%; text-align: left; }
     .annotations-box h3 { margin-top: 0; color: #f57f17; }
@@ -281,11 +289,9 @@
                 '杏花村：杏花深處的村莊。'
             ],
             mcq: [
-                // 原有題目
                 { q: '詩歌第一句描寫的是甚麼樣的天氣？', options: ['晴天', '陰天', '雨天'], ans: 2 },
                 { q: '詩歌首兩句展現了怎麼樣的氣氛？', options: ['歡樂高興', '傷心(欲斷魂)', '悠閒自在'], ans: 1 },
                 { type: 'multi-select', q: '詩歌哪兩句寫的是人物之間的「一問一答」？(請點擊選出兩句)', options: ['清明時節雨紛紛', '路上行人欲斷魂', '借問酒家何處有', '牧童遙指杏花村'], ans: [2, 3] },
-                // 新增的注釋題目
                 { q: '詩句中「雨紛紛」的意思是甚麼？', options: ['大雨滂沱', '細雨紛飛', '不曾下雨'], ans: 1 },
                 { q: '詩句中「斷魂」的意思是甚麼？', options: ['生氣發怒', '悠閒自在', '悲哀、傷心，好像失去魂魄的樣子'], ans: 2 },
                 { q: '詩句中「酒家」是指甚麼？', options: ['賣酒的店鋪', '喝酒的人', '吃飯的餐廳'], ans: 0 },
@@ -303,11 +309,9 @@
                 '夜來：昨天夜裏。'
             ],
             mcq: [
-                // 原有題目
                 { q: '「花落知多少」一句表達了詩人怎樣的心情？', options: ['生氣', '惋惜', '期待', '高興'], ans: 1 },
                 { q: '根據詩歌內容，以下哪一項陳述正確？', options: ['詩人描寫的都是他親眼看到的景色', '詩人在清晨時分被鳥鳴聲叫醒'], ans: 1 },
                 { q: '詩中「沒有」描寫以下哪一種聲音？', options: ['風聲', '鳥叫聲', '雨聲', '花朵落到地上的聲音'], ans: 3 },
-                // 新增的注釋題目
                 { q: '詩句中「曉」的解釋是甚麼？', options: ['晚上', '中午', '天明，早晨'], ans: 2 },
                 { q: '詩句中「啼鳥」的意思是甚麼？', options: ['睡覺的鳥', '鳥鳴，鳥叫聲', '飛翔的鳥'], ans: 1 },
                 { q: '詩句中「夜來」是指甚麼時候？', options: ['明天晚上', '今天晚上', '昨天夜裏'], ans: 2 }
@@ -332,6 +336,9 @@
     let readingQueue = [];
     let currentReadingIndex = 0;
     let currentReadingFullText = "";
+
+    // ★ 新增：防呆鎖定變數，防止 iOS 多點觸控與連點導致錯亂
+    let isTransitioning = false;
 
     // --- 語音及音效 ---
     const synth = window.speechSynthesis;
@@ -361,6 +368,7 @@
         osc.stop(audioCtx.currentTime + 0.3);
     }
 
+    // ★ 修復 iOS 語音回調 Bug 的加強版 readAloud
     function readAloud(text, force = false, onEndCallback = null) {
         if (!force && !document.getElementById('auto-read-toggle').checked) {
             if (onEndCallback) setTimeout(onEndCallback, 500); 
@@ -372,8 +380,19 @@
         utterance.rate = 0.85; 
         
         if (onEndCallback) {
-            utterance.onend = onEndCallback;
-            utterance.onerror = onEndCallback; 
+            // 防止 iOS 觸發兩次 onend 或完全不觸發的防呆機制
+            let callbackFired = false;
+            const safeCallback = () => {
+                if (!callbackFired) {
+                    callbackFired = true;
+                    onEndCallback();
+                }
+            };
+            utterance.onend = safeCallback;
+            utterance.onerror = safeCallback; 
+            
+            // 如果 iOS 語音系統壞掉沒反應，最多等 (字數*300毫秒 + 1秒) 就強制跳下一題
+            setTimeout(safeCallback, text.length * 300 + 1000);
         }
         
         synth.speak(utterance);
@@ -463,6 +482,7 @@
             gameQueue = [];
             score = 0;
             currentIndex = 0;
+            isTransitioning = false; // 重設防呆鎖
             
             selectedData.forEach(ch => {
                 if (selectedLevel === 1 || selectedLevel === 3) {
@@ -543,7 +563,10 @@
             return;
         }
 
+        // 每次載入新題目時解開防呆鎖
+        isTransitioning = false; 
         currentMistakes = 0;
+        
         const qData = gameQueue[currentIndex];
         document.getElementById('progress-text').innerText = `${currentIndex + 1} / ${gameQueue.length}`;
         document.getElementById('progress-fill').style.width = `${((currentIndex) / gameQueue.length) * 100}%`;
@@ -599,7 +622,10 @@
     }
 
     function handleMCQAnswer(btn, selectedIdx, correctIdx) {
+        if (isTransitioning) return; // ★ 鎖定中不允許點擊
+
         if (selectedIdx === correctIdx) {
+            isTransitioning = true; // ★ 答對了，立刻上鎖
             playBeep(true);
             btn.classList.add('correct');
             disableAllOptions();
@@ -616,6 +642,7 @@
         } else {
             playBeep(false);
             btn.classList.add('wrong');
+            btn.disabled = true; // ★ 答錯的按鈕停用，防連按
             currentMistakes++;
             
             if (currentMistakes >= 2) {
@@ -654,12 +681,12 @@
             btn.innerText = opt;
             
             btn.onclick = () => {
+                if (isTransitioning) return; // ★ 鎖定中不允許點擊
+                
                 if (selectedIndexes.has(idx)) {
-                    // 取消選取
                     selectedIndexes.delete(idx);
                     btn.classList.remove('multi-selected');
                 } else {
-                    // 新增選取
                     if (selectedIndexes.size < requiredCount) {
                         selectedIndexes.add(idx);
                         btn.classList.add('multi-selected');
@@ -668,7 +695,6 @@
                         return;
                     }
                 }
-                // 當選滿數量時顯示提交按鈕
                 submitBtn.style.display = (selectedIndexes.size === requiredCount) ? 'block' : 'none';
             };
 
@@ -682,7 +708,6 @@
             optionsArea.appendChild(row);
         });
 
-        // 加入專屬的提交答案按鈕
         const submitBtn = document.createElement('button');
         submitBtn.className = 'btn';
         submitBtn.innerText = '提交答案';
@@ -695,11 +720,14 @@
     }
 
     function checkMultiSelectAnswer(selectedIndexes, qData, submitBtn) {
+        if (isTransitioning) return; // ★ 鎖定中不允許點擊
+
         let selectedArr = Array.from(selectedIndexes).sort();
         let ansArr = [...qData.ans].sort();
         let isCorrect = selectedArr.length === ansArr.length && selectedArr.every((val, index) => val === ansArr[index]);
 
         if (isCorrect) {
+            isTransitioning = true; // ★ 答對了，立刻上鎖
             playBeep(true);
             submitBtn.classList.add('correct');
             submitBtn.disabled = true;
@@ -796,6 +824,7 @@
     }
 
     function addSortItem(itemDiv) {
+        if (isTransitioning) return; // ★ 鎖定中不允許點擊
         const emptySlotIdx = userSortState.findIndex(val => val === null);
         if (emptySlotIdx !== -1) {
             userSortState[emptySlotIdx] = itemDiv.dataset.originalLine;
@@ -805,6 +834,7 @@
     }
 
     function removeSortItem(slotIdx) {
+        if (isTransitioning) return; // ★ 鎖定中不允許點擊
         const val = userSortState[slotIdx];
         if (val !== null) {
             userSortState[slotIdx] = null;
@@ -835,6 +865,8 @@
     }
 
     function checkSortAnswer() {
+        if (isTransitioning) return; // ★ 鎖定中不允許點擊
+
         let isCorrect = true;
         for(let i=0; i<currentSortCorrect.length; i++){
             if(userSortState[i] !== currentSortCorrect[i]) {
@@ -843,6 +875,7 @@
         }
 
         if (isCorrect) {
+            isTransitioning = true; // ★ 答對了，立刻上鎖
             playBeep(true);
             const btn = document.getElementById('submit-sort-btn');
             btn.classList.add('correct');
