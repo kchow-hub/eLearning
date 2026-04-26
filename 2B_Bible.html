@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>G2 下學期聖經學習遊戲 (最終完美整合版)</title>
+    <style>
+        :root {
+            /* 女孩風格 (護眼馬卡龍粉) */
+            --bg-color: #fff1f2;         
+            --primary-color: #f472b6;    
+            --secondary-color: #fce7f3;  
+            --text-color: #4c1d95;       
+            --btn-text: #ffffff;
+            --correct-color: #4ade80;    
+            --wrong-color: #fb7185;      
+            --card-bg: #ffffff;
+        }
+
+        [data-theme="boy"] {
+            /* 男孩風格 (護眼薄荷綠) */
+            --bg-color: #f0fdf4;
+            --primary-color: #4ade80;
+            --secondary-color: #dcfce7;
+            --text-color: #166534;
+            --btn-text: #ffffff;
+        }
+
+        * { box-sizing: border-box; font-family: 'Comic Sans MS', 'PingFang HK', 'Microsoft JhengHei', sans-serif; }
+        
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-color); color: var(--text-color);
+            transition: background-color 0.3s;
+            display: flex; flex-direction: column; align-items: center; 
+            min-height: 100vh;
+            overscroll-behavior-y: none; 
+        }
+
+        /* UI 元件 */
+        .header {
+            width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
+            background-color: var(--secondary-color); box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .header-controls { display: flex; gap: 10px; align-items: center; }
+        
+        .btn {
+            background-color: var(--primary-color); color: var(--btn-text);
+            border: none; padding: 12px 20px; border-radius: 25px;
+            font-size: 18px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.15); 
+            transition: all 0.1s ease;
+        }
+        .btn:active { transform: translateY(4px); box-shadow: 0 0 0 rgba(0,0,0,0.15); }
+        .btn:disabled { background-color: #cbd5e1; cursor: not-allowed; box-shadow: none; transform: none; }
+        
+        .view { display: none; width: 100%; max-width: 900px; padding: 20px; text-align: center; }
+        .view.active { display: block; }
+
+        input[type="text"] {
+            padding: 12px; font-size: 20px; border-radius: 12px; border: 3px solid var(--primary-color);
+            text-align: center; margin-bottom: 20px; outline: none; color: var(--text-color);
+        }
+
+        .chapter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin: 20px 0; }
+        .chapter-btn {
+            background-color: var(--card-bg); border: 3px solid var(--secondary-color);
+            padding: 20px 10px; border-radius: 15px; font-size: 20px; color: var(--text-color);
+            cursor: pointer; transition: all 0.2s; font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .chapter-btn.selected { 
+            border-color: var(--primary-color); background-color: var(--secondary-color); 
+            transform: scale(1.05);
+        }
+
+        /* 遊戲區域 */
+        .progress-bar { font-size: 20px; font-weight: bold; margin-bottom: 15px; background: var(--secondary-color); padding: 10px; border-radius: 20px; display: inline-block;}
+        .verse-display { font-size: 26px; line-height: 1.8; background: var(--card-bg); padding: 25px; border-radius: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .verse-ref { font-size: 20px; color: #6b7280; margin-top: 15px; }
+
+        .play-area { display: flex; flex-direction: column; gap: 20px; width: 100%; flex: 1; }
+        .zone-title { font-size: 18px; font-weight: bold; color: var(--text-color); margin-bottom: -10px; text-align: left; padding-left: 10px;}
+
+        /* LV1 拖放區 */
+        .drop-zone, .drag-pool {
+            min-height: 150px; padding: 20px; border-radius: 20px;
+            display: flex; flex-wrap: wrap; gap: 15px; 
+            justify-content: center; align-items: center; align-content: center;
+        }
+        .drop-zone { background-color: #f8fafc; border: 4px dashed #cbd5e1; }
+        .drag-pool { background-color: var(--card-bg); box-shadow: 0 4px 15px rgba(0,0,0,0.04); border: 2px solid var(--secondary-color);}
+        
+        /* LV1 積木字卡 */
+        .word-piece {
+            background-color: var(--primary-color); color: var(--btn-text);
+            padding: 16px 24px; border-radius: 14px; font-size: 24px; font-weight: bold;
+            cursor: pointer; user-select: none; box-shadow: 0 6px 0 rgba(0,0,0,0.15); 
+            transition: all 0.1s ease; touch-action: manipulation; 
+        }
+        .word-piece:active { transform: translateY(6px); box-shadow: 0 0 0 rgba(0,0,0,0.15); }
+        .word-piece.dragging { opacity: 0.7; border: 3px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.2); transform: translateY(-5px) scale(1.05); }
+        
+        /* LV2 選擇題區 */
+        .quiz-question { font-size: 24px; font-weight: bold; margin-bottom: 20px; padding: 20px; background: var(--card-bg); border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: left;}
+        .quiz-options { display: flex; flex-direction: column; gap: 15px; }
+        .quiz-option-btn {
+            background-color: #ffffff; border: 3px solid var(--primary-color); color: var(--text-color);
+            padding: 18px; border-radius: 15px; font-size: 22px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1); transition: all 0.1s ease; text-align: left;
+        }
+        .quiz-option-btn:active { transform: translateY(4px); box-shadow: 0 0 0 rgba(0,0,0,0.1); }
+        .quiz-option-btn.disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; background-color: #e2e8f0; border-color: #94a3b8; }
+
+        /* 動畫與狀態 */
+        .correct-anim { background-color: var(--correct-color) !important; color: white !important; border-color: var(--correct-color) !important; animation: pop 0.4s ease; }
+        .wrong-anim { background-color: var(--wrong-color) !important; color: white !important; border-color: var(--wrong-color) !important; animation: shake 0.5s ease; }
+        
+        @keyframes pop { 50% { transform: scale(1.05); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-15px); } 50% { transform: translateX(15px); } 75% { transform: translateX(-15px); } }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: var(--card-bg); border-radius: 15px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        th, td { border: 1px solid var(--secondary-color); padding: 15px; text-align: center; font-size: 18px; }
+        th { background-color: var(--secondary-color); color: var(--text-color); }
+        .action-buttons { display: flex; justify-content: center; gap: 20px; margin-top: 10px; flex-wrap: wrap;}
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-controls">
+            <span id="display-name" style="font-weight: bold; font-size: 22px;">👤 Hailey</span>
+        </div>
+        <div class="header-controls">
+            <button class="btn" onclick="toggleTTS()" id="btn-tts" style="padding: 10px 15px; font-size: 16px;">🔊 語音: 開</button>
+            <button class="btn" onclick="toggleTheme()" style="padding: 10px 15px; font-size: 16px;">🎨 主題</button>
+        </div>
+    </div>
+
+    <div id="home-view" class="view active">
+        <h1 style="font-size: 32px; margin-bottom: 10px;">📖 聖經學習遊戲</h1>
+        <p style="color: #6b7280; margin-bottom: 30px;">為 Hailey 專屬設計的溫習小幫手</p>
+        
+        <input type="text" id="input-name" placeholder="輸入你的名字" value="Hailey">
+        <br>
+        <div style="display: flex; flex-direction: column; gap: 15px; align-items: center;">
+            <button class="btn" style="width: 280px; padding: 18px;" onclick="goToChapterSelect('LV0')">👓 LV0: 金句跟讀模式</button>
+            <button class="btn" style="width: 280px; padding: 18px;" onclick="goToChapterSelect('LV1')">🧩 LV1: 金句挑戰模式</button>
+            <button class="btn" style="width: 280px; padding: 18px; background-color: #3b82f6; box-shadow: 0 4px 0 #1d4ed8;" onclick="goToChapterSelect('LV2')">📝 LV2: 工作紙問答</button>
+            <button class="btn" style="width: 280px; padding: 18px; background-color: #fcd34d; color: #78350f; box-shadow: 0 4px 0 #d97706;" onclick="showLeaderboard()">🏆 榮譽排行榜</button>
+        </div>
+    </div>
+
+    <div id="chapter-view" class="view">
+        <h2 id="chapter-title">選擇你要溫習的課文</h2>
+        <div id="chapter-list" class="chapter-grid"></div>
+        <div class="action-buttons" style="margin-top: 30px;">
+            <button class="btn" style="background-color: #94a3b8; box-shadow: 0 4px 0 #64748b;" onclick="switchView('home-view')">⬅️ 返回</button>
+            <button class="btn" style="background-color: var(--correct-color); box-shadow: 0 4px 0 #16a34a;" onclick="startLevel()" id="btn-start" disabled>🚀 開始遊戲</button>
+        </div>
+    </div>
+
+    <div id="game-view" class="view">
+        <div class="progress-bar" id="game-progress">進度: 0 / 0</div>
+        
+        <div id="lv0-area" style="display: none;">
+            <div class="verse-display" id="lv0-verse"></div>
+            <div class="action-buttons">
+                <button class="btn" onclick="readFullVerse()">🔊 朗讀整句</button>
+                <button class="btn" style="background-color: var(--correct-color); box-shadow: 0 4px 0 #16a34a;" onclick="nextQuestion()">下一題 ➡️</button>
+            </div>
+        </div>
+
+        <div id="lv1-area" style="display: none;" class="play-area">
+            <div class="zone-title">✅ 答案區 (請將字卡排在這裡)：</div>
+            <div id="lv1-drop" class="drop-zone" data-type="target"></div>
+            <div class="zone-title" style="margin-top: 10px;">🧩 備選區 (點擊字卡即可飛上來)：</div>
+            <div id="lv1-pool" class="drag-pool" data-type="pool"></div>
+            <div class="action-buttons">
+                <button class="btn" style="background-color: #f59e0b; box-shadow: 0 4px 0 #d97706;" onclick="resetPieces()">🔄 全部退回</button>
+                <button class="btn" style="background-color: var(--correct-color); box-shadow: 0 4px 0 #16a34a; padding: 15px 30px; font-size: 22px;" onclick="checkAnswerLV1()">✅ 檢查答案</button>
+            </div>
+            <div id="lv1-hint" style="color: var(--wrong-color); font-size: 20px; font-weight: bold; margin-top: 15px; display: none; background: #fee2e2; padding: 15px; border-radius: 15px;"></div>
+        </div>
+
+        <div id="lv2-area" style="display: none;" class="play-area">
+            <div class="quiz-question" id="lv2-question">這裡顯示題目</div>
+            <div class="quiz-options" id="lv2-options">
+                </div>
+            <div id="lv2-feedback" style="font-size: 22px; font-weight: bold; margin-top: 15px; display: none; padding: 15px; border-radius: 15px;"></div>
+        </div>
+        
+        <div style="margin-top: 40px;">
+            <button class="btn" style="background-color: #94a3b8; box-shadow: 0 4px 0 #64748b;" onclick="endGame()">🚪 放棄離開</button>
+        </div>
+    </div>
+
+    <div id="result-view" class="view">
+        <h1 id="result-title" style="font-size: 36px; color: var(--primary-color);"></h1>
+        <h2 id="result-score" style="font-size: 28px; background: var(--card-bg); padding: 20px; border-radius: 20px; display: inline-block;"></h2>
+        <br><br>
+        <div class="action-buttons">
+            <button class="btn" onclick="switchView('home-view')">🏠 回主目錄</button>
+            <button class="btn" style="background-color: #fcd34d; color: #78350f; box-shadow: 0 4px 0 #d97706;" onclick="showLeaderboard()">🏆 看排行榜</button>
+        </div>
+    </div>
+
+    <div id="leaderboard-view" class="view">
+        <h2 style="font-size: 30px;">🏆 榮譽榜</h2>
+        <div style="overflow-x: auto;">
+            <table id="lb-table">
+                <tr><th>名字</th><th>模式</th><th>分數</th><th>日期</th></tr>
+            </table>
+        </div>
+        <br>
+        <div class="action-buttons">
+            <button class="btn" onclick="switchView('home-view')">🏠 回主目錄</button>
+            <button class="btn" onclick="clearLeaderboard()" style="background-color: var(--wrong-color); box-shadow: 0 4px 0 #e11d48;">🗑️ 清除紀錄</button>
+        </div>
+    </div>
+
+<script>
+    /* ================= 整合型資料庫 (Dataset) 包含 LV1 與 LV2 ================= */
+    const rawData = [
+        { 
+          id: 1, title: "第一課: 認識新約聖經", ref: "路加福音22:20-下", 
+          text: "這杯是用我的血所立的新約，為你們流出來的。", 
+          fragments: ["這杯是", "用我的血", "所立的", "新約，", "為你們", "流出來的。"],
+          quizzes: [
+              { q: "舊約聖經共有多少卷？", options: ["39卷", "27卷", "66卷"], answer: 0 },
+              { q: "新約聖經共有多少卷？", options: ["27卷", "39卷", "66卷"], answer: 0 },
+              { q: "聖經所指的「約」是甚麼意思？", options: ["盟約", "朋友", "一般的合同"], answer: 0 },
+              { q: "為何神要與我們另立一個「新約」？", options: ["因為舊約時代的人經常背約，神要與人重新建立關係", "因為神忘記了舊約", "因為舊約不見了"], answer: 0 },
+              { q: "新的盟約是用甚麼立的？", options: ["耶穌基督的血", "動物的血", "金銀珠寶"], answer: 0 },
+              { q: "新約書卷主要由甚麼文字寫成？", options: ["希臘文", "英文", "中文"], answer: 0 },
+              { q: "新約的首 4 卷書被稱為什麼？", options: ["福音書", "歷史書", "詩歌"], answer: 0 },
+              { q: "「福音書」主要記載了誰的事蹟？", options: ["耶穌基督", "亞伯拉罕", "挪亞"], answer: 0 },
+              { q: "馬太福音的作者馬太，他原本的職業是什麼？", options: ["稅吏", "醫生", "漁夫"], answer: 0 },
+              { q: "路加福音的作者路加，他原本的職業是什麼？", options: ["醫生", "稅吏", "漁夫"], answer: 0 },
+              { q: "約翰福音的作者約翰，他原本的職業是什麼？", options: ["漁夫", "醫生", "稅吏"], answer: 0 },
+              { q: "「福音」的意思是甚麼？", options: ["好消息", "壞消息", "假消息"], answer: 0 },
+              { q: "以下哪一項關於新約聖經的描述是不正確的？", options: ["作者只有耶穌一人", "共27卷", "首4卷稱為「福音書」"], answer: 0 },
+              { q: "約翰福音3:16「神愛世人，甚至將祂的獨生子賜給他們，叫一切信祂的，不致滅亡，反得________。」", options: ["永生", "財富", "聰明"], answer: 0 }
+          ]
+        },
+        { 
+          id: 2, title: "第二課: 主是好牧人", ref: "約翰福音10:10", 
+          text: "盜賊來，無非要偷竊、殺害、毀壞；我來了，是要羊得生命，並且得的更豐盛。", 
+          fragments: ["盜賊來，", "無非要", "偷竊、", "殺害、毀壞；", "我來了，", "是要羊得生命，", "並且得的", "更豐盛。"],
+          quizzes: [
+              { q: "主耶穌看顧和保護祂的羊，祂是：", options: ["好牧人", "盜賊", "僱工"], answer: 0 },
+              { q: "主耶穌應許賜予我們怎樣的生命？", options: ["豐盛的生命", "平淡的生命", "辛苦的生命"], answer: 0 },
+              { q: "誰會毀壞我們的生命，破壞我們與神的關係？", options: ["那惡者", "好牧人", "天使"], answer: 0 },
+              { q: "好牧人耶穌會為羊做出什麼犧牲？", options: ["捨命", "逃走", "睡覺"], answer: 0 },
+              { q: "「耶和華是我的______，我必不致缺乏。」", options: ["牧者", "醫生", "老師"], answer: 0 }
+          ]
+        },
+        { 
+          id: 3, title: "第三課: 魔鬼的技倆", ref: "馬太福音6:13", 
+          text: "不叫我們陷入試探；救我們脫離那惡者。因為國度、權柄、榮耀，全是祢的，直到永遠。阿們！", 
+          fragments: ["不叫我們", "陷入試探；", "救我們", "脫離那惡者。", "因為國度、", "權柄、榮耀，", "全是祢的，", "直到永遠。阿們！"],
+          quizzes: [
+              { q: "耶穌被聖靈引導到哪裡受魔鬼的試探？", options: ["曠野", "聖殿", "加利利"], answer: 0 },
+              { q: "耶穌禁食了多少天後便肚餓了？", options: ["四十天", "七天", "十天"], answer: 0 },
+              { q: "魔鬼經常以甚麼來試探人？", options: ["謊言與誘惑", "誠實", "愛心"], answer: 0 },
+              { q: "要遠離魔鬼的試探，必須常常以甚麼來抵擋？", options: ["禱告與讀經", "玩遊戲", "睡覺"], answer: 0 },
+              { q: "當魔鬼叫耶穌把石頭變成食物時，耶穌怎樣回答？", options: ["人活著，不是單靠食物...", "不可試探主你的神", "給我更多石頭"], answer: 0 },
+              { q: "「撒但」這個名字是什麼意思？", options: ["敵擋", "朋友", "美麗"], answer: 0 }
+          ]
+        },
+        { 
+          id: 4, title: "第四課: 平靜風浪", ref: "詩篇 86:7-8", 
+          text: "我在患難之日要求告祢，因為祢必應允我。", 
+          fragments: ["我在", "患難之日", "要求告祢，", "因為祢", "必應允我。"],
+          quizzes: [
+              { q: "當耶穌斥責風和海時，發生了什麼事？", options: ["風和海大大平靜了", "雨下得更大了", "船沉了"], answer: 0 },
+              { q: "耶穌對門徒說：「為什麼膽怯，你們還沒有____嗎？」", options: ["信心", "食物", "力氣"], answer: 0 },
+              { q: "在困難中，我們應當用信心怎樣？", options: ["仰望神", "向神抱怨", "放棄希望"], answer: 0 },
+              { q: "神是我們的避難所，是我們在患難中隨時的____。", options: ["幫助", "阻礙", "玩笑"], answer: 0 }
+          ]
+        },
+        { 
+          id: 5, title: "第五課: 不要論斷人", ref: "馬太福音 7:1-2", 
+          text: "你們不要評斷別人，免得你們被審判。", 
+          fragments: ["你們", "不要", "評斷別人，", "免得你們", "被審判。"],
+          quizzes: [
+              { q: "聖經教導我們不要做什麼，免得被審判？", options: ["幫助別人", "讚美別人", "評斷別人"], answer: 2 }
+          ]
+        },
+        { 
+          id: 6, title: "第六課: 主差遣門徒", ref: "路加福音10:2", 
+          text: "要收的莊稼多，做工的人少。所以，你們要求莊稼的主差遣做工的人出去收祂的莊稼。", 
+          fragments: ["要收的", "莊稼多，", "做工的", "人少。", "所以，", "你們要求", "莊稼的主", "差遣做工的人", "出去", "收祂的莊稼。"],
+          quizzes: [
+              { q: "耶穌說要收的什麼多，做工的人少？", options: ["莊稼", "水果", "麥子"], answer: 0 },
+              { q: "我們要求莊稼的主差遣誰出去收莊稼？", options: ["做工的人", "休息的人", "聰明的人"], answer: 0 }
+          ]
+        }
+    ];
+
+    /* ================= 狀態管理 (State) ================= */
+    let state = {
+        playerName: "Hailey", theme: "girl", ttsEnabled: true, currentLevel: "", 
+        selectedChapters: [], gameQueue: [], currentIndex: 0, score: 0, mistakesThisQ: 0, draggingPiece: null
+    };
+
+    /* ================= 初始化與 UI 切換 ================= */
+    window.onload = () => {
+        let savedName = localStorage.getItem('g2_player_name');
+        if(savedName) { state.playerName = savedName; document.getElementById('input-name').value = savedName; }
+        updateNameDisplay();
+        document.getElementById('input-name').addEventListener('input', (e) => {
+            state.playerName = e.target.value || "Hailey";
+            localStorage.setItem('g2_player_name', state.playerName);
+            updateNameDisplay();
+        });
+    };
+
+    function updateNameDisplay() { document.getElementById('display-name').innerText = `👤 ${state.playerName}`; }
+    function switchView(viewId) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+    }
+    function toggleTheme() {
+        state.theme = state.theme === "girl" ? "boy" : "girl";
+        document.body.setAttribute('data-theme', state.theme);
+    }
+    function toggleTTS() {
+        state.ttsEnabled = !state.ttsEnabled;
+        document.getElementById('btn-tts').innerText = state.ttsEnabled ? "🔊 語音: 開" : "🔇 語音: 關";
+    }
+
+    function speakText(text) {
+        if (!state.ttsEnabled) return;
+        window.speechSynthesis.cancel();
+        let utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'zh-HK'; utterance.rate = 0.85; 
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function readFullVerse() { speakText(state.gameQueue[state.currentIndex].text); }
+
+    /* ================= 遊戲設定與流程 ================= */
+    function goToChapterSelect(level) {
+        state.currentLevel = level;
+        state.selectedChapters = [];
+        document.getElementById('btn-start').disabled = true;
+        let titleText = "📖 選擇溫習課文";
+        if(level === 'LV1') titleText = "🔥 選擇挑戰課文";
+        if(level === 'LV2') titleText = "📝 選擇工作紙範圍";
+        document.getElementById('chapter-title').innerText = titleText + " (可多選)";
+        
+        const listDiv = document.getElementById('chapter-list');
+        listDiv.innerHTML = "";
+        
+        rawData.forEach(item => {
+            let btn = document.createElement('div');
+            btn.className = 'chapter-btn';
+            btn.innerText = item.title;
+            btn.onclick = () => {
+                if (state.selectedChapters.includes(item.id)) {
+                    state.selectedChapters = state.selectedChapters.filter(id => id !== item.id);
+                    btn.classList.remove('selected');
+                } else {
+                    state.selectedChapters.push(item.id);
+                    btn.classList.add('selected');
+                }
+                document.getElementById('btn-start').disabled = state.selectedChapters.length === 0;
+            };
+            listDiv.appendChild(btn);
+        });
+        switchView('chapter-view');
+    }
+
+    function startLevel() {
+        state.gameQueue = [];
+        let selectedData = rawData.filter(d => state.selectedChapters.includes(d.id));
+        
+        if(state.currentLevel === 'LV0' || state.currentLevel === 'LV1') {
+            state.gameQueue = [...selectedData];
+        } else if (state.currentLevel === 'LV2') {
+            selectedData.forEach(lesson => {
+                lesson.quizzes.forEach(quiz => {
+                    // 將選項陣列和正確答案帶入，方便隨機打亂順序
+                    let optData = quiz.options.map((opt, i) => ({ text: opt, isCorrect: i === quiz.answer }));
+                    optData.sort(() => Math.random() - 0.5); // 選項隨機排序
+                    
+                    state.gameQueue.push({ 
+                        type: 'quiz', 
+                        lessonTitle: lesson.title, 
+                        text: quiz.q, 
+                        options: optData 
+                    });
+                });
+            });
+        }
+
+        state.gameQueue.sort(() => Math.random() - 0.5); 
+        state.currentIndex = 0;
+        state.score = 0;
+        
+        document.getElementById('lv0-area').style.display = state.currentLevel === 'LV0' ? 'block' : 'none';
+        document.getElementById('lv1-area').style.display = state.currentLevel === 'LV1' ? 'flex' : 'none';
+        document.getElementById('lv2-area').style.display = state.currentLevel === 'LV2' ? 'flex' : 'none';
+        
+        switchView('game-view');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        state.mistakesThisQ = 0;
+        let q = state.gameQueue[state.currentIndex];
+        document.getElementById('game-progress').innerText = `目前進度: 第 ${state.currentIndex + 1} 題 / 共 ${state.gameQueue.length} 題`;
+
+        if (state.currentLevel === 'LV0') {
+            let verseHtml = q.text.split('').map(char => `<span onclick="speakText('${char}')" style="cursor:pointer; display:inline-block; padding: 2px;">${char}</span>`).join('');
+            document.getElementById('lv0-verse').innerHTML = `<strong style="color:var(--primary-color);">${q.title}</strong><br><br>${verseHtml}<div class="verse-ref">(${q.ref})</div>`;
+        } 
+        else if (state.currentLevel === 'LV1') {
+            document.getElementById('lv1-hint').style.display = 'none';
+            const dropZone = document.getElementById('lv1-drop');
+            const poolZone = document.getElementById('lv1-pool');
+            dropZone.innerHTML = ""; poolZone.innerHTML = "";
+            
+            setupDropZoneEvents(dropZone); setupDropZoneEvents(poolZone);
+            
+            let shuffledFrags = q.fragments.map((frag, index) => ({ frag, index }));
+            shuffledFrags.sort(() => Math.random() - 0.5);
+            
+            shuffledFrags.forEach(pieceData => {
+                let piece = document.createElement('div');
+                piece.className = 'word-piece'; piece.innerText = pieceData.frag;
+                piece.id = 'lv1-piece-' + pieceData.index; piece.draggable = true;
+                piece.onclick = () => moveOrRemovePiece(piece);
+                setupCardDragEvents(piece);
+                poolZone.appendChild(piece);
+            });
+        }
+        else if (state.currentLevel === 'LV2') {
+            speakText(q.text);
+            document.getElementById('lv2-question').innerHTML = `<span style="font-size:18px; color:gray;">[${q.lessonTitle}]</span><br><br>${q.text}`;
+            let optionsDiv = document.getElementById('lv2-options');
+            optionsDiv.innerHTML = "";
+            document.getElementById('lv2-feedback').style.display = 'none';
+            
+            q.options.forEach((optObj) => {
+                let btn = document.createElement('button');
+                btn.className = 'quiz-option-btn';
+                btn.innerText = `👉 ${optObj.text}`;
+                btn.onclick = () => checkAnswerLV2(btn, optObj.isCorrect);
+                optionsDiv.appendChild(btn);
+            });
+        }
+    }
+
+    /* ================= LV1 拖放與點擊邏輯 ================= */
+    function moveOrRemovePiece(piece) {
+        speakText(piece.innerText);
+        let dropZone = document.getElementById('lv1-drop'); let poolZone = document.getElementById('lv1-pool');
+        piece.style.transform = "scale(1.1)"; setTimeout(() => piece.style.transform = "", 150);
+        if (piece.parentElement === poolZone) dropZone.appendChild(piece);
+        else poolZone.appendChild(piece);
+    }
+
+    function setupCardDragEvents(piece) {
+        piece.addEventListener('dragstart', (e) => {
+            state.draggingPiece = piece; piece.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', piece.id); e.dataTransfer.effectAllowed = 'move';
+        });
+        piece.addEventListener('dragend', (e) => { piece.classList.remove('dragging'); state.draggingPiece = null; });
+    }
+
+    function setupDropZoneEvents(zone) {
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+            if (!state.draggingPiece) return;
+            if (zone.dataset.type === 'target') {
+                const afterElement = getDragAfterElement(zone, e.clientX, e.clientY);
+                if (afterElement == null) zone.appendChild(state.draggingPiece);
+                else zone.insertBefore(state.draggingPiece, afterElement);
+            } else if (zone.dataset.type === 'pool') zone.appendChild(state.draggingPiece);
+        });
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault(); 
+            if (state.draggingPiece) speakText(state.draggingPiece.innerText);
+        });
+    }
+
+    function getDragAfterElement(container, x, y) {
+        const draggableElements = [...container.querySelectorAll('.word-piece:not(.dragging)')];
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offsetX = x - box.left - box.width / 2; const offsetY = y - box.top - box.height / 2;
+            if (offsetY < box.height/2 && offsetX < 0 && offsetX > closest.offset) return { offset: offsetX, element: child };
+            else return closest;
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    function resetPieces() {
+        const pool = document.getElementById('lv1-pool');
+        document.querySelectorAll('#lv1-drop .word-piece').forEach(p => pool.appendChild(p));
+    }
+
+    function checkAnswerLV1() {
+        let currentQ = state.gameQueue[state.currentIndex];
+        let dropPiecesFrags = Array.from(document.getElementById('lv1-drop').children).map(p => p.innerText);
+        
+        if (dropPiecesFrags.length < currentQ.fragments.length) { alert("請把備選區所有的字卡都排上去喔！"); return; }
+
+        let isCorrect = dropPiecesFrags.join('') === currentQ.fragments.join('');
+        let dropZone = document.getElementById('lv1-drop');
+
+        if (isCorrect) {
+            dropZone.classList.add('correct-anim'); speakText("答對了！" + currentQ.text);
+            if (state.mistakesThisQ === 0) state.score += 10; else if (state.mistakesThisQ === 1) state.score += 5;
+            setTimeout(() => { dropZone.classList.remove('correct-anim'); nextQuestion(); }, 2500);
+        } else {
+            state.mistakesThisQ++; dropZone.classList.add('wrong-anim');
+            setTimeout(() => dropZone.classList.remove('wrong-anim'), 500);
+            if (state.mistakesThisQ >= 2) {
+                let hintDiv = document.getElementById('lv1-hint');
+                hintDiv.innerText = `💡 提示解答：\n${currentQ.text}`; hintDiv.style.display = 'block';
+            }
+        }
+    }
+
+    /* ================= LV2 工作紙邏輯 ================= */
+    function checkAnswerLV2(btnElement, isCorrect) {
+        if (btnElement.classList.contains('disabled')) return;
+        let feedback = document.getElementById('lv2-feedback');
+        
+        if (isCorrect) {
+            btnElement.classList.add('correct-anim');
+            speakText("太棒了，答對了！");
+            
+            feedback.innerText = "✨ 正確！";
+            feedback.style.color = "var(--correct-color)";
+            feedback.style.backgroundColor = "#dcfce7";
+            feedback.style.display = "block";
+            
+            if (state.mistakesThisQ === 0) state.score += 10;
+            else if (state.mistakesThisQ === 1) state.score += 5;
+
+            document.querySelectorAll('.quiz-option-btn').forEach(b => b.classList.add('disabled'));
+            setTimeout(() => { nextQuestion(); }, 2000);
+        } else {
+            state.mistakesThisQ++;
+            btnElement.classList.add('wrong-anim');
+            btnElement.classList.add('disabled'); 
+            speakText("哎呀，再試一次！");
+            
+            feedback.innerText = "❌ 答錯了，請再試試看！";
+            feedback.style.color = "var(--wrong-color)";
+            feedback.style.backgroundColor = "#fee2e2";
+            feedback.style.display = "block";
+            
+            setTimeout(() => btnElement.classList.remove('wrong-anim'), 500);
+        }
+    }
+
+    /* ================= 遊戲推進與結算 ================= */
+    function nextQuestion() {
+        state.currentIndex++;
+        if (state.currentIndex >= state.gameQueue.length) endGame(true);
+        else loadQuestion();
+    }
+
+    function endGame(completed = false) {
+        if (completed && (state.currentLevel === 'LV1' || state.currentLevel === 'LV2')) {
+            saveScore();
+            document.getElementById('result-title').innerText = `🎉 太棒了，${state.playerName}！`;
+            document.getElementById('result-score').innerText = `本次測驗總得分： ${state.score} 分`;
+            switchView('result-view');
+        } else {
+            switchView('home-view');
+        }
+    }
+
+    /* ================= 排行榜 ================= */
+    function saveScore() {
+        let lb = JSON.parse(localStorage.getItem('g2_bible_leaderboard') || '[]');
+        lb.push({ name: state.playerName, level: state.currentLevel, score: state.score, date: new Date().toLocaleDateString() });
+        lb.sort((a, b) => b.score - a.score);
+        localStorage.setItem('g2_bible_leaderboard', JSON.stringify(lb));
+    }
+
+    function showLeaderboard() {
+        let lb = JSON.parse(localStorage.getItem('g2_bible_leaderboard') || '[]');
+        let table = document.getElementById('lb-table');
+        table.innerHTML = "<tr><th>名字</th><th>模式</th><th>分數</th><th>日期</th></tr>";
+        lb.slice(0, 10).forEach(r => {
+            let row = table.insertRow();
+            row.insertCell(0).innerText = r.name; row.insertCell(1).innerText = r.level;
+            row.insertCell(2).innerText = r.score; row.insertCell(3).innerText = r.date;
+        });
+        switchView('leaderboard-view');
+    }
+
+    function clearLeaderboard() {
+        if(confirm("確定要清除所有紀錄嗎？")) {
+            localStorage.removeItem('g2_bible_leaderboard'); showLeaderboard();
+        }
+    }
+</script>
+</body>
+</html>
