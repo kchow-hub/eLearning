@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>《歷代文言小故事》32、33、34、37、38 - V19</title>
+    <style>
+        :root {
+            --primary: #2c3e50; --accent: #3498db; --success: #27ae60;
+            --error: #e74c3c; --bg: #f0f3f5; 
+            --note-orange: #f39c12; --exercise-red: #e74c3c; --translate-green: #27ae60; --highlight-blue: #3498db;
+        }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; padding: 10px; display: flex; justify-content: center; }
+        #game-box { width: 100%; max-width: 850px; background: white; padding: 20px; border-radius: 25px; box-shadow: 0 12px 40px rgba(0,0,0,0.15); min-height: 95vh; }
+        .settings-bar { background: #eee; padding: 10px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .chapter-card { border: 2px solid #edf2f7; border-radius: 18px; padding: 15px; margin-bottom: 15px; background: #fff; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+        .mode-btn { padding: 14px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.9em; color: white; transition: 0.2s; }
+        .btn-lv0 { background: #9b59b6; } .btn-lv1 { background: #c0392b; } .btn-lv2 { background: #2c3e50; grid-column: span 2; }
+        .full-text-box { background: #f8f9fa; border-left: 5px solid var(--accent); padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .section-title { font-weight: bold; color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;}
+        .source-full { font-size: 1.5em; line-height: 2.2; letter-spacing: 1.5px; margin-bottom: 25px; color: #2d3436; }
+        .trans-full { font-size: 1.15em; color: #4a5568; line-height: 1.8; }
+        .answer-section { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .ans-box { padding: 12px; border-radius: 8px; font-size: 0.85em; line-height: 1.6; }
+        .box-note { background: #fff5e6; border: 1px solid #f39c12; }
+        .box-exercise { background: #fdf2f2; border: 1px solid #e74c3c; }
+        .box-translate { background: #f0fff4; border: 1px solid #27ae60; grid-column: span 2; }
+        .char-span { cursor: pointer; padding: 0 1px; border-radius: 4px; transition: 0.2s; }
+        .char-span:hover { background: #dfe6e9; }
+        .note-orange { color: var(--note-orange); font-weight: bold; border-bottom: 2px solid var(--note-orange); }
+        .exercise-red { color: var(--exercise-red); font-weight: bold; border-bottom: 2px solid var(--exercise-red); }
+        .trans-green { color: var(--translate-green); font-weight: bold; background-color: #e6ffed; }
+        .blue-highlight { color: var(--highlight-blue); border-bottom: 3px solid var(--highlight-blue); font-weight: bold; }
+        .opt-btn { display: block; width: 100%; padding: 18px; margin: 12px 0; border: 2px solid #eee; border-radius: 12px; background: white; text-align: left; cursor: pointer; font-size: 1.1em; }
+        .correct { background: var(--success) !important; color: white; border-color: var(--success); }
+        .wrong { background: var(--error) !important; color: white; border-color: var(--error); }
+        .dictation-input { width: 100%; padding: 15px; font-size: 1.2em; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; margin: 20px 0; }
+        .feedback-msg { padding: 15px; border-radius: 10px; font-weight: bold; margin-top: 10px; display: none; }
+        .hidden { display: none !important; }
+        .footer { margin-top: 30px; display: flex; gap: 10px; position: sticky; bottom: 0; background: white; padding: 10px; border-top: 1px solid #eee; }
+        .nav-btn { flex: 1; padding: 16px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; background: #bdc3c7; }
+    </style>
+</head>
+<body>
+<div id="game-box">
+    <div id="menu">
+        <h2 style="text-align:center;">《歷代文言小故事》<br>32、33、34、37、38</h2>
+        <div class="settings-bar">
+            <label style="cursor:pointer; font-weight:bold;"><input type="checkbox" id="auto-read-toggle" checked> 自動朗讀題目 (ON/OFF)</label>
+        </div>
+        <div id="chapter-list"></div>
+    </div>
+    <div id="screen-lv0" class="hidden">
+        <h2 id="lv0-head"></h2>
+        <div class="full-text-box">
+            <div class="section-title">原文 <span style="cursor:pointer; font-size: 0.8em; color:var(--accent);" onclick="speakTextId('raw')">🔊 朗讀全段</span></div>
+            <div id="lv0-source" class="source-full"></div>
+            <div id="source-tag" style="text-align: right; color: #999; margin-top: -15px; margin-bottom: 20px;"></div>
+            <div class="section-title">釋文 <span style="cursor:pointer; font-size: 0.8em; color:var(--accent);" onclick="speakTextId('trans')">🔊 朗讀全段</span></div>
+            <div id="lv0-trans" class="trans-full"></div>
+            <div class="answer-section">
+                <div class="ans-box box-note"><b style="color:var(--note-orange);">🧡 注釋 (Orange)</b><div id="lv0-notes-list"></div></div>
+                <div class="ans-box box-exercise"><b style="color:var(--exercise-red);">❤️ 練習字詞 (Red)</b><div id="lv0-ex-list"></div></div>
+                <div class="ans-box box-translate"><b style="color:var(--translate-green);">💚 翻譯/理解題目 (Green)</b><div id="lv0-trans-list"></div></div>
+            </div>
+        </div>
+        <div class="footer"><button class="nav-btn" onclick="showMenu()">返回目錄</button></div>
+    </div>
+    <div id="screen-quiz" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items: center;"><span id="mode-badge" style="color:white; padding:4px 10px; border-radius:5px; font-size:0.9em; font-weight:bold;"></span><span id="quiz-progress" style="font-weight:bold; color:#666;"></span></div>
+        <div id="quiz-q-box" style="margin-top:20px;">
+            <div id="quiz-source-context" style="background:#fff9db; padding:18px; border-radius:15px; margin-bottom:20px; line-height:1.8; font-size:1.15em; border:1px solid #ffeaa7;"></div>
+            <h3 id="quiz-question" style="color:var(--primary); line-height:1.4;"></h3>
+            <div id="quiz-options" class="hidden"></div>
+            <div id="quiz-dictation" class="hidden"><input type="text" id="user-input" class="dictation-input" placeholder="在此輸入答案..."><button class="nav-btn" style="background:var(--accent); color:white; width:100%;" onclick="checkDictation()">提交答案</button></div>
+            <div id="feedback-msg" class="feedback-msg"></div>
+        </div>
+        <div class="footer"><button id="next-btn" class="nav-btn hidden" style="background:var(--success); color:white;" onclick="nextQ()">下一題</button><button class="nav-btn" onclick="showMenu()">返回目錄</button></div>
+    </div>
+</div>
+
+<script>
+const chaptersData = {
+    32: {
+        t: "32. 關羽刮骨療毒", tag: "節選自《三國志》",
+        fullSource: "羽嘗為流矢所中，貫其左臂，後創雖愈，每至陰雨，骨常疼痛。醫曰：「矢鏃有毒，毒入於骨，當破臂作創，刮骨去毒，然後此患乃除耳。」羽便伸臂令醫劈之。時羽適請諸將飲食相對，臂血流離，盈於盤器，而羽割炙引酒，言笑自若。",
+        fullTrans: "關羽曾經被亂箭射中，穿透了他的左臂，後來傷口雖然已經痊癒，但每逢天陰下雨，臂骨常常疼痛。醫生說：「箭頭有毒，毒已深入臂骨，應當破開手臂，打開傷口，刮骨以清除毒素，這樣之後這病才能除盡。」關羽便伸出手臂讓醫生剖開它。當時關羽正巧請眾將相對吃喝，他手臂的血淋漓而下，盤子盛滿了血，而關羽割肉飲酒，談笑跟平常一樣。",
+        notes: { "羽":{ans:"指關羽",o:["指關羽","項羽","羽毛"]}, "流矢":{ans:"亂箭",o:["亂箭","流星","箭頭"]}, "鏃":{ans:"金屬箭頭",o:["金屬箭頭","弓弦","箭桿"]}, "作":{ans:"打開",o:["打開","寫作","發作"]}, "流離":{ans:"淋漓",o:["淋漓","流浪","離散"]} },
+        exercises: { "中":{ans:"射中",o:["射中","中間","中獎"]}, "貫":{ans:"穿透",o:["穿透","連繫","一貫"]}, "劈":{ans:"剖開",o:["剖開","劈柴","砍斷"]}, "盈":{ans:"滿",o:["滿","盈餘","多"]} },
+        translations: { "然後此患乃除耳":{ans:"這樣之後這病才能除盡。",o:["這樣之後這病才能除盡。","這之後病就好了。","這之後傷口就癒合了。"]}, "時羽適請諸將飲食相對":{ans:"當時關羽正巧請眾將相對吃喝。",o:["當時關羽正巧請眾將相對吃喝。","當時關羽正請客。","關羽在宴會上交談。"]}, "而羽割炙引酒，言笑自若":{ans:"而關羽割肉飲酒，談笑跟平常一樣。",o:["而關羽割肉飲酒，談笑跟平常一樣。","關羽談笑風生。","關羽忍痛大笑。"]} }
+    },
+    33: {
+        t: "33. 樊重種梓漆", tag: "節選自《齊民要術》",
+        fullSource: "樊重欲作器物，先種梓、漆，時人嗤之。然而積以歲月，皆得其用。向之笑者，咸來求假焉。此種植之不可已也。諺曰：「一年之計，莫如樹穀；十年之計，莫如樹木。」此之謂也。",
+        fullTrans: "樊重想要製作器物，他先種植梓樹與漆樹，當時的人們譏笑他。然而經過一段年月，兩種樹木都派上用場。早先譏笑他的人，都向他來求借。種植這件事是不可停止的。諺語說：一年的計劃，沒有比種植穀子更好；十年的計劃，沒有比種植樹木更好。說的就是這個道理。",
+        notes: { "梓":{ans:"樹木名",o:["樹木名","種子","梓官"]} },
+        exercises: { "嗤":{ans:"譏笑",o:["譏笑","嗤之以鼻","生氣"]}, "已":{ans:"停止",o:["停止","已經","而已"]}, "樹":{ans:"種植",o:["種植","樹木","樹立"]} },
+        translations: { "向之笑者，咸來求假焉":{ans:"早先譏笑他的人，都向他來求借。",o:["早先譏笑他的人，都向他來求借。","向他求助的人都笑了。","以前笑他的人都離開了。"]}, "此之謂也":{ans:"說的就是這個道理。",o:["說的就是這個道理。","這就是它的名字。","這是別人說的。"]}, "古語有「人無遠慮，必有近憂」，意為":{ans:"人如果沒有長遠的策劃，就會有即將到來的憂患。",o:["人如果沒有長遠的策劃，就會有即將到來的憂患。","人如果不考慮別人的事，自己就會憂慮。","人沒有遠大的理想，就會很懶惰。"]} }
+    },
+    34: {
+        t: "34. 「黃耳」傳書", tag: "節選自《晉書》",
+        fullSource: "晉之陸機，畜一犬，曰「黃耳」。機官京師，久無家信。一日，戲語犬曰：「汝能攜書馳取消息否？」犬喜，搖尾。機遂作書，盛以竹筒，繫犬頸。犬經驛路，晝夜不息。家人見書，又反書陸機。犬即上路，越嶺翻山，馳往京師。其間千里之遙，人行往返五旬，而犬才二旬餘。後犬死，機葬之，名之曰「黃耳塚」。",
+        fullTrans: "晉朝的陸機養了一隻狗叫黃耳。他在京城做官，很久沒家信。一天他逗狗說：你能帶信去獲取消息嗎？狗很高興，搖著尾巴。陸機於是寫了信，用竹筒裝著，繫在狗頸上。狗經過驛路，日夜不停。家人看見書信，又回信給陸機。狗立即上路，翻山越嶺，奔往京城。兩地之間有千里的距離，人們走路往返要五十天，但狗只用了二十多天。後來狗死了，陸機埋葬了牠，給墳墓起名叫「黃耳塚」。",
+        notes: { "陸機":{ans:"晉朝著名文學家",o:["晉朝著名文學家","唐朝詩人","宋朝詞人"]}, "京師":{ans:"京城",o:["京城","軍隊","老師"]}, "驛路":{ans:"古代交通大道",o:["古代交通大道","小路","水路"]}, "旬":{ans:"十天",o:["十天","月份","一年"]} },
+        exercises: { "畜":{ans:"養",o:["養","畜牲","看見"]}, "官":{ans:"做官",o:["做官","官員","管理"]}, "反":{ans:"回",o:["回","相反","反叛"]}, "二旬餘":{ans:"二十多天",o:["二十多天","兩個月","二十年"]} },
+        translations: { "汝能攜書馳取消息否":{ans:"你能夠帶著書信奔去獲得家中消息嗎？",o:["你能夠帶著書信奔去獲得家中消息嗎？","你能送信嗎？","你跑去京城拿信嗎？"]}, "盛以竹筒":{ans:"用竹筒裝著書信。",o:["用竹筒裝著書信。","放在竹林裡。","裝滿了竹筒。"]}, "五旬":{ans:"五十天",o:["五十天","十五天","五天"]} }
+    },
+    37: {
+        t: "37. 戴若思悔過", tag: "節選自《晉書》",
+        fullSource: "戴若思少好游俠，不拘操行。遇陸機赴洛，船裝甚盛，遂與其徒掠之。若思登岸，指揮同旅，皆得其宜。機察見之，知非常人，在舫屋上遙謂之曰：「卿才器如此，乃復作劫邪？」若思感悟，因流涕，投劍就之。機與言，深加賞異，遂與定交焉。",
+        fullTrans: "戴若思年輕時愛好俠義行為，品行不受約束。遇到陸機前往洛陽，船上裝載很多，就帶領他的手下人搶劫了它。戴若思上岸後，指揮眾人，都處理得很恰當。陸機觀察他，知道他不是一般的人，在船上的小屋遠遠對他說：「你有這樣的才幹器度，還要作強盜嗎？」戴若思有所覺悟，因而流淚，放下刀劍投靠陸機。陸機與他交談，大加讚賞並認為他與眾不同，就跟他確定朋友關係。",
+        notes: { "戴若思":{ans:"晉朝人，官至征西將軍",o:["晉朝人，官至征西將軍","唐朝人","宋朝人"]}, "游俠":{ans:"俠義行為",o:["俠義行為","遊玩","武士"]}, "洛":{ans:"指洛陽",o:["指洛陽","洛水","長安"]}, "旅":{ans:"眾人",o:["眾人","旅行","軍隊"]}, "機":{ans:"指陸機",o:["指陸機","機器","機會"]}, "舫屋":{ans:"船上的小屋",o:["船上的小屋","房屋","紡織"]} },
+        exercises: { "拘":{ans:"受約束",o:["受約束","拘捕","拘留"]}, "行":{ans:"品行",o:["品行","行走","行為"]}, "盛":{ans:"多",o:["多","盛大","強盛"]}, "遙":{ans:"遠遠地",o:["遠遠地","搖動","遙控"]}, "就":{ans:"靠近",o:["靠近","就是","完成"]} },
+        translations: { "遂與其徒掠之":{ans:"就帶領他的手下人搶劫了它。",o:["就帶領他的手下人搶劫了它。","和徒弟離開了。","於是跟隨他。"]}, "皆得其宜":{ans:"都很恰當。",o:["都很恰當。","都很便宜。","都得到了合適的東西。"]}, "知非常人":{ans:"知道(他)不是一般的人。",o:["知道(他)不是一般的人。","知道他是個不正常的人。","知道他非常有名。"]}, "深加賞異，遂與定交焉":{ans:"大加讚賞並認為(他)與眾不同，就跟他確定朋友關係。",o:["大加讚賞並認為(他)與眾不同，就跟他確定朋友關係。","深深賞賜他，於是結交。","覺得他很奇異，就定下規則。"]} }
+    },
+    38: {
+        t: "38. 愚人食鹽", tag: "節選自《百喻經》",
+        fullSource: "昔有愚人，至於他家。主人與食，嫌淡無味。主人聞已，更為益鹽。既得鹽美，便自念道：「所以美者，緣有鹽故。少有鹽美，況復多也？」愚人無智，便空食鹽。食已口爽，返為其患。",
+        fullTrans: "以前有個愚人，到了別人家裏。主人給他食物，他嫌清淡沒有味道。主人聽了之後，再為愚人增加鹽。愚人已嚐到鹽的美味，便自己心想：「食物之所以美味，因為有鹽的原因。少許鹽已美味，何況再多一些呢？」愚人沒有智慧，便單單吃鹽。食後口味敗壞，反而成為它的災難。",
+        notes: { "口爽":{ans:"口味敗壞",o:["口味敗壞","爽口","爽快"]}, "返":{ans:"同「反」",o:["同「反」","返回","造反"]} },
+        exercises: { "已":{ans:"之後",o:["之後","已經","停止"]}, "故":{ans:"原因",o:["原因","緣分","故事"]} },
+        translations: { "更為益鹽":{ans:"再為(愚人)增加鹽。",o:["再為(愚人)增加鹽。","更喜歡鹽。","加了一些好處。"]}, "既得鹽美":{ans:"已嚐到鹽的美味。",o:["已嚐到鹽的美味。","既然鹽很美。","得到了美味。"]}, "返為其患":{ans:"反而成為它的災難。",o:["反而成為它的災難。","回家看病。","反而擔心鹽不夠。"]}, "這則寓言告訴人們一個什麼道理？":{ans:"凡事要恰到好處，過了頭就會適得其反。",o:["凡事要恰到好處，過了頭就會適得其反。","鹽是生活中不可或缺的。","要聽從別人的建議。"]} }
+    }
+};
+
+let currentChapter = null, quizPool = [], qIdx = 0, isDictationMode = false;
+
+function init() {
+    const list = document.getElementById('chapter-list'); list.innerHTML = '';
+    for (let id in chaptersData) {
+        const item = chaptersData[id]; const card = document.createElement('div');
+        card.className = 'chapter-card'; card.innerHTML = `<div style="font-weight:bold;">${item.t}</div><div class="btn-group">
+            <button class="mode-btn btn-lv0" onclick="startLV0(${id})">LV0 全篇對照</button>
+            <button class="mode-btn btn-lv1" onclick="startQuiz(${id}, false)">LV1 選擇挑戰</button>
+            <button class="mode-btn btn-lv2" onclick="startQuiz(${id}, true)">LV2 默寫挑戰</button></div>`;
+        list.appendChild(card);
+    }
+}
+
+const isIndexInKeys = (index, s, dict) => {
+    for(let k in dict) {
+        let start = 0, idx = -1;
+        while((idx = s.indexOf(k, start)) !== -1) {
+            if(index >= idx && index < idx + k.length) return true;
+            start = idx + 1;
+        }
+    }
+    return false;
+};
+
+function startLV0(id) {
+    const c = chaptersData[id]; currentChapter = c;
+    document.getElementById('lv0-head').innerText = c.t; document.getElementById('source-tag').innerText = `(${c.tag})`;
+    let html = "", s = c.fullSource;
+    
+    for(let i=0; i<s.length; i++){
+        let char = s[i], cls = "char-span";
+        if(isIndexInKeys(i, s, c.translations)) cls += " trans-green";
+        else if(isIndexInKeys(i, s, c.exercises)) cls += " exercise-red";
+        else if(isIndexInKeys(i, s, c.notes)) cls += " note-orange";
+        
+        html += `<span class="${cls}" onclick="speak('${char}')">${char}</span>`;
+    }
+    
+    document.getElementById('lv0-source').innerHTML = html; document.getElementById('lv0-trans').innerText = c.fullTrans;
+    let nH = ""; for(let k in c.notes) nH += `• <b>${k}</b>: ${c.notes[k].ans}<br>`; document.getElementById('lv0-notes-list').innerHTML = nH;
+    let eH = ""; for(let k in c.exercises) eH += `• <b>${k}</b>: ${c.exercises[k].ans}<br>`; document.getElementById('lv0-ex-list').innerHTML = eH;
+    let tH = ""; for(let k in c.translations) tH += `• <b>${k}</b><br>　👉 ${c.translations[k].ans}<br>`; document.getElementById('lv0-trans-list').innerHTML = tH;
+    window.curRaw = c.fullSource; window.curTrans = c.fullTrans; switchScreen('screen-lv0');
+}
+
+function startQuiz(id, dictation) {
+    const c = chaptersData[id]; currentChapter = c; isDictationMode = dictation; quizPool = [];
+    const addToPool = (data, type) => { for(let k in data) quizPool.push({ type: type, q: type==='翻譯/理解'?`題目：「${k}」`:`「${k}」的意思是？`, a: data[k].ans, o: data[k].o, kw: [k] }); };
+    addToPool(c.notes, "注釋"); addToPool(c.exercises, "練習"); addToPool(c.translations, "翻譯/理解");
+    quizPool.sort(() => Math.random() - 0.5); qIdx = 0; window.curRaw = c.fullSource; switchScreen('screen-quiz');
+    const b = document.getElementById('mode-badge'); b.innerText = isDictationMode ? "LV2 默寫挑戰" : "LV1 選擇挑戰"; b.style.background = isDictationMode ? "#2c3e50" : "#c0392b"; renderQ();
+}
+
+function renderQ() {
+    const q = quizPool[qIdx]; document.getElementById('quiz-progress').innerText = `${qIdx+1} / ${quizPool.length}`;
+    document.getElementById('quiz-question').innerText = `【${q.type}題】${q.q}`;
+    let context = window.curRaw;
+    q.kw.forEach(k => { if(context.indexOf(k) !== -1) context = context.replace(new RegExp(k, 'g'), `<span class="blue-highlight">${k}</span>`); });
+    document.getElementById('quiz-source-context').innerHTML = context;
+    document.getElementById('feedback-msg').style.display = "none"; document.getElementById('next-btn').classList.add('hidden');
+    
+    const optContainer = document.getElementById('quiz-options');
+    const dictContainer = document.getElementById('quiz-dictation');
+
+    if(isDictationMode) {
+        optContainer.classList.add('hidden'); dictContainer.classList.remove('hidden');
+        document.getElementById('user-input').value = ""; document.getElementById('user-input').disabled = false; document.getElementById('user-input').focus();
+    } else {
+        dictContainer.classList.add('hidden'); optContainer.classList.remove('hidden');
+        optContainer.innerHTML = '';
+        [...q.o].sort(() => Math.random() - 0.5).forEach(o => {
+            const btn = document.createElement('button'); btn.className = 'opt-btn'; btn.innerText = o;
+            btn.onclick = () => handleAnswer(o === q.a, q.a, btn); optContainer.appendChild(btn);
+        });
+    }
+    if(document.getElementById('auto-read-toggle').checked) speak(q.q);
+}
+
+function handleAnswer(isCorrect, correctAns, btn = null) {
+    document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+    if(isCorrect) { if(btn) btn.classList.add('correct'); speakFeedback(true); } 
+    else { if(btn) btn.classList.add('wrong'); document.querySelectorAll('.opt-btn').forEach(b => { if(b.innerText === correctAns) b.classList.add('correct'); }); speakFeedback(false, correctAns); }
+    document.getElementById('next-btn').classList.remove('hidden');
+}
+
+function checkDictation() {
+    const q = quizPool[qIdx], input = document.getElementById('user-input').value.trim();
+    const clean = (s) => s.replace(/[，。！？：、()（）_]/g, "");
+    const isCorrect = clean(input) === clean(q.a), fb = document.getElementById('feedback-msg');
+    fb.style.display = "block"; document.getElementById('user-input').disabled = true;
+    if(isCorrect) { fb.innerText = "答對了！"; fb.style.background = "#e6ffed"; fb.style.color = "#27ae60"; speakFeedback(true); } 
+    else { fb.innerText = `答錯了。正確答案係：${q.a}`; fb.style.background = "#fdf2f2"; fb.style.color = "#e74c3c"; speakFeedback(false, q.a); }
+    document.getElementById('next-btn').classList.remove('hidden');
+}
+
+function nextQ() { 
+    qIdx++; 
+    if(qIdx < quizPool.length) renderQ(); 
+    else { alert("🎉 完成挑戰！"); showMenu(); } 
+}
+
+function speak(t) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang='zh-HK'; u.rate=0.9; window.speechSynthesis.speak(u); }
+function speakFeedback(isC, ans = "") { window.speechSynthesis.cancel(); let msg = isC ? "答對了" : `答錯了，正確答案係 ${ans}`; const u = new SpeechSynthesisUtterance(msg); u.lang='zh-HK'; u.rate=0.9; window.speechSynthesis.speak(u); }
+function speakTextId(type) { speak(type==='raw'?window.curRaw:window.curTrans); }
+function switchScreen(id) { ['menu','screen-lv0','screen-quiz'].forEach(s => document.getElementById(s).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); window.speechSynthesis.cancel(); }
+function showMenu() { switchScreen('menu'); }
+window.onload = init;
+</script>
+</body>
+</html>
