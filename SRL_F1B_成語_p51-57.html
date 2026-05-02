@@ -3,174 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>《中一成語名言警句手冊》 頁51-57</title>
+    <title>SRL F1下學期《中一成語名言警句手冊》</title>
     <style>
-        :root { --primary: #007aff; --bg: #f2f2f7; --card: #ffffff; --success: #34c759; --error: #ff3b30; --meaning: #e67e22; --example: #27ae60; }
+        :root { --primary: #007aff; --bg: #f2f2f7; --card: #ffffff; --success: #34c759; --error: #ff3b30; --meaning: #e67e22; --example: #27ae60; --highlight: #ff9500; }
         body { margin: 0; font-family: -apple-system, sans-serif; background: var(--bg); display: flex; justify-content: center; height: 100vh; overflow: hidden; }
         .app { width: 100%; max-width: 500px; display: flex; flex-direction: column; }
         .screen { flex: 1; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; overflow-y: auto; }
         .hidden { display: none !important; }
         .card { background: var(--card); border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.05); }
         .btn { background: var(--primary); color: white; border: none; border-radius: 14px; padding: 16px; font-size: 18px; font-weight: 600; margin: 8px 0; cursor: pointer; width: 100%; -webkit-tap-highlight-color: transparent; }
-        .btn-purple { background: #af52de; }
+        .btn-exam { background: var(--highlight); }
+        .btn-l0 { background: #5856d6; }
+        .btn-l4 { background: #1c1c1e; } /* 黑色代表挑戰模式 */
         .btn-outline { background: none; color: var(--primary); border: 2px solid var(--primary); }
         .toolbar { display: flex; justify-content: space-between; padding: 10px 20px; align-items: center; background: white; border-bottom: 1px solid #ddd; }
-        .back-link { color: var(--primary); background: none; border: none; font-size: 17px; font-weight: 600; cursor: pointer; padding: 10px 0; display: flex; align-items: center; }
-        .chapter-header { font-size: 1.4rem; font-weight: bold; margin: 20px 0 10px; color: #333; border-bottom: 3px solid var(--primary); display: block; padding-bottom: 5px; }
+        .back-link { color: var(--primary); background: none; border: none; font-size: 17px; font-weight: 600; cursor: pointer; padding: 10px 0; }
         .list-item { background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: left; }
-        .word-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-        .word-row b { font-size: 1.3rem; color: #003366; }
-        .exp-text { color: var(--meaning); font-size: 1rem; margin-bottom: 5px; font-weight: 600; }
-        .ex-text { color: var(--example); font-size: 0.95rem; line-height: 1.5; }
-        .speak-btn { background: #f2f2f7; border: none; border-radius: 50%; cursor: pointer; font-size: 1.2rem; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; }
+        .word-row { display: flex; align-items: center; gap: 5px; margin-bottom: 8px; flex-wrap: wrap; }
+        .char-btn { border: 1.5px solid #d1d1d6; background: #fff; border-radius: 6px; padding: 4px 8px; font-size: 1.2rem; cursor: pointer; color: #003366; font-weight: bold; }
+        .char-btn:active { background: #007aff; color: #fff; }
+        .exp-text { color: var(--meaning); font-size: 1rem; font-weight: 600; margin-bottom: 5px; }
+        .ex-text { color: var(--example); font-size: 0.9rem; line-height: 1.5; }
+        .speak-btn { background: #f2f2f7; border: none; border-radius: 50%; cursor: pointer; font-size: 1.1rem; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; }
         input { width: 100%; padding: 15px; font-size: 1.4rem; border-radius: 15px; border: 2px solid #ccc; text-align: center; box-sizing: border-box; }
+        .feedback-area { margin-top: 15px; min-height: 40px; font-weight: bold; font-size: 1.1rem; text-align: center; }
     </style>
 </head>
 <body>
     <div class="app">
         <div class="toolbar">
-            <span style="font-weight:700;">《中一成語名言警句手冊》 頁51-57</span>
+            <span style="font-weight:700;">SRL F1下學期《中一成語名言警句手冊》</span>
             <button onclick="toggleGlobalSnd()" id="snd-btn" style="border:none; background:none; font-size:22px;">🔊</button>
         </div>
 
         <div id="sc-cover" class="screen">
-            <div class="card" style="margin-top:10px;">
-                <div style="font-size:50px;">🚀</div>
-                <h1>成語能力提升</h1>
-                <p style="color: #8e8e93;">廣東話朗讀版 (U5, U6, U7)</p>
+            <div class="card" style="background: #fff9f0;">
+                <h3 style="margin:0 0 10px 0; color:#e67e22;">🔥 下學期測考必考範圍</h3>
+                <button class="btn btn-exam" onclick="openChapterMenu('單元七')">單元七：自我成長</button>
+                <button class="btn btn-exam" onclick="openChapterMenu('價值教育 6-9')">價值教育 (6-9)</button>
             </div>
-            <button class="btn" onclick="openChapterMenu('單元五')">單元五：大地景象</button>
-            <button class="btn" onclick="openChapterMenu('單元六')">單元六：生物奧妙</button>
-            <button class="btn" onclick="openChapterMenu('單元七')">單元七：自我成長</button>
-            <button class="btn btn-outline" style="margin-top:10px;" onclick="renderFullList()">📜 總覽清單 (朗讀/分色)</button>
+            <div style="margin-top:15px; font-weight:bold; color:#666; padding-left:5px;">溫習其他單元</div>
+            <button class="btn btn-outline" onclick="openChapterMenu('單元五')">單元五：大地景象</button>
+            <button class="btn btn-outline" onclick="openChapterMenu('單元六')">單元六：生物奧妙</button>
+            <button class="btn btn-outline" onclick="openChapterMenu('價值教育 1-5')">價值教育 (1-5)</button>
         </div>
 
         <div id="sc-level" class="screen hidden">
             <button class="back-link" onclick="showScreen('sc-cover')">← 返回主頁</button>
-            <h2 id="chapter-title" style="text-align:center;"></h2>
-            <button class="btn" onclick="startGame(1)">Level 1 (手冊原句)</button>
-            <button class="btn btn-purple" onclick="startGame(2)">Level 2 (全新應用)</button>
+            <div class="card"><h2 id="chapter-title" style="margin:0; color: var(--primary);"></h2></div>
+            <button class="btn btn-l0" onclick="showLevel0()">1. Level 0 (點字溫習)</button>
+            <button class="btn" onclick="startGame(1)">2. Level 1 (意思填充)</button>
+            <button class="btn btn-purple" onclick="startGame(2)">3. Level 2 (應用挑戰)</button>
+            <button class="btn btn-l4" onclick="startGame(4)">🏆 Level 4 (聽音默寫 - 無字)</button>
+        </div>
+
+        <div id="sc-l0-list" class="screen hidden">
+            <button class="back-link" onclick="showScreen('sc-level')">← 返回</button>
+            <div id="l0-content"></div>
         </div>
 
         <div id="sc-game" class="screen hidden">
             <button class="back-link" onclick="confirmExit()">← 放棄練習</button>
             <div id="game-info" style="text-align:center; color:#8e8e93; margin-bottom:10px;"></div>
-            <div id="q-text" class="card" style="font-size:1.2rem; min-height:100px; display:flex; align-items:center; justify-content:center;"></div>
-            <div id="q-hint" style="text-align:center; letter-spacing:6px; font-size:1.4rem; font-weight:bold; margin:15px 0; background:#eee; padding:10px; border-radius:10px;"></div>
-            <input type="text" id="ans-in" placeholder="輸入答案" autocomplete="off">
-            <div id="fb" style="text-align:center; font-weight:bold; min-height:24px; margin:10px 0;"></div>
-            <button class="btn" onclick="checkAnswer()">提交</button>
-        </div>
-
-        <div id="sc-list" class="screen hidden">
-            <button class="back-link" onclick="showScreen('sc-cover')">← 返回主頁</button>
-            <div id="list-content"></div>
+            <div id="q-card" class="card">
+                <div id="q-text" style="font-size:1.15rem; line-height:1.6; padding: 10px 0;"></div>
+                <button id="q-speak" class="btn btn-outline" style="padding:8px; font-size:0.9rem;" onclick="speakCurrentQ()">🔊 朗讀題目</button>
+            </div>
+            <div id="q-hint" style="text-align:center; letter-spacing:4px; font-size:1.2rem; font-weight:bold; margin:15px 0; background:#eee; padding:12px; border-radius:10px;"></div>
+            <input type="text" id="ans-in" placeholder="請輸入答案" autocomplete="off">
+            <div id="fb-area" class="feedback-area"></div>
+            <div id="action-area" class="hidden"><button class="btn" onclick="nextQuestion()">下一題</button></div>
+            <button id="submit-btn" class="btn" onclick="checkAnswer()">提交</button>
         </div>
 
         <div id="sc-res" class="screen hidden">
-            <div class="card" style="margin-top:40px;">
-                <h1 id="res-score" style="font-size:3rem;"></h1>
-                <p id="res-msg"></p>
-            </div>
-            <button class="btn" onclick="showScreen('sc-cover')">完成</button>
+            <div class="card" style="margin-top:40px;"><h1 id="res-score" style="font-size:3.5rem;"></h1><p id="res-msg"></p></div>
+            <button class="btn" onclick="showScreen('sc-cover')">完成溫習</button>
         </div>
     </div>
 
-    <audio id="s-ok" src="https://cdn.pixabay.com/audio/2022/03/15/audio_806089163a.mp3"></audio>
-    <audio id="s-no" src="https://cdn.pixabay.com/audio/2022/03/10/audio_c356100570.mp3"></audio>
-
 <script>
     const bank = [
-        // 單元五、六內容已略過以節省篇幅，實際代碼中已包含
-        // 以下為新增的單元七內容 
-        { ch: "單元七", w: "時時刻刻", exp: "時常、經常。", l1: "不良的習慣，便______會來引誘我們做不正當的事。", l2: "警察提示市民，要______提高警覺，鎖好門窗。" },
-        { ch: "單元七", w: "因循怠惰", exp: "形容做事懶散拖延，依照舊習慣行事。", l1: "因為______，是一條綑住手腳的繩子。", l2: "如果一直______，不肯嘗試新方法，公司很難進步。" },
-        { ch: "單元七", w: "優柔寡斷", exp: "面對抉擇時遲疑不決。", l1: "修端做事果敢，遇事不會______。", l2: "他在關鍵時刻總是______，白白錯失了投資的良機。" },
-        { ch: "單元七", w: "三心兩意", exp: "形容人意念不專，拿不定主意。", l1: "家寶______，遲遲未能作出決定。", l2: "選定了目標就要堅持到底，不能______。" },
-        { ch: "單元七", w: "一往無前", exp: "勇往直前，不怕任何困難。", l1: "只要你有一往無前的精神，就必定可以戰勝難關。", l2: "探險隊員以______的氣概，成功登上了峰頂。" },
-        { ch: "單元七", w: "當機立斷", exp: "立刻作出判斷，沒有片刻猶豫。", l1: "消防員______，帶領市民前往天台等候救援。", l2: "機長在引擎故障時______，決定緊急迫降，救了所有人。" },
-        { ch: "單元七", w: "全力以赴", exp: "拿出自己所有力量做事。", l1: "為了這次表演，大家都______，希望得到讚賞。", l2: "我自問已經______，無論結果如何，也問心無愧。" },
-        { ch: "單元七", w: "破釜沉舟", exp: "比喻下定決心，不顧一切。", l1: "球員抱著______的決心上陣，誓要擊敗對手。", l2: "面對強大的競爭對手，我們必須有______的勇氣。" },
-        { ch: "單元七", w: "日月蹉跎", exp: "浪費光陰，一事無成。", l1: "你不想______的話，就要立下目標，努力奮鬥。", l2: "如果不趁年輕學習，整天玩樂，最終只會______。" },
-        { ch: "單元七", w: "爭分奪秒", exp: "每分每秒也不放過，形容抓緊時間。", l1: "考試只剩下五分鐘，考生都______，拼命書寫。", l2: "救護車在馬路上______，希望能盡快將病人送到醫院。" },
-        { ch: "單元七", w: "去惡,如農夫之務去草焉", exp: "去除罪惡，像農夫拔除雜草一樣。", l1: "古人說：「______」。", l2: "改掉壞習慣不能猶豫，必須本著「______」的精神。" },
-        { ch: "單元七", w: "斬草不除根,春風吹又生", exp: "比喻徹底除去禍根，不留後患。", l1: "俗語說：「______」。", l2: "防範病菌必須徹底消毒，否則「______」。" },
-        { ch: "單元七", w: "世上無難事,只怕有心人", exp: "只要肯下定決心，便能克服任何困難。", l1: "所謂「______」，只要你願意嘗試，就有機會成功。", l2: "雖然數學很難，但「______」，只要多練習一定會進步。" },
-        { ch: "單元七", w: "少壯不努力,老大徒傷悲", exp: "年輕時不發憤，年老時白白悲傷。", l1: "我們要抓緊時間，否則便會「______」。", l2: "他年輕時遊手好閒，老來落魄，正是「______」。" },
-        { ch: "單元七", w: "一寸光陰一寸金,寸金難買寸光陰", exp: "比喻時間極為寶貴。", l1: "所謂「______」，可想而知時間是多寶貴。", l2: "別再浪費時間玩電子遊戲了，要記住「______」。" }
+        // 確保單元五 (13個項目)
+        { ch: "單元五", w: "肩摩轂擊", exp: "肩部相擦，車輪相碰。形容人車擁擠。", l1: "平日______的大街，一看完全換了樣。" },
+        { ch: "單元五", w: "熙來攘往", exp: "形容人來人往，非常熱鬧。", l1: "那些______的人都受了風的威脅，躲在家裡了。" },
+        { ch: "單元五", w: "一箭之地", exp: "比喻距離不遠。", l1: "離兩處都不過「______」。" },
+        { ch: "單元五", w: "不毛之地", exp: "荒涼、不長草木的土地。", l1: "經過多年開墾，這片______終於變成良田。" },
+        { ch: "單元五", w: "美不勝收", exp: "美好的東西太多，來不及欣賞。", l1: "奇花異卉爭相盛放，______。" },
+        { ch: "單元五", w: "賞心悅目", exp: "看到美好的景色而心情舒暢。", l1: "一望無際的草原點綴著野花，真叫人______。" },
+        { ch: "單元五", w: "欣欣向榮", exp: "形容草木生長茂盛，亦比喻事業蓬勃。", l1: "春天來了，郊外的花草______地生長。" },
+        { ch: "單元五", w: "五光十色", exp: "色彩鮮豔奪目。", l1: "嘉年華會上______的燈飾，吸引不少遊人。" },
+        { ch: "單元五", w: "山明水秀", exp: "山水優美。", l1: "這裡昔日______，但因受污染而可惜。" },
+        { ch: "單元五", w: "氣象萬千", exp: "景象宏偉多樣。", l1: "山上的雲海______，讓人目不暇給。" },
+        { ch: "單元五", w: "雷聲大,雨點小", exp: "比喻聲勢很大，實效很小。", l1: "他總是「______」，起初提意見但工作時不見人。" },
+        { ch: "單元五", w: "欲窮千里目,更上一層樓", exp: "比喻要達到更高境界，需付出更多努力。", l1: "老師鼓勵他說「______」。" },
+        { ch: "單元五", w: "禍不單行", exp: "指不幸的事接連發生。", l1: "丟了錢包又遺失電話，真是______。" },
+
+        // 單元六 (12個項目)
+        { ch: "單元六", w: "千里迢迢", exp: "形容路途遙遠。", l1: "像燕子那樣______，飛到溫暖的南方去。" },
+        { ch: "單元六", w: "春暖花開", exp: "春天氣候溫暖，百花盛開。", l1: "待到來年______時，蚊子、夜蛾活躍了。" },
+        { ch: "單元六", w: "金蟬脫殼", exp: "比喻用計謀脫身。", l1: "善於「______」的海參，也有睡大覺的本事。" },
+        { ch: "單元六", w: "風和日麗", exp: "形容天氣晴朗。", l1: "海面上______，氣候炎熱。" },
+        { ch: "單元六", w: "寒氣逼人", exp: "形容非常寒冷。", l1: "熱烘烘的海面，變得______。" },
+        { ch: "單元六", w: "生意盎然", exp: "充滿生機。", l1: "古蓮子竟頂破硬殼，______。" },
+        { ch: "單元六", w: "碩果僅存", exp: "僅剩下的極少數。", l1: "現在只剩下這間______的老店舖。" },
+        { ch: "單元六", w: "光怪陸離", exp: "形容奇形怪狀，色彩繁多。", l1: "大自然種種______的現象，令人嘖嘖稱奇。" },
+        { ch: "單元六", w: "曇花一現", exp: "比喻事物一出現便迅速消失。", l1: "這種生物只在晚上______。" },
+        { ch: "單元六", w: "物競天擇,適者生存", exp: "自然淘汰，適應者方能生存。", l1: "我們要精益求精，才不會被社會淘汰，這就是「______」。" },
+        { ch: "單元六", w: "一元復始,萬象更新", exp: "新一年開始，萬物景象一新。", l1: "市民喜氣洋洋，感悟「______」的喜悅。" },
+        { ch: "單元六", w: "麻雀雖小,五臟俱全", exp: "比喻規模小但設備完善。", l1: "這間公寓面積雖然不大，但卻是______。" },
+
+        // 單元七 (15個項目)
+        { ch: "單元七", w: "時時刻刻", exp: "經常、時常。", l1: "不良習慣，便______會來引誘我們做不正當的事。" },
+        { ch: "單元七", w: "因循怠惰", exp: "做事懶散、不思進取。", l1: "因為______，是一條綑住手腳的繩子。" },
+        { ch: "單元七", w: "優柔寡斷", exp: "抉擇時遲疑不決。", l1: "修端做事果敢，遇事不會______。" },
+        { ch: "單元七", w: "三心兩意", exp: "意念不專，猶疑不決。", l1: "家寶______，遲遲未能作出決定。" },
+        { ch: "單元七", w: "一往無前", exp: "勇敢前進，不畏艱難。", l1: "只要有一往無前的精神，必可戰勝難關。" },
+        { ch: "單元七", w: "當機立斷", exp: "抓住時機迅速做決定。", l1: "消防員______，帶領市民前往天台等候救援。" },
+        { ch: "單元七", w: "全力以赴", exp: "竭盡全力完成。", l1: "大家都______，希望得到觀眾讚賞。" },
+        { ch: "單元七", w: "破釜沉舟", exp: "下定決心，不顧一切。", l1: "球員抱著______的決心上陣，誓要擊敗對手。" },
+        { ch: "單元七", w: "日月蹉跎", exp: "虛度光陰。", l1: "不想______的話，就要努力奮鬥。" },
+        { ch: "單元七", w: "爭分奪秒", exp: "抓緊每一秒鐘。", l1: "考試只剩五分鐘，考生都______地拼命書寫。" },
+        { ch: "單元七", w: "去惡,如農夫之務去草焉", exp: "去除惡習應像拔草一樣徹底。", l1: "古人說：「______」。" },
+        { ch: "單元七", w: "斬草不除根,春風吹又生", exp: "比喻處理問題要徹底，否則後患無窮。", l1: "俗語說：「______」。" },
+        { ch: "單元七", w: "世上無難事,只怕有心人", exp: "只要下決心，沒有做不到的事。", l1: "所謂「______」，只要願意嘗試就有機會。" },
+        { ch: "單元七", w: "少壯不努力,老大徒傷悲", exp: "年輕時不努力，老了只能白白悲傷。", l1: "我們要抓緊時間學習，否則「______」。" },
+        { ch: "單元七", w: "一寸光陰一寸金,寸金難買寸光陰", exp: "比喻光陰極為珍貴。", l1: "名句「______」提醒我們珍惜時間。" },
+
+        // 價值教育 6-9 (本次重點)
+        { ch: "價值教育 6-9", w: "山重水複疑無路,柳暗花明又一村", exp: "困境中鑑定信念，終會出現美好新景象。", l1: "陸游名句「______」象徵人生路崎嶇但有希望。" },
+        { ch: "價值教育 6-9", w: "祭如在,祭神如神在", exp: "參與禮祭應以虔敬的心，視天主如在旁。", l1: "參與彌撒儀式，應懷著「______」的心。" },
+        { ch: "價值教育 6-9", w: "路漫漫其修遠兮,吾將上下而求索", exp: "前面的路遙遠，將追尋理想。", l1: "屈原《離騷》中表達「______」的信念。" },
+        { ch: "價值教育 6-9", w: "但願人長久,千里共嬋娟", exp: "健康長壽，雖隔千里也能共享月色。", l1: "蘇軾《水調歌頭》表達「______」的盼望。" },
+
+        // 價值教育 1-5
+        { ch: "價值教育 1-5", w: "天生我材必有用", exp: "每個人的出生都有其價值。", l1: "李白《將進酒》中提及「______」。" },
+        { ch: "價值教育 1-5", w: "知人者智,自知者明", exp: "了解他人是智慧，了解自己是高明。", l1: "老子強調「自勝者強」與「______」。" },
+        { ch: "價值教育 1-5", w: "勿以善小而不為,勿以惡小而為之", exp: "好事不嫌小，壞事莫去犯。", l1: "朱子家訓云「______」。" },
+        { ch: "價值教育 1-5", w: "人之有德於我也,不可忘也", exp: "受人恩惠，不可忘記。", l1: "我們應飲水思源，謹記「______」。" },
+        { ch: "價值教育 1-5", w: "靜以修身,儉以養德", exp: "心靜修身，節約養德。", l1: "諸葛亮勸誠「______」。" }
     ];
 
-    // 此處補回單元五、六的部分內容供示範
-    bank.push({ ch: "單元五", w: "禍不單行", exp: "指不幸的事接連發生。", l1: "他弄丟了錢包，還遺失了電話，真是______。", l2: "原本感冒剛好，現在又扭傷腳，真是______。" });
-
-    let currentCh = 'ALL', activeSet = [], qIdx = 0, score = 0, level = 1, sndOn = true;
+    let currentCh = '', activeSet = [], qIdx = 0, score = 0, level = 1, sndOn = true;
 
     function speak(txt) { 
         if (!window.speechSynthesis) return;
         window.speechSynthesis.cancel();
         const msg = new SpeechSynthesisUtterance(txt);
-        msg.lang = 'zh-HK'; msg.rate = 0.95;
+        msg.lang = 'zh-HK'; msg.rate = 0.9;
         window.speechSynthesis.speak(msg);
     }
 
     function toggleGlobalSnd() { sndOn = !sndOn; document.getElementById('snd-btn').innerText = sndOn ? "🔊" : "🔈"; }
     function playSfx(t) { if(sndOn) document.getElementById(t==='ok'?'s-ok':'s-no').play(); }
     function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
-    function openChapterMenu(ch) { currentCh = ch; document.getElementById('chapter-title').innerText = ch === 'ALL' ? '綜合挑戰' : ch; showScreen('sc-level'); }
-    function confirmExit() { if(confirm("確定要放棄練習嗎？")) showScreen('sc-cover'); }
+    function openChapterMenu(ch) { currentCh = ch; document.getElementById('chapter-title').innerText = ch; showScreen('sc-level'); }
+    function confirmExit() { if(confirm("確定要放棄並回到主頁？")) showScreen('sc-cover'); }
 
-    function renderFullList() {
-        const box = document.getElementById('list-content');
-        box.innerHTML = "";
-        ["單元五", "單元六", "單元七"].forEach(ch => {
-            const items = bank.filter(i => i.ch === ch);
-            if(items.length > 0) {
-                const head = document.createElement('div'); head.className = "chapter-header"; head.innerText = ch; box.appendChild(head);
-                items.forEach(i => {
-                    const d = document.createElement('div'); d.className = "list-item";
-                    d.innerHTML = `<div class="word-row"><b>${i.w}</b><button class="speak-btn" onclick="speak('${i.w}')">🔊</button></div>
-                                   <div class="exp-text">【解釋】：${i.exp} <button class="speak-btn" style="width:25px;height:25px;font-size:0.8rem;" onclick="speak('${i.exp}')">🔊</button></div>
-                                   <div class="ex-text">【例句】：${i.l1.replace('______', i.w)} <button class="speak-btn" style="width:25px;height:25px;font-size:0.8rem;" onclick="speak('${i.l1.replace('______', i.w)}')">🔊</button></div>`;
-                    box.appendChild(d);
-                });
-            }
+    function showLevel0() {
+        const box = document.getElementById('l0-content');
+        box.innerHTML = `<h3 style="text-align:center;">${currentCh} 溫習清單</h3>`;
+        bank.filter(i => i.ch === currentCh).forEach((i, idx) => {
+            const d = document.createElement('div');
+            d.className = "list-item";
+            const charBtns = i.w.split('').map(char => `<button class="char-btn" onclick="speak('${char}')">${char}</button>`).join('');
+            d.innerHTML = `
+                <div class="word-row"><b>${idx+1}.</b> ${charBtns} <button class="speak-btn" style="margin-left:auto" onclick="speak('${i.w}')">🔊</button></div>
+                <div class="exp-text">【意思】：${i.exp}</div>
+            `;
+            box.appendChild(d);
         });
-        showScreen('sc-list');
+        showScreen('sc-l0-list');
     }
 
     function startGame(lv) {
         level = lv; qIdx = 0; score = 0;
-        let pool = currentCh === 'ALL' ? bank : bank.filter(i => i.ch === currentCh);
-        activeSet = [...pool].sort(() => Math.random() - 0.5).slice(0, 10);
-        showScreen('sc-game'); loadNextQ();
+        activeSet = bank.filter(i => i.ch === currentCh).sort(() => Math.random() - 0.5);
+        showScreen('sc-game');
+        
+        // Level 4 UI 調整：隱藏題目文字卡片，只留朗讀按鈕
+        const qCard = document.getElementById('q-card');
+        const qHint = document.getElementById('q-hint');
+        if (lv === 4) {
+            qCard.style.background = "#1c1c1e";
+            document.getElementById('q-text').innerText = "🏆 聽音默寫模式 - 點擊按鈕聽音";
+            qHint.innerText = "🔇 無提示模式";
+        } else {
+            qCard.style.background = "var(--card)";
+        }
+        loadNextQ();
     }
 
     function loadNextQ() {
         if(qIdx >= activeSet.length) { finishGame(); return; }
         const q = activeSet[qIdx];
         document.getElementById('game-info').innerText = `題目 ${qIdx + 1} / ${activeSet.length}`;
-        document.getElementById('q-text').innerText = level === 1 ? q.l1 : q.l2;
-        let h = q.w.split('').map(c => (Math.random() > 0.7 || c === ',' || c === ' ' || c === '。' || c === '，') ? c : "□");
-        if (!h.includes("□")) h[0] = "□";
-        document.getElementById('q-hint').innerText = h.join('');
-        document.getElementById('ans-in').value = ""; document.getElementById('fb').innerText = "";
+        
+        if (level === 4) {
+            // Lv4：直接朗讀
+            speak("請默寫：" + q.w);
+        } else {
+            document.getElementById('q-text').innerText = q.l1;
+            let h = q.w.split('').map(c => (Math.random() > 0.8 || ",，。·".includes(c)) ? c : "□");
+            document.getElementById('q-hint').innerText = h.join('');
+        }
+        
+        document.getElementById('ans-in').value = "";
+        document.getElementById('fb-area').innerText = "";
+        document.getElementById('action-area').classList.add('hidden');
+        document.getElementById('submit-btn').classList.remove('hidden');
         document.getElementById('ans-in').focus();
+    }
+
+    function speakCurrentQ() {
+        const q = activeSet[qIdx];
+        if (level === 4) { speak(q.w); } 
+        else { speak(q.l1.replace('______', q.w)); }
     }
 
     function checkAnswer() {
         const u = document.getElementById('ans-in').value.trim();
         const c = activeSet[qIdx].w;
-        const f = document.getElementById('fb');
-        if(u === c) { score++; f.style.color = "var(--success)"; f.innerText = "正確！✓"; playSfx('ok'); setTimeout(() => { qIdx++; loadNextQ(); }, 1000); }
-        else { f.style.color = "var(--error)"; f.innerText = `答案：${c}`; playSfx('no'); setTimeout(() => { qIdx++; loadNextQ(); }, 3000); }
+        const fb = document.getElementById('fb-area');
+        if(u === c) {
+            score++; fb.style.color = "var(--success)"; fb.innerText = "正確！✓";
+            speak("答對了。答案是" + c);
+            setTimeout(() => { qIdx++; loadNextQ(); }, 1200);
+        } else {
+            fb.style.color = "var(--error)"; fb.innerText = `答錯了。正確答案：${c}`;
+            speak("答錯了。正確答案是" + c);
+            document.getElementById('submit-btn').classList.add('hidden');
+            document.getElementById('action-area').classList.remove('hidden');
+        }
     }
+
+    function nextQuestion() { qIdx++; loadNextQ(); }
 
     function finishGame() {
         document.getElementById('res-score').innerText = `${score} / ${activeSet.length}`;
-        document.getElementById('res-msg').innerText = score >= 8 ? "太棒了！你已經完全掌握！" : "再温習一下清單吧！";
+        document.getElementById('res-msg').innerText = score === activeSet.length ? "太強了！測考必贏！" : "再多溫習一下 Level 4 吧！";
         showScreen('sc-res');
     }
-
     document.getElementById('ans-in').addEventListener('keypress', e => { if(e.key==='Enter') checkAnswer(); });
 </script>
 </body>
