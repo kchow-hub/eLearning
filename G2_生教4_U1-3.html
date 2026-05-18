@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>✨ 公主常識溫習寶典 ✨</title>
+    <style>
+        :root {
+            --princess-pink: #FFB7D5;
+            --deep-pink: #FF69B4;
+            --soft-purple: #E0BBE4;
+            --magic-gold: #FFD700;
+            --mint-green: #B2F2BB;
+            --sky-blue: #A7D8FF;
+            --text-color: #4A148C;
+            --wrong-red: #FF8787;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: "Microsoft JhengHei", "PingFang HK", sans-serif;
+            background: linear-gradient(135deg, #FFF5F7 0%, #F0F4FF 100%);
+            margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: var(--text-color); overflow-x: hidden;
+        }
+
+        .screen { display: none; width: 100%; max-width: 600px; height: 95vh; background: rgba(255, 255, 255, 0.93); border: 6px solid var(--princess-pink); border-radius: 30px; box-shadow: 0 10px 30px rgba(255,183,213,0.3); padding: 20px; flex-direction: column; position: relative; }
+        .screen.active { display: flex; }
+
+        h1 { text-align: center; font-size: 24px; color: var(--deep-pink); text-shadow: 1px 1px 2px rgba(0,0,0,0.1); margin-bottom: 10px; }
+        h2 { text-align: center; font-size: 18px; color: #6A1B9A; margin-top: 0; }
+
+        .btn { background: linear-gradient(180deg, #FFF 0%, var(--princess-pink) 100%); border: 2px solid var(--deep-pink); border-radius: 20px; color: var(--text-color); padding: 12px 24px; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; margin: 8px 0; width: 100%; }
+        .btn:active { transform: scale(0.97); box-shadow: 0 2px 3px rgba(0,0,0,0.1); }
+        .btn:disabled { background: #E0E0E0; border-color: #9E9E9E; color: #757575; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .content-area { flex: 1; overflow-y: auto; padding: 10px; margin-bottom: 15px; display: flex; flex-direction: column; justify-content: center; }
+
+        /* Level 1: Vocab Style */
+        .vocab-box { text-align: center; padding: 30px 20px; background: white; border-radius: 20px; border: 3px dashed var(--soft-purple); }
+        .vocab-text { font-size: 42px; font-weight: bold; color: var(--deep-pink); letter-spacing: 3px; margin-bottom: 25px; line-height: 1.4; }
+
+        /* Level 2 & 3: Quiz Style */
+        .question-header { display: flex; align-items: center; justify-content: space-between; background: #FFF0F5; padding: 15px; border-radius: 15px; border-left: 5px solid var(--deep-pink); margin-bottom: 20px; gap: 10px; }
+        .question-text { font-size: 20px; font-weight: bold; line-height: 1.6; flex: 1; }
+        .question-text span.highlight { color: red !important; font-weight: bold !important; text-decoration: underline; }
+        
+        .speaker-icon { background: var(--soft-purple); border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex-shrink: 0; }
+        .speaker-icon:active { transform: scale(0.9); }
+
+        .options-container { display: flex; flex-direction: column; width: 100%; gap: 10px; }
+        .opt-row { display: flex; align-items: center; gap: 8px; width: 100%; }
+        .opt-btn { background: white; border: 2px solid var(--soft-purple); border-radius: 15px; padding: 14px; font-size: 17px; text-align: left; font-weight: bold; cursor: pointer; transition: all 0.2s; color: var(--text-color); flex: 1; }
+        .opt-btn:active { background: #F6EEF8; }
+        .opt-btn.correct { background: var(--mint-green) !important; border-color: #4CAF50 !important; color: #1B5E20; }
+        .opt-btn.wrong { background: var(--wrong-red) !important; border-color: #F44336 !important; color: #721C24; }
+
+        /* Drag and Drop Sorting for iPad */
+        .drag-instruction { font-size: 16px; font-weight: bold; color: #7B1FA2; margin-bottom: 10px; text-align: center; }
+        .drag-container { display: flex; justify-content: space-around; margin-bottom: 20px; background: #FFF3E0; padding: 10px; border-radius: 15px; min-height: 70px; align-items: center; border: 2px dashed #FF9800; }
+        .drag-item { background: linear-gradient(135deg, #FFF9C4 0%, var(--magic-gold) 100%); border: 2px solid #F57C00; padding: 10px 15px; border-radius: 12px; font-weight: bold; cursor: grab; user-select: none; touch-action: none; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-size: 16px; }
+        .slots-container { display: flex; flex-direction: column; gap: 12px; }
+        .slot-row { display: flex; align-items: center; background: white; border: 2px solid var(--princess-pink); border-radius: 15px; padding: 8px 15px; }
+        .slot-label { font-weight: bold; width: 120px; color: var(--deep-pink); font-size: 16px; }
+        .slot-target { flex: 1; min-height: 50px; background: #FFF5F7; border: 2px dashed var(--soft-purple); border-radius: 10px; display: flex; justify-content: center; align-items: center; padding: 5px; }
+
+        /* Feedback Area */
+        .feedback-box { text-align: center; font-size: 18px; font-weight: bold; margin-top: 10px; min-height: 40px; padding: 8px; border-radius: 10px; }
+        .feedback-box.correct-msg { background-color: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9; }
+        .feedback-box.wrong-msg { background-color: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; animation: shake 0.3s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+
+        /* Leaderboard Style */
+        .leaderboard { width: 100%; background: white; border-radius: 15px; border: 2px solid var(--princess-pink); padding: 10px; max-height: 200px; overflow-y: auto; margin-top: 10px; }
+        .leader-row { display: flex; justify-content: space-between; padding: 6px 10px; border-bottom: 1px dashed #E0E0E0; font-size: 14px; font-weight: bold; }
+        .leader-row:last-child { border-bottom: none; }
+        .leader-rank { color: var(--deep-pink); }
+
+        .bottom-bar { display: flex; justify-content: space-between; gap: 10px; margin-top: auto; }
+        .progress-text { text-align: right; font-size: 14px; font-weight: bold; color: #888; margin-bottom: 5px; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; margin-top: 10px; }
+        .chapter-title { background: #E1BEE7; padding: 6px 12px; border-radius: 10px; font-weight: bold; margin-top: 12px; font-size: 15px; color: #4A148C; }
+    </style>
+</head>
+<body>
+
+    <div id="toast">提示訊息</div>
+
+    <div id="screen-home" class="screen active">
+        <div style="text-align:center; font-size:70px; margin-bottom:20px; animation: float 3s ease-in-out infinite;">👑</div>
+        <h1>✨ 公主常識溫習寶典 ✨</h1>
+        <h2>新三章與綜合加油站複習</h2>
+        <button class="btn" onclick="showScreen('screen-selection')">🌟 開始魔法溫習大冒險 🌟</button>
+    </div>
+
+    <div id="screen-selection" class="screen">
+        <h1>🎀 選擇溫習大門 🎀</h1>
+        <div class="content-area" style="justify-content: flex-start;">
+            
+            <div class="chapter-title">👑 LV1 : 詞語朗讀王國 (按課分開)</div>
+            <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
+                <button class="btn" style="font-size:13px; padding:10px 5px;" onclick="startActivity(1, 'c1')">🧸 第1課詞語</button>
+                <button class="btn" style="font-size:13px; padding:10px 5px;" onclick="startActivity(1, 'c2')">🇨🇳 第2課詞語</button>
+                <button class="btn" style="font-size:13px; padding:10px 5px;" onclick="startActivity(1, 'c3')">🚀 第3課詞語</button>
+            </div>
+
+            <div class="chapter-title">📝 LV2 & LV3 : 智慧習作與應用挑戰</div>
+            <div class="grid">
+                <button class="btn" style="font-size:15px; padding:10px;" onclick="startActivity(2, 'c1')">🧸 第 1 課：中國民間故事 (17題)</button>
+                <button class="btn" style="font-size:15px; padding:10px;" onclick="startActivity(2, 'c2')">🇨🇳 第 2 課：中國重要的歷史 (12題)</button>
+                <button class="btn" style="font-size:15px; padding:10px;" onclick="startActivity(2, 'c3')">🚀 第 3 課：四大發明 (16題)</button>
+                <button class="btn" style="font-size:15px; padding:10px;" onclick="startActivity(3, 'station')">⛽ 綜合挑戰：單元加油站 (16題)</button>
+                <button class="btn" style="background: linear-gradient(180deg, #FFF 0%, #B2F2BB 100%); font-size:16px; padding:12px;" onclick="startActivity(3, 'all_q')">🔥 終極大洗腦：全範圍混亂隨機抽題</button>
+            </div>
+        </div>
+        <button class="btn" style="border-color:#999;" onclick="showScreen('screen-home')">⬅ 返回首頁</button>
+    </div>
+
+    <div id="screen-activity" class="screen">
+        <div class="progress-text" id="progress-indicator">0 / 0</div>
+        <h1 id="activity-title">魔法溫習中...</h1>
+        
+        <div class="content-area" id="main-content-bucket"></div>
+        <div class="feedback-box" id="feedback-display" style="display:none;"></div>
+
+        <div class="bottom-bar">
+            <button class="btn" style="width:35%; border-color:#999;" onclick="handleBack()">退出 🏰</button>
+            <button class="btn" style="width:60%;" id="next-btn" onclick="goNext()">下一題 ✨</button>
+        </div>
+    </div>
+
+    <div id="screen-finish" class="screen">
+        <div style="text-align:center; font-size:50px; width:100%; margin-bottom:10px;">🎉</div>
+        <h1>✨ 大冒險圓滿成功！ ✨</h1>
+        
+        <div class="content-area" style="justify-content: flex-start;">
+            <div id="final-msg" style="text-align:center; font-size:20px; font-weight:bold; color:var(--deep-pink); margin-bottom:15px;"></div>
+            
+            <div style="font-weight:bold; color:#6A1B9A; margin-bottom:5px;">🏆 皇家遊樂排行榜 (最新10次戰績)</div>
+            <div class="leaderboard" id="leaderboard-box"></div>
+        </div>
+        
+        <button class="btn" onclick="showScreen('screen-selection')">🌟 再次挑戰 🌟</button>
+    </div>
+
+    <script>
+        // --- 核心數據庫 (無刪減，完整保留61題) ---
+        const vocabDatabase = [
+            { type: 'v', q: '打獵', c: 'c1' }, { type: 'v', q: '耕種', c: 'c1' }, { type: 'v', q: '畜牧', c: 'c1' },
+            { type: 'v', q: '黃帝', c: 'c1' }, { type: 'v', q: '炎帝', c: 'c1' }, { type: 'v', q: '炎黃子孫', c: 'c1' },
+            { type: 'v', q: '中華民族', c: 'c1' }, { type: 'v', q: '黃河', c: 'c1' }, { type: 'v', q: '文字', c: 'c1' },
+            { type: 'v', q: '指南車', c: 'c1' }, { type: 'v', q: '養蠶取絲', c: 'c1' },
+            { type: 'v', q: '大禹治水', c: 'c2' }, { type: 'v', q: '夏朝', c: 'c2' }, { type: 'v', q: '秦朝', c: 'c2' },
+            { type: 'v', q: '始皇帝', c: 'c2' }, { type: 'v', q: '孫中山', c: 'c2' }, { type: 'v', q: '革命', c: 'c2' },
+            { type: 'v', q: '清朝', c: 'c2' }, { type: 'v', q: '天安門', c: 'c2' }, { type: 'v', q: '國旗', c: 'c2' },
+            { type: 'v', q: '國徽', c: 'c2' }, { type: 'v', q: '國歌', c: 'c2' }, { type: 'v', q: '升旗禮', c: 'c2' },
+            { type: 'v', q: '蔡倫', c: 'c3' }, { type: 'v', q: '造紙術', c: 'c3' }, { type: 'v', q: '畢昇', c: 'c3' },
+            { type: 'v', q: '活字印刷術', c: 'c3' }, { type: 'v', q: '知識傳播', c: 'c3' }, { type: 'v', q: '火藥', c: 'c3' },
+            { type: 'v', q: '煙花', c: 'c3' }, { type: 'v', q: '開闢土地', c: 'c3' }, { type: 'v', q: '磁鐵', c: 'c3' },
+            { type: 'v', q: '水羅盤', c: 'c3' }, { type: 'v', q: '航海', c: 'c3' }, { type: 'v', q: '動腦筋', c: 'c3' }
+        ];
+
+        const quizDatabase = [
+            // 第 1 課 (17題)
+            { type: 'q', c: 'c1', q: '五十萬年前的先民過著原始生活，當時他們____衣服。', a: '不穿', options: ['不穿', '穿獸皮做', '穿絲織品'] },
+            { type: 'q', c: 'c1', q: '五千多年前的先民已經有進步的生活，會穿____的衣服。', a: '獸皮做', options: ['獸皮做', '不穿', '塑膠做'] },
+            { type: 'q', c: 'c1', q: '五十萬年前的先民主要吃野果 and 野獸的肉。', a: '野獸', options: ['野獸', '飼養', '耕種'] },
+            { type: 'q', c: 'c1', q: '五千多年前的先民懂得通過____和畜牧得到食物。', a: '耕種', options: ['耕種', '打獵', '採集'] },
+            { type: 'q', c: 'c1', q: '五十萬年前的先民居住在____中。', a: '山洞', options: ['山洞', '簡單的房屋', '高樓大廈'] },
+            { type: 'q', c: 'c1', q: '五千多年前的先民已經懂得蓋房子，居住在____。', a: '簡單的房屋', options: ['簡單的房屋', '山洞', '摩天大樓'] },
+            { type: 'q', c: 'c1', q: '五十萬年前的先民使用的工具是石頭 and ____製作的。', a: '木', options: ['木', '陶瓷', '鐵'] },
+            { type: 'q', c: 'c1', q: '五千多年前的先民在用具上有了進步，懂得使用____。', a: '陶瓷', options: ['陶瓷', '不鏽鋼', '塑膠杯'] },
+            { type: 'q', c: 'c1', q: '相傳約五千年前，中國出現了兩個強大的部族，首領分別是____和黃帝。', a: '炎帝', options: ['炎帝', '蚩尤', '大禹'] },
+            { type: 'q', c: 'c1', q: '後世的中國人以黃帝和炎帝作為____的祖先，並自稱「炎黃子孫」。', a: '中華民族', options: ['中華民族', '夏朝', '清朝'] },
+            { type: 'q', c: 'c1', q: '判斷正誤：五千年前，人們已經懂得生火煮食。', a: '正確 ✔', options: ['正確 ✔', '錯誤 ✘'] },
+            { type: 'q', c: 'c1', q: '判斷正誤：相傳約五千年前，黃帝聯合蚩尤打敗了炎帝。', a: '錯誤 ✘', options: ['正確 ✔', '錯誤 ✘'] },
+            { type: 'q', c: 'c1', q: '相傳黃帝和炎帝的部落在黃河流域定居。判斷此句地點正誤：', a: '正確 ✔', options: ['正確 ✔', '錯誤 ✘'] },
+            { type: 'q', c: 'c1', q: '判斷正誤：相傳黃帝時期發明了造紙術。', a: '錯誤 ✘', options: ['正確 ✔', '錯誤 ✘'] },
+            { type: 'q', c: 'c1', q: '相傳黃帝時期發明了____，用來記錄事情。', a: '文字', options: ['文字', '指南車', '造紙術'] },
+            { type: 'q', c: 'c1', q: '相傳黃帝時期懂得____，能紡織成輕而薄的布。', a: '養蠶取絲', options: ['養蠶取絲', '種植棉花', '使用陶器'] },
+            { type: 'q', c: 'c1', q: '相傳黃帝時期發明了____，用來指示方向。', a: '指南車', options: ['指南車', '火藥', '活字印刷術'] },
+
+            // 第 2 課 (12題)
+            { type: 'q', c: 'c2', q: '禹說：「中國發生大水災，我負責____。經過多年努力，我終於成功了。」', a: '治水', options: ['治水', '修築', '首領', '皇帝'] },
+            { type: 'q', c: 'c2', q: '秦始皇說：「我建立____。我是中國第一個皇帝。」', a: '秦朝', options: ['秦朝', '清朝', '夏朝', '北京'] },
+            { type: 'q', c: 'c2', q: '秦始皇說：「我是中國第一個皇帝。我下令修築____，抵抗外族入侵。」', a: '長城', options: ['長城', '北京', '首領', '治水'] },
+            { type: 'q', c: 'c2', q: '孫中山說：「我組織革命活動。經過很多次失敗後，我終於成功推翻____，中國結束了皇帝統治的時代。」', a: '清朝', options: ['清朝', '秦朝', '夏朝', '長城'] },
+            { type: 'q', c: 'c2', q: '中國國旗和國徽主要是甚麼顏色？', a: '紅色', options: ['紅色', '黃色', '藍色', '金色'] },
+            { type: 'q', c: 'c2', q: '中國國旗和國徽上各有幾顆星？', a: '五顆', options: ['五顆', '一顆', '四顆', '六顆'] },
+            { type: 'q', c: 'c2', q: '中國國旗上的星是甚麼顏色？', a: '黃色', options: ['黃色', '紅色', '白色', '銀色'] },
+            { type: 'q', c: 'c2', q: '中國國徽上有哪一座建築物的圖案？', a: '天安門', options: ['天安門', '長城', '故宮', '北京'] },
+            { type: 'q', c: 'c2', q: '國慶日是在幾月幾日？', a: '10月1日', options: ['10月1日', '7月1日', '1月1日', '10月4日'] },
+            { type: 'q', c: 'c2', q: '當聽到歌詞「起來！不願做奴隸的人們……」，圖中的學生在唱甚麼歌？', a: '國歌', options: ['國歌', '校歌', '民歌', '生日歌'] },
+            { type: 'q', c: 'c2', q: '唱國歌時，我們應該怎樣做？', a: '立正', options: ['立正', '邊唱邊揮手', '跟著節奏拍手'] },
+            { type: 'q', c: 'c2', q: '唱國歌時，以下哪一種態度是正確且應該做的？', a: '認真地唱', options: ['認真地唱', '嘻嘻哈哈地笑', '東張西望'] },
+
+            // 第 3 課 (16題)
+            { type: 'q', c: 'c3', q: '蔡倫在改良造紙術時，科學步驟中的「1. 找出問題」對應哪項過程？', a: '觀察各種書寫材料', options: ['觀察各種書寫材料', '翻閱古人造紙的紀錄', '找到容易得來的原料', '把原料製成紙漿'] },
+            { type: 'q', c: 'c3', q: '蔡倫在改良造紙術時，科學步驟中的「2. 搜集資料」對應哪項過程？', a: '翻閱古人造紙的紀錄', options: ['翻閱古人造紙的紀錄', '觀察各種書寫材料', '定出解決方案', '得出結果'] },
+            { type: 'q', c: 'c3', q: '蔡倫在改良造紙術時，科學步驟中的「3. 定出解決方案」對應哪項過程？', a: '找到容易得來的原料', options: ['找到容易得來的原料', '把原料製成紙漿', '造出便宜和質地優良的紙張', '翻閱古人造紙的紀錄'] },
+            { type: 'q', c: 'c3', q: '蔡倫在改良造紙術時，科學步驟中的「4. 嘗試實行，並反覆試驗」對應哪項過程？', a: '把原料製成紙漿', options: ['把原料製成紙漿', '找到容易得來的原料', '造出便宜和質地優良的紙張', '觀察各種書寫材料'] },
+            { type: 'q', c: 'c3', q: '蔡倫在改良造紙術時，科學步驟中的「5. 得出結果」對應哪項過程？', a: '造出便宜和質地優良的紙張', options: ['造出便宜和質地優良的紙張', '把原料製成紙漿', '找到容易得來的原料', '觀察各種書寫材料'] },
+            { type: 'q', c: 'c3', q: '觀察圖片（工人正在爆破開山），這項事物與哪項四大發明有關？', a: '火藥', options: ['火藥', '指南針', '造紙術', '印刷術'] },
+            { type: 'q', c: 'c3', q: '觀察圖片（船長在船艙看著儀器駕駛），航行時用來辨別方向與哪項四大發明有關？', a: '指南針', options: ['指南針', '火藥', '造紙術', '印刷術'] },
+            { type: 'q', c: 'c3', q: '觀察圖片（夜空中綻放的美麗煙花），煙花與哪項四大發明有關？', a: '火藥', options: ['火藥', '指南針', '造紙術', '印刷術'] },
+            { type: 'q', c: 'c3', q: '觀察圖片（小朋友開心讀著故事書），印刷精美的小朋友書籍與哪兩項四大發明有關？', a: '印刷術、造紙術', options: ['印刷術、造紙術', '造紙術、火藥', '印刷術、指南針', '指南針、火藥'] },
+            { type: 'q', c: 'c3', q: '判斷正誤：「雕版印刷術」可以把印刷字粒拆出來重用。', a: '錯誤 ✘', options: ['正確 ✔', '錯誤 ✘'] },
+            { type: 'q', c: 'c3', q: '判斷正誤：把火藥用作武器，會危害人類的生命。', a: '正確 ✔', options: ['正確 ✔', '錯誤 ✘'] },
+            { type: 'q', c: 'c3', q: '判斷正誤：「活字印刷術」是畢昇發明的。', a: '正確 ✔', options: ['正確 ✔', '錯誤 ✘'] },
+            { type: 'q', c: 'c3', q: '判斷正誤：指南針的兩端分別指向東方和西方。', a: '錯誤 ✘', options: ['正確 ✔', '錯誤 ✘'] },
+            { type: 'drag_sort', c: 'c3', title: '請幫三種指示方向的工具【按發明歷史次序】排排坐：', items: ['水羅盤', '指南車', '現代指南針'], correctOrder: ['指南車', '水羅盤', '現代指南針'] },
+
+            // 單元加油站 (16題)
+            { type: 'q', c: 'station', q: '觀察地圖提示，中國的首都是哪裡？', a: '北京', options: ['北京', '上海', '香港', '西安'] },
+            { type: 'q', c: 'station', q: '孕育中華文明、被稱為中華民族母親河的是哪一條河？', a: '黃河', options: ['黃河', '長江', '珠江', '黑龍江'] },
+            { type: 'q', c: 'station', q: '中華人民共和國的國慶日是每年的哪一天？', a: '10月1日', options: ['10月1日', '7月1日', '5月1日', '12月25日'] },
+            { type: 'q', c: 'station', q: '禹因為治水成功，受到族人愛戴，後來建立了中國歷史上第一個朝代：____。', a: '夏朝', options: ['夏朝', '秦朝', '清朝', '唐朝'] },
+            { type: 'q', c: 'station', q: '贏政統治時期，建立了中國歷史上非常重要的中央集權朝代：____。', a: '秦朝', options: ['秦朝', '夏朝', '清朝', '漢朝'] },
+            { type: 'q', c: 'station', q: '孫中山先生組織革命活動，在1911年成功推翻了哪一個朝代？', a: '清朝', options: ['清朝', '秦朝', '夏朝', '明朝'] },
+            { type: 'q', c: 'station', q: '關於「禹」的歷史功績，以下哪項描述是正確的？', a: '領導人民治理水災', options: ['領導人民治理水災', '修築長城防禦外族', '推翻清朝，結束皇帝統治'] },
+            { type: 'q', c: 'station', q: '關於「秦始皇」的歷史功績，以下哪項描述是正確的？', a: '下令修築長城，防禦外族', options: ['下令修築長城，防禦外族', '領導人民治理水災', '推翻清朝，結束皇帝統治'] },
+            { type: 'q', c: 'station', q: '關於「孫中山」的歷史功績，以下哪項描述是正確的？', a: '組織革命活動，推翻皇帝統治', options: ['組織革命活動，推翻皇帝統治', '領導人民治理水災', '下令修築長城，防禦外族'] },
+            { type: 'q', c: 'station', q: '判斷正誤：東漢時期的蔡倫發明了世界上最早的紙張。', a: '錯誤 ✘', options: ['正確 ✔', '錯誤 ✘'] },
+            { type: 'q', c: 'station', q: '判斷正誤：「雕版印刷術」需要把整頁書稿雕刻在木板上，非常費時。', a: '正確 ✔', options: ['正確 ✔', '錯誤 ✘'] },
+            { type: 'q', c: 'station', q: '判斷正誤：「活字印刷術」可以把印完的膠泥字粒拆出來，重新排列重用，比較省時方便。', a: '正確 ✔', options: ['正確 ✔', '錯誤 ✘'] },
+            { type: 'q', c: 'station', q: '四大發明中的「造紙術」和「印刷術」對世界產生了甚麼重大影響？', a: '促進了知識的傳播和交流', options: ['促進了知識的傳播和交流', '幫助人們辨別航海方向', '用來製造更厲害的武器'] },
+            { type: 'q', c: 'station', q: '古代中國人最早利用磁鐵製成甚麼來指示方向？', a: '水羅盤', options: ['水羅盤', '現代指南針', 'GPS導航儀'] },
+            { type: 'q', c: 'station', q: '指南針在後來傳入西方，對人類哪一項活動的發展有了極大的貢獻？', a: '航海事業', options: ['航海事業', '農業耕種', '圖書印刷'] },
+            { type: 'q', c: 'station', q: '火藥除了可以做武器，在日常生活中還可以用於哪些對人類進步有幫助的地方？', a: '開闢土地和修築道路', options: ['開闢土地和修築道路', '印製輕便的故事書', '指示出海航行的方向'] }
+        ];
+
+        // --- 狀態管理 ---
+        let state = {
+            mode: 1, 
+            filter: 'c1',
+            items: [],
+            index: 0,
+            isUnlocked: false,
+            hasErrorCurrentQuestion: false,
+            firstAttemptCorrectCount: 0 // 排行榜算分依據
+        };
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(id === 'screen-selection') speechSynthesis.cancel();
+        }
+
+        // --- 開始活動 ---
+        function startActivity(mode, filter) {
+            state.mode = mode;
+            state.filter = filter;
+            state.index = 0;
+            state.isUnlocked = false;
+            state.hasErrorCurrentQuestion = false;
+            state.firstAttemptCorrectCount = 0;
+
+            if (mode === 1) {
+                state.items = vocabDatabase.filter(i => i.c === filter);
+                shuffle(state.items);
+                let chName = filter === 'c1' ? '第1課' : filter === 'c2' ? '第2課' : '第3課';
+                document.getElementById('activity-title').innerText = `👑 詞語朗讀王國 (${chName})`;
+            } else {
+                state.items = [...quizDatabase];
+                if (filter !== 'all_q') state.items = state.items.filter(i => i.c === filter);
+                shuffle(state.items);
+                document.getElementById('activity-title').innerText = mode === 2 ? "📝 智慧習作挑戰" : "⛽ 應用小達人綜合關";
+            }
+
+            if (state.items.length === 0) return;
+            showScreen('screen-activity');
+            loadQuestion();
+        }
+
+        // --- 載入單一題目 ---
+        function loadQuestion() {
+            state.isUnlocked = false;
+            state.hasErrorCurrentQuestion = false;
+            document.getElementById('next-btn').disabled = true;
+            
+            const feedbackBox = document.getElementById('feedback-display');
+            feedbackBox.style.display = 'none';
+
+            document.getElementById('progress-indicator').innerText = `${state.index + 1} / ${state.items.length}`;
+            const bucket = document.getElementById('main-content-bucket');
+            bucket.innerHTML = '';
+
+            const current = state.items[state.index];
+
+            if (current.type === 'v') {
+                // LV1 詞語
+                bucket.innerHTML = `
+                    <div class="vocab-box">
+                        <div class="vocab-text" id="raw-vocab">${current.q}</div>
+                        <button class="btn" style="width:auto; padding: 8px 20px; font-size:15px;" onclick="speakVocab()">🔊 重新聽讀</button>
+                    </div>
+                `;
+                state.isUnlocked = true;
+                document.getElementById('next-btn').disabled = false;
+                setTimeout(() => speakVocab(), 400);
+
+            } else if (current.type === 'q') {
+                // LV2 & LV3 選擇題（增加題目點讀、選項點讀）
+                let processedQuestion = highlightKeywords(current.q);
+                let shuffdOpts = [...current.options].sort(() => Math.random() - 0.5);
+                let optionsHtml = '';
+                
+                shuffdOpts.forEach((opt, idx) => {
+                    optionsHtml += `
+                        <div class="opt-row">
+                            <button class="opt-btn" id="opt-${idx}" onclick="checkChoiceAnswer(this, '${opt.replace(/'/g, "\\'")}')">${opt}</button>
+                            <button class="speaker-icon" onclick="speak('${opt.replace(/'/g, "\\'")}')">🔊</button>
+                        </div>
+                    `;
+                });
+
+                bucket.innerHTML = `
+                    <div class="question-header">
+                        <div class="question-text">${processedQuestion}</div>
+                        <button class="speaker-icon" onclick="speakQuestionText('${current.q.replace(/'/g, "\\'")}')">🔊</button>
+                    </div>
+                    <div class="options-container">${optionsHtml}</div>
+                `;
+                setTimeout(() => speakQuestionText(current.q), 300);
+
+            } else if (current.type === 'drag_sort') {
+                // 拖拉次序題
+                bucket.innerHTML = `
+                    <div class="drag-instruction">${current.title}</div>
+                    <div class="drag-container" id="source-pool"></div>
+                    <div class="slots-container">
+                        <div class="slot-row"><div class="slot-label">第 1 (最早) 👑</div><div class="slot-target" data-index="0"></div></div>
+                        <div class="slot-row"><div class="slot-label">第 2 (中期) 🌟</div><div class="slot-target" data-index="1"></div></div>
+                        <div class="slot-row"><div class="slot-label">第 3 (最晚) 🚀</div><div class="slot-target" data-index="2"></div></div>
+                    </div>
+                `;
+                
+                const pool = document.getElementById('source-pool');
+                let randomizedItems = [...current.items].sort(() => Math.random() - 0.5);
+                randomizedItems.forEach((it, idx) => {
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'drag-item';
+                    itemEl.innerText = it;
+                    itemEl.draggable = true;
+                    itemEl.id = `drag-${idx}`;
+                    pool.appendChild(itemEl);
+                });
+
+                setupDragAndDropEvents();
+                setTimeout(() => speak("請幫三種指示方向的工具，按發明歷史次序，用手指拖拉排排坐。"), 300);
+            }
+        }
+
+        function highlightKeywords(text) {
+            let res = text;
+            res = res.replace(/五十萬年前/g, `<span class="highlight">五十萬年前</span>`);
+            res = res.replace(/五十萬年/g, `<span class="highlight">五十萬年</span>`);
+            res = res.replace(/五千多年前/g, `<span class="highlight">五千多年前</span>`);
+            res = res.replace(/五千年前/g, `<span class="highlight">五千年前</span>`);
+            return res;
+        }
+
+        // --- 語音系統 ---
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-HK';
+            utterance.rate = 0.85;
+            speechSynthesis.cancel();
+            speechSynthesis.speak(utterance);
+        }
+
+        function speakVocab() {
+            speak(document.getElementById('raw-vocab').innerText);
+        }
+
+        function speakQuestionText(rawText) {
+            let clean = rawText.replace(/____/g, "什麼");
+            if(clean.startsWith("判斷正誤：")) clean = clean.replace("判斷正誤：", "");
+            speak(clean);
+        }
+
+        // --- 洗腦校對邏輯 ---
+        function checkChoiceAnswer(btnElement, selectedOpt) {
+            const current = state.items[state.index];
+            const feedbackBox = document.getElementById('feedback-display');
+
+            if (state.isUnlocked && !state.hasErrorCurrentQuestion) return; 
+
+            if (selectedOpt === current.a) {
+                btnElement.className = "opt-btn correct";
+                feedbackBox.style.display = 'block';
+                feedbackBox.className = "feedback-box correct-msg";
+                feedbackBox.innerText = "🌸 答對了！小公主太棒了！ ✨";
+                
+                // 如果是第一次就答對，計入排行榜分數
+                if (!state.hasErrorCurrentQuestion) {
+                    state.firstAttemptCorrectCount++;
+                }
+
+                state.isUnlocked = true;
+                state.hasErrorCurrentQuestion = false; 
+                document.getElementById('next-btn').disabled = false; 
+                
+                let sentence = current.q.includes("____") ? current.q.replace("____", current.a) : `${current.q}。答案是${current.a}`;
+                sentence = sentence.replace("判斷正誤：", "").replace(/and/g, "和");
+                
+                playSfx(true);
+                speak(`答對了！${sentence}`);
+                
+                document.querySelectorAll('.opt-btn').forEach(b => {
+                    if(b !== btnElement) b.style.opacity = '0.5';
+                });
+            } else {
+                state.hasErrorCurrentQuestion = true; 
+                btnElement.className = "opt-btn wrong";
+                feedbackBox.style.display = 'block';
+                feedbackBox.className = "feedback-box wrong-msg";
+                feedbackBox.innerText = `❌ 答錯了！正確答案提示：【${current.a}】。請再選一選正確答案才可以下一題。`;
+                
+                document.getElementById('next-btn').disabled = true; 
+                
+                playSfx(false);
+                speak(`答錯了！正確答案是：${current.a}。請再選一次正確答案。`);
+            }
+        }
+
+        // --- iPad 拖拉排序觸控引擎 ---
+        function setupDragAndDropEvents() {
+            const items = document.querySelectorAll('.drag-item');
+            const targets = document.querySelectorAll('.slot-target');
+            let draggedNode = null;
+
+            items.forEach(item => {
+                item.addEventListener('dragstart', function() { draggedNode = this; });
+                item.addEventListener('touchstart', handleTouchStart, { passive: false });
+                item.addEventListener('touchmove', handleTouchMove, { passive: false });
+                item.addEventListener('touchend', handleTouchEnd, { passive: false });
+            });
+
+            targets.forEach(target => {
+                target.addEventListener('dragover', function(e) { e.preventDefault(); });
+                target.addEventListener('drop', function() {
+                    if (draggedNode) { this.appendChild(draggedNode); checkDragSortingSequence(); }
+                });
+            });
+
+            let cloneNode = null;
+            function handleTouchStart(e) {
+                const touch = e.touches[0]; draggedNode = this;
+                cloneNode = this.cloneNode(true);
+                cloneNode.style.position = 'fixed'; cloneNode.style.opacity = '0.8'; cloneNode.style.zIndex = '1000'; cloneNode.style.pointerEvents = 'none';
+                cloneNode.style.left = touch.clientX - 40 + 'px'; cloneNode.style.top = touch.clientY - 20 + 'px';
+                document.body.appendChild(cloneNode);
+            }
+            function handleTouchMove(e) {
+                e.preventDefault(); if (!cloneNode) return;
+                const touch = e.touches[0];
+                cloneNode.style.left = touch.clientX - 40 + 'px'; cloneNode.style.top = touch.clientY - 20 + 'px';
+            }
+            function handleTouchEnd(e) {
+                if (!cloneNode) return;
+                const touch = e.changedTouches[0];
+                document.body.removeChild(cloneNode); cloneNode = null;
+                const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+                const actualTarget = dropTarget ? dropTarget.closest('.slot-target') : null;
+                if (actualTarget) { actualTarget.innerHTML = ''; actualTarget.appendChild(draggedNode); checkDragSortingSequence(); }
+            }
+        }
+
+        function checkDragSortingSequence() {
+            const current = state.items[state.index];
+            const targets = document.querySelectorAll('.slot-target');
+            let filledCount = 0; let currentStateOrder = [];
+
+            targets.forEach(slot => {
+                if (slot.children.length > 0) {
+                    filledCount++; currentStateOrder.push(slot.children[0].innerText);
+                } else { currentStateOrder.push(null); }
+            });
+
+            if (filledCount === 3) {
+                let isAllCorrect = true;
+                for (let i = 0; i < 3; i++) {
+                    if (currentStateOrder[i] !== current.correctOrder[i]) isAllCorrect = false;
+                }
+
+                const feedbackBox = document.getElementById('feedback-display');
+                feedbackBox.style.display = 'block';
+
+                if (isAllCorrect) {
+                    feedbackBox.className = "feedback-box correct-msg";
+                    feedbackBox.innerText = "🌸 排序完全正確！三大工具歷史定位成功！ ✨";
+                    if (!state.hasErrorCurrentQuestion) state.firstAttemptCorrectCount++;
+                    state.isUnlocked = true;
+                    document.getElementById('next-btn').disabled = false;
+                    playSfx(true);
+                    speak("排序完全正確！最早是指南車，中期是水羅盤，最晚是現代指南針。你太棒了！");
+                } else {
+                    state.hasErrorCurrentQuestion = true;
+                    feedbackBox.className = "feedback-box wrong-msg";
+                    feedbackBox.innerText = "❌ 發明次序不對喔！系統已自動重置，請重新排排看。";
+                    document.getElementById('next-btn').disabled = true;
+                    playSfx(false);
+                    speak("發明次序不對喔！最早是指南車，中期是水羅盤，最晚是現代指南針。請重新排一次。");
+                    
+                    setTimeout(() => {
+                        const pool = document.getElementById('source-pool');
+                        document.querySelectorAll('.drag-item').forEach(it => pool.appendChild(it));
+                        targets.forEach(slot => slot.innerHTML = '');
+                    }, 3500);
+                }
+            }
+        }
+
+        function goNext() {
+            state.index++;
+            if (state.index < state.items.length) { loadQuestion(); } 
+            else { finishAdventure(); }
+        }
+
+        function handleBack() {
+            speechSynthesis.cancel();
+            showScreen('screen-selection');
+        }
+
+        // --- 排行榜數據處理機制 ---
+        function finishAdventure() {
+            showScreen('screen-finish');
+            const msgEl = document.getElementById('final-msg');
+            
+            if (state.mode === 1) {
+                msgEl.innerText = "👑 公主太聰明了！本課的生字詞語都完美朗讀完畢囉！";
+                speak("恭喜公主，生字都讀完了，你太棒了！");
+                document.getElementById('leaderboard-box').innerHTML = "<div class='leader-row'>✨ 朗讀模式不計入排行榜分數，多聽多讀變身朗讀小女王！</div>";
+            } else {
+                // 習作與綜合模式：儲存並更新排行榜
+                let score = state.firstAttemptCorrectCount;
+                let total = state.items.length;
+                let pct = Math.round((score / total) * 100);
+                
+                let title = "✨ 鑽石級公主";
+                if(pct === 100) title = "👑 滿分皇家女皇";
+                else if(pct >= 85) title = "🌸 亮麗金牌公主";
+                else if(pct >= 60) title = "🧸 聰明常識達人";
+
+                msgEl.innerHTML = `本次得分：<span style="color:red; font-size:26px;">${score}</span> / ${total} 題<br>獲得榮譽：${title}`;
+                speak(`挑戰完成！你答對了${score}題，獲得榮譽${title}！`);
+
+                // 寫入本地紀錄
+                let modeLabel = state.filter === 'c1' ? '第1課' : state.filter === 'c2' ? '第2課' : state.filter === 'c3' ? '第3課' : state.filter === 'station' ? '加油站' : '全範圍混亂';
+                let record = {
+                    date: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                    tag: modeLabel,
+                    score: `${score}/${total} (${pct}%)`
+                };
+
+                let saved = JSON.parse(localStorage.getItem('princess_leaderboard') || '[]');
+                saved.unshift(record); // 最新記錄排在最前面
+                if(saved.length > 10) saved.pop(); // 只留最新10次
+                localStorage.setItem('princess_leaderboard', JSON.stringify(saved));
+
+                // 渲染展示
+                renderLeaderboard(saved);
+            }
+        }
+
+        function renderLeaderboard(records) {
+            const box = document.getElementById('leaderboard-box');
+            if(records.length === 0) {
+                box.innerHTML = "<div class='leader-row'>暫無冒險記錄，等待公主出征！</div>";
+                return;
+            }
+            let html = '';
+            records.forEach((r, i) => {
+                let medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `第 ${i+1} 次`;
+                html += `
+                    <div class="leader-row">
+                        <span class="leader-rank">${medal} [${r.tag}]</span>
+                        <span>${r.score}</span>
+                        <span style="color:#888; font-size:12px;">${r.date}</span>
+                    </div>
+                `;
+            });
+            box.innerHTML = html;
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function playSfx(isSuccess) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                if (isSuccess) {
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.12);
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                    osc.start(); osc.stop(ctx.currentTime + 0.35);
+                } else {
+                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(180, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    osc.start(); osc.stop(ctx.currentTime + 0.25);
+                }
+            } catch(e) {}
+        }
+    </script>
+</body>
+</html>
