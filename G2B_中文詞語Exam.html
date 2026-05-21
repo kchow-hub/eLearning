@@ -126,7 +126,8 @@
             <button class="btn-primary" onclick="openChapterSelect('LV1')">🗣️ LV1 詞語跟讀</button>
             <button class="btn-primary" onclick="openChapterSelect('LV2')">🎧 LV2 聽音選詞</button>
             <button class="btn-primary" onclick="openChapterSelect('LV3')">✏️ LV3 供詞填充</button>
-            <button class="btn-accent" style="grid-column: 1 / -1;" onclick="openChapterSelect('LV9')">🔥 LV9 默寫大挑戰</button>
+            <button class="btn-primary" onclick="openChapterSelect('LV4')">🧩 LV4 不供詞填充 (填1個空字)</button>
+            <button class="btn-accent" style="grid-column: 1 / -1;" onclick="openChapterSelect('LV9')">🔥 LV9 不供詞填充 (無提示)</button>
         </div>
 
         <div class="leaderboard-container">
@@ -337,10 +338,31 @@
         } else if (currentMode === 'LV3') {
             textDiv.innerText = q.s;
             renderOptions(q.w);
+        } else if (currentMode === 'LV4') {
+            // 隨機選擇要空缺的字元位置
+            let word = q.w;
+            let blankIdx = Math.floor(Math.random() * word.length);
+            q.missingChar = word[blankIdx]; // 記錄正確答案為這個單字
+            
+            let maskedWord = "";
+            for (let i = 0; i < word.length; i++) {
+                if (i === blankIdx) {
+                    maskedWord += "（ ）"; // 替換為單字空缺
+                } else {
+                    maskedWord += word[i];
+                }
+            }
+            
+            textDiv.innerText = q.s.replace('____', maskedWord);
+            inputArea.classList.remove('hidden');
+            document.getElementById('answer-input').value = '';
+            document.getElementById('answer-input').placeholder = '請輸入缺少的 1 個字';
+            document.getElementById('answer-input').focus();
         } else if (currentMode === 'LV9') {
             textDiv.innerText = q.s;
             inputArea.classList.remove('hidden');
             document.getElementById('answer-input').value = '';
+            document.getElementById('answer-input').placeholder = '請輸入詞語';
             document.getElementById('answer-input').focus();
         }
         
@@ -375,15 +397,18 @@
 
     function checkInputAnswer() {
         let val = document.getElementById('answer-input').value.trim();
-        let correctW = gameQueue[currentQIndex].w;
-        if(val === correctW) {
+        let q = gameQueue[currentQIndex];
+        // 判斷當前模式是要核對整組詞語還是單個字
+        let correctAns = currentMode === 'LV4' ? q.missingChar : q.w;
+        
+        if(val === correctAns) {
             document.getElementById('answer-input').classList.add('correct-anim');
             handleCorrectAnswer();
         } else {
             document.getElementById('answer-input').classList.add('wrong-anim');
             setTimeout(() => document.getElementById('answer-input').classList.remove('wrong-anim'), 500);
             currentQFailed = true; // 標記為答錯過
-            showWrong(correctW);
+            showWrong(correctAns);
         }
     }
 
@@ -403,7 +428,7 @@
         let pts = currentMode === 'LV9' ? 20 : 10;
         let correctW = gameQueue[currentQIndex].w;
         
-        // 答對了，系統自動讀出正確詞語 (無論是否開啟自動朗讀，答對都發聲以作鼓勵)
+        // 答對了，系統自動讀出完整的正確詞語以作鼓勵及加深印象
         speakText(correctW);
 
         // 如果這題之前答錯過，補答對不給分；一擊命中才給分
