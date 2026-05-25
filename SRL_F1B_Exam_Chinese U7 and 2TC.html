@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中文科中一單元高效智庫系統</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-u7: #2ecc71;
+            --accent-wy1: #3498db;
+            --accent-wy2: #9b59b6;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --correct-bg: #d4edda;
+            --correct-border: #28a745;
+            --wrong-bg: #f8d7da;
+            --wrong-border: #dc3545;
+        }
+
+        body {
+            font-family: 'PingFang HK', 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 1.5rem 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 { margin: 0; font-size: 1.8rem; }
+        header p { margin: 0.5rem 0 0 0; opacity: 0.8; font-size: 0.9rem; }
+
+        /* 計分儀表板樣式 */
+        .scoreboard {
+            background: #2d3748;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            font-weight: bold;
+            box-shadow: inset 0 -2px 5px rgba(0,0,0,0.2);
+        }
+        .score-item { font-size: 1.1rem; }
+        .score-item span { color: #f1c40f; font-size: 1.3rem; margin: 0 0.2rem; }
+        
+        .progress-container {
+            width: 150px;
+            background-color: #4a5568;
+            border-radius: 10px;
+            padding: 3px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 0.5rem;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 12px;
+            background-color: #2ecc71;
+            border-radius: 8px;
+            transition: width 0.4s ease;
+        }
+
+        /* 暱稱顯示與修改 */
+        .user-tag {
+            background: #4a5568;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px dashed #f1c40f;
+        }
+
+        /* 朗讀功能控制鈕 */
+        .tts-toggle-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .tts-toggle-btn.enabled {
+            background: #2ecc71;
+        }
+
+        .nav-tabs, .level-tabs {
+            display: flex;
+            justify-content: center;
+            background: #ecf0f1;
+            padding: 0.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .level-tabs {
+            top: 50px;
+            background: #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .tab-btn, .lvl-btn {
+            background: none;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            margin: 0 0.25rem;
+            color: #7f8c8d;
+        }
+
+        .tab-btn.active[data-target="u7"] { background: var(--accent-u7); color: white; }
+        .tab-btn.active[data-target="wy1"] { background: var(--accent-wy1); color: white; }
+        .tab-btn.active[data-target="wy2"] { background: var(--accent-wy2); color: white; }
+
+        .lvl-btn.active { background: #34495e; color: white; }
+
+        .container { max-width: 950px; margin: 1.5rem auto; padding: 0 1rem; }
+        .tab-content, .level-content { display: none; }
+        .tab-content.active, .level-content.active { display: block; }
+
+        .chapter-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-top: 5px solid var(--primary-color);
+        }
+
+        .u7-card { border-top-color: var(--accent-u7); }
+        .wy1-card { border-top-color: var(--accent-wy1); }
+        .wy2-card { border-top-color: var(--accent-wy2); }
+
+        h2 { margin-top: 0; color: var(--primary-color); border-bottom: 2px solid #eee; padding-bottom: 0.5rem; font-size: 1.4rem; }
+        h3 { color: #444; margin-top: 1.2rem; background: #f1f2f6; padding: 0.3rem 0.8rem; border-left: 4px solid var(--primary-color); font-size: 1.05rem; }
+        
+        .u7-card h3 { border-left-color: var(--accent-u7); }
+        .wy1-card h3 { border-left-color: var(--accent-wy1); }
+        .wy2-card h3 { border-left-color: var(--accent-wy2); }
+
+        .quiz-section {
+            background: #fafafa;
+            border: 1px solid #eaeded;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 6px;
+        }
+
+        .quiz-sentence { margin-bottom: 0.8rem; text-align: justify; font-size: 1.05rem; position: relative; }
+
+        .drop-box, .blank-input {
+            display: inline-block;
+            min-width: 90px;
+            height: 28px;
+            border-bottom: 2px solid #bdc3c7;
+            background-color: #fffde7;
+            vertical-align: middle;
+            text-align: center;
+            font-weight: bold;
+            color: #2980b9;
+            padding: 0 0.4rem;
+            margin: 0 0.2rem;
+            transition: all 0.2s ease;
+        }
+
+        .blank-input {
+            border: none;
+            border-bottom: 2px solid #bdc3c7;
+            font-size: 1rem;
+        }
+        .blank-input:focus { outline: none; background-color: #fff; border-bottom-color: #3498db; }
+
+        .drop-box { border: 1px dashed #95a5a6; border-radius: 4px; line-height: 28px; cursor: pointer; }
+        .drop-box.over { border: 2px dashed #2c3e50; background-color: #e8f4f8; }
+
+        .word-bank {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            background: #edf2f7;
+            padding: 0.8rem;
+            border-radius: 6px;
+            margin-top: 0.8rem;
+            border: 1px solid #cbd5e0;
+        }
+
+        .word-tag {
+            background: #ffffff;
+            border: 1px solid #a0aec0;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            cursor: grab;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #2d3748;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.1s;
+        }
+        .word-tag:active { cursor: grabbing; transform: scale(0.95); }
+        .word-tag.dragged { opacity: 0.4; }
+
+        .state-correct { background-color: var(--correct-bg) !important; border-color: var(--correct-border) !important; color: #155724 !important; }
+        .state-wrong { background-color: var(--wrong-bg) !important; border-color: var(--wrong-border) !important; color: #721c24 !important; }
+
+        .error-hint-msg {
+            display: inline-block;
+            color: #c0392b;
+            background: #fdf2e9;
+            border: 1px solid #f5b041;
+            padding: 0 0.4rem;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            margin-left: 0.4rem;
+            font-weight: bold;
+            vertical-align: middle;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-5px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .btn-reset { background: #95a5a6; color: white; border: none; padding: 0.4rem 1rem; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 0.5rem; }
+        .btn-reset:hover { background: #7f8c8d; }
+
+        /* 排行榜與學習歷史區塊樣式 */
+        .dashboard-section {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border-top: 5px solid #34495e;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        @media (max-width: 768px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+        .data-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 1rem;
+        }
+        .data-card h4 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #cbd5e0; padding-bottom: 0.3rem; }
+        
+        .leaderboard-table, .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+        .leaderboard-table th, .leaderboard-table td,
+        .history-table th, .history-table td {
+            padding: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .leaderboard-table th, .history-table th { background: #edf2f7; color: #4a5568; }
+        
+        .rank-1 { color: #f1c40f; font-weight: bold; }
+        .rank-2 { color: #95a5a6; font-weight: bold; }
+        .rank-3 { color: #d35400; font-weight: bold; }
+        
+        .history-log-container {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .btn-clear-data {
+            background: #e74c3c; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-top: 0.5rem; float: right;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>中文科中一單元高效智庫系統</h1>
+    <p>Lv1 拖拉詞條（分段練習） | Lv2 不供詞填充（錯題即時顯示答案）</p>
+</header>
+
+<div class="scoreboard">
+    <div class="score-item">挑戰者：<span id="user-name-display" class="user-tag" onclick="changeNickname()">請輸入暱稱</span></div>
+    <div class="score-item">
+        <button id="tts-toggle" class="tts-toggle-btn enabled" onclick="toggleTTS()">
+            <span id="tts-icon">🔊</span> 語音洗腦：<span id="tts-status">開啟</span>
+        </button>
+    </div>
+    <div class="score-item">累計得分：<span id="total-score">0</span> 分</div>
+    <div class="score-item">答對進度：<span id="correct-count">0</span> / <span id="total-count">0</span></div>
+    <div class="score-item">
+        完成進度：
+        <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+    </div>
+</div>
+
+<div class="nav-tabs">
+    <button class="tab-btn active" data-target="u7">單元七《從今天起》</button>
+    <button class="tab-btn" data-target="wy1">文言《曾子殺豬》</button>
+    <button class="tab-btn" data-target="wy2">文言《賣油翁》</button>
+</div>
+
+<div class="level-tabs">
+    <button class="lvl-btn active" data-lvl="lvl1">Level 1：分段拖拉字條模式</button>
+    <button class="lvl-btn" data-lvl="lvl2">Level 2：全篇不供詞填充模式</button>
+</div>
+
+<div class="container">
+
+    <div id="u7" class="tab-content active">
+        <div class="chapter-card u7-card">
+            <h2>單元七 甘績瑞《從今天起》</h2>
+
+            <div class="level-content lvl1 active">
+                <div class="quiz-section">
+                    <h3>一、主旨</h3>
+                    <div class="quiz-sentence">
+                        本文指出了現代人 <div class="drop-box" data-ans="因循怠惰"></div> 的弊病，勸勉人們不論是革除 <div class="drop-box" data-ans="不良習慣"></div>，還是想做 <div class="drop-box" data-ans="正當的事"></div>，都要下定 <div class="drop-box" data-ans="決心"></div> 去做，這樣才能取得 <div class="drop-box" data-ans="成功"></div>。
+                    </div>
+                    <div class="word-bank" data-words="因循怠惰,不良習慣,正當的事,決心,成功"></div>
+                </div>
+
+                <div class="quiz-section">
+                    <h3>二、段落層次</h3>
+                    <div class="quiz-sentence">【引論】第 1 段： 解釋論題「從今天起」的兩層意思，帶出文章的中心思想。</div>
+                    <div class="quiz-sentence">【本論】第 2 段：  論述「從今天起」的第一層意思：想革除 <div class="drop-box" data-ans="惡習"></div>，必須下定 <div class="drop-box" data-ans="決心"></div>，從今天起 <div class="drop-box" data-ans="不要再做"></div>。</div>
+                    <div class="quiz-sentence">【本論】第 3 段：  論述「從今天起」的第二層意思：想做 <div class="drop-box" data-ans="正當"></div> 的事，莫存 <div class="drop-box" data-ans="等待明天"></div> 的心態，必須從今天起去做。</div>
+                    <div class="quiz-sentence">【結論】第 4 段：  <div class="drop-box" data-ans="重申人們要「從今天起」不再做壞事和立刻做好事。" style="min-width:300px;"></div></div>
+                    <div class="word-bank" data-words="惡習,決心,不要再做,正當,等待明天,重申人們要「從今天起」不再做壞事和立刻做好事。"></div>
+                </div>
+
+                <div class="quiz-section">
+                    <h3>三、內容分析</h3>
+                    <div class="quiz-sentence">1. 【引題方法】 <div class="drop-box" data-ans="解題法"></div>：解釋「從今天起」的意思，說明題意。</div>
+                    <div class="quiz-sentence">2. 【引論（第 1 段）】 中心論點：無論是不再做 <div class="drop-box" data-ans="不正當和不應當"></div> 的事，還是開始去做 <div class="drop-box" data-ans="正當和應當做"></div> 的事，都要從今天起。</div>
+                    <div class="quiz-sentence">3. 【本論（第 2 段）分論點一】 想革除不良的習慣，必須下定 <div class="drop-box" data-ans="決心"></div>，才不會受不良習慣的 <div class="drop-box" data-ans="引誘和驅使"></div>。</div>
+                    <div class="quiz-sentence">4. 【第 2 段右側論據方框】 引用語句：以古語：「 <div class="drop-box" data-ans="去惡，如農夫之務去草焉" style="min-width:180px;"></div> 」和俗語：「 <div class="drop-box" data-ans="斬草不除根，春風吹又生" style="min-width:180px;"></div> 」說明下定決心的重要。</div>
+                    <div class="quiz-sentence">5. 【本論（第 3 段）分論點二】 想做正當的事，必須立刻 <div class="drop-box" data-ans="去做"></div>，不要被 <div class="drop-box" data-ans="因循怠惰"></div> 的心態耽誤事情。</div>
+                    <div class="quiz-sentence">6. 【第 3 段右側論據方框】 比喻：以綑住手腳的繩子，比喻 <div class="drop-box" data-ans="因循怠惰的心態" style="min-width:130px;"></div>，說明這種心態會妨礙我們 <div class="drop-box" data-ans="取得事業成功" style="min-width:120px;"></div>。</div>
+                    <div class="quiz-sentence">7. 【結論（第 4 段）重申論點】 要從今天起 <div class="drop-box" data-ans="改過從善"></div>；能決心 <div class="drop-box" data-ans="改過"></div> 就可以重新開始。</div>
+                    <div class="quiz-sentence">8. 【第 4 段右側論據方框】 引用語句：以古語「 <div class="drop-box" data-ans="從前種種，譬如昨日死；以後種種，譬如今日生" style="min-width:300px;"></div> 」和佛家語「 <div class="drop-box" data-ans="放下屠刀，立地成佛" style="min-width:150px;"></div> 」論證看法。</div>
+                    <div class="quiz-sentence">9. 【結論方法】 <div class="drop-box" data-ans="引用"></div>：運用古語和佛家語重申論點。</div>
+                    <div class="quiz-sentence">10. 【勸喻】 勸告人們要革除 <div class="drop-box" data-ans="不良習慣"></div>。</div>
+                    <div class="word-bank" data-words="解題法,不正當和不應當,正當和應當做,決心,引誘和驅使,去惡，如農夫之務去草焉,斬草不除根，春風吹又生,去做,因循怠惰,因循怠惰的心態,取得事業成功,改過從善,改過,從前種種，譬如昨日死；以後種種，譬如今日生,放下屠刀，立地成佛,引用,不良習慣"></div>
+                </div>
+
+                <div class="quiz-section">
+                    <h3>四、寫作手法</h3>
+                    <div class="quiz-sentence"> 在本文開首，作者先 <div class="drop-box" data-ans="解釋"></div> 題目「從今天起」的兩層意思：不再 <div class="drop-box" data-ans="去做不正當和不應當做" style="min-width:160px;"></div> 的事；開始 <div class="drop-box" data-ans="去做正當和應當做" style="min-width:150px;"></div> 的事，這是運用了解題法。</div>
+                    <div class="quiz-sentence"> 在本文結尾，作者借用古語「從前種種，譬如昨日死；以後種種，譬如今日生」和佛家語「放下屠刀，立地成佛」，勸告人們要 <div class="drop-box" data-ans="去惡從善"></div>，不論是要 <div class="drop-box" data-ans="革除不良習慣" style="min-width:110px;"></div>，還是想做正當的事，都要 <div class="drop-box" data-ans="立刻行動"></div>，這裏運用了引用和勸喻。</div>
+                    <div class="quiz-sentence"> 本課文的文題為「從今天起」，文章首句已緊扣題目，解釋「從今天起」這句話的兩層意思，開宗明義，起 <div class="drop-box" data-ans="一目了然"></div> 的效果。</div>
+                    <div class="quiz-sentence"> 首段解釋文題的兩層意思後，作者於下文逐一論述—— <div class="drop-box" data-ans="第 2"></div> 段論述 <div class="drop-box" data-ans="「從今天起」改掉壞習慣的重要" style="min-width:200px;"></div>，再於第 3 段論述 <div class="drop-box" data-ans="「從今天起」開始做正當和應當做的事" style="min-width:220px;"></div>，最後於末段總結，呼籲讀者「從今天起」做好事，忘卻昨日壞的自己。全文採用「總分總」的議論結構，層次分明，結構嚴謹。</div>
+                    <div class="word-bank" data-words="解釋,去做不正當和不應當做,去做正當和應當做,去惡從善,革除不良習慣,立刻行動,一目了然,第 2,「從今天起」改掉壞習慣的重要,「從今天起」開始做正當和應當做的事"></div>
+                </div>
+                <button class="btn-reset" onclick="resetSection(this)">重置本頁</button>
+            </div>
+
+            <div class="level-content lvl2">
+                <div class="quiz-section">
+                    <h3>一、主旨</h3>
+                    <div class="quiz-sentence">本文指出了現代人 <input type="text" class="blank-input" data-ans="因循怠惰" style="width:100px;"> 的弊病，勸勉人們不論是革除 <input type="text" class="blank-input" data-ans="不良習慣" style="width:100px;">，還是想做 <input type="text" class="blank-input" data-ans="正當的事" style="width:100px;">，都要下定 <input type="text" class="blank-input" data-ans="決心" style="width:60px;"> 去做，這樣才能取得 <input type="text" class="blank-input" data-ans="成功" style="width:60px;">。</div>
+                    <h3>二、段落層次</h3>
+                    <div class="quiz-sentence">【本論】第 2 段：  論述「從今天起」的第一層意思：想革除 <input type="text" class="blank-input" data-ans="惡習" style="width:60px;">，必須下定 <input type="text" class="blank-input" data-ans="決心" style="width:60px;">，從今天起 <input type="text" class="blank-input" data-ans="不要再做" style="width:90px;">。</div>
+                    <div class="quiz-sentence">【本論】第 3 段：  論述「從今天起」的第二層意思：想做 <input type="text" class="blank-input" data-ans="正當" style="width:60px;"> 的事，莫存 <input type="text" class="blank-input" data-ans="等待明天" style="width:90px;"> 的心態，必須從今天起去做。</div>
+                    <div class="quiz-sentence">【結論】第 4 段：  <input type="text" class="blank-input" data-ans="重申人們要「從今天起」不再做壞事和立刻做好事。" style="width:360px;"></div>
+                    <h3>三、內容分析</h3>
+                    <div class="quiz-sentence">1. 引題方法：<input type="text" class="blank-input" data-ans="解題法" style="width:80px;"></div>
+                    <div class="quiz-sentence">2. 中心論點：無論是不再做 <input type="text" class="blank-input" data-ans="不正當和不應當" style="width:130px;"> 的事，還是開始去做 <input type="text" class="blank-input" data-ans="正當和應當做" style="width:130px;"> 的事。</div>
+                    <div class="quiz-sentence">3. 必須下定 <input type="text" class="blank-input" data-ans="決心" style="width:60px;">，才不會受不良習慣的 <input type="text" class="blank-input" data-ans="引誘和驅使" style="width:100px;">。</div>
+                    <div class="quiz-sentence">4. 古語：「<input type="text" class="blank-input" data-ans="去惡，如農夫之務去草焉" style="width:200px;">」，俗語：「<input type="text" class="blank-input" data-ans="斬草不除根，春風吹又生" style="width:200px;">」。</div>
+                    <div class="quiz-sentence">5. 必須立刻 <input type="text" class="blank-input" data-ans="去做" style="width:60px;">，不要被 <input type="text" class="blank-input" data-ans="因循怠惰" style="width:90px;"> 的心態耽誤。</div>
+                    <div class="quiz-sentence">6. 比喻 <input type="text" class="blank-input" data-ans="因循怠惰的心態" style="width:130px;">，妨礙我們 <input type="text" class="blank-input" data-ans="取得事業成功" style="width:120px;">。</div>
+                    <div class="quiz-sentence">7. 從今天起 <input type="text" class="blank-input" data-ans="改過從善" style="width:90px;">；能決心 <input type="text" class="blank-input" data-ans="改過" style="width:60px;">。</div>
+                    <div class="quiz-sentence">8. 古語「<input type="text" class="blank-input" data-ans="從前種種，譬如昨日死；以後種種，譬如今日生" style="width:300px;">」，佛家語「<input type="text" class="blank-input" data-ans="放下屠刀，立地成佛" style="width:150px;">」。</div>
+                    <div class="quiz-sentence">9. 結論方法：<input type="text" class="blank-input" data-ans="引用" style="width:60px;">，10. 革除 <input type="text" class="blank-input" data-ans="不良習慣" style="width:90px;">。</div>
+                    <h3>四、寫作手法</h3>
+                    <div class="quiz-sentence"> 作者先 <input type="text" class="blank-input" data-ans="解釋" style="width:60px;"> 題目。不再 <input type="text" class="blank-input" data-ans="去做不正當和不應當做" style="width:180px;">；開始 <input type="text" class="blank-input" data-ans="去做正當和應當做" style="width:160px;">。</div>
+                    <div class="quiz-sentence"> 勸告人們要 <input type="text" class="blank-input" data-ans="去惡從善" style="width:90px;">，革除 <input type="text" class="blank-input" data-ans="不良習慣" style="width:110px;">，都要 <input type="text" class="blank-input" data-ans="立刻行動" style="width:90px;">。</div>
+                    <div class="quiz-sentence"> 緊扣題目，起 <input type="text" class="blank-input" data-ans="一目了然" style="width:90px;"> 的效果。</div>
+                    <div class="quiz-sentence"> <input type="text" class="blank-input" data-ans="第 2" style="width:50px;"> 段論述 <input type="text" class="blank-input" data-ans="「從今天起」改掉壞習慣的重要" style="width:220px;">，再於第 3 段論述 <input type="text" class="blank-input" data-ans="「從今天起」開始做正當和應當做的事" style="width:240px;">。</div>
+                </div>
+                <button class="btn-reset" onclick="resetSection(this)">重置本頁</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="wy1" class="tab-content">
+        <div class="chapter-card wy1-card">
+            <h2>文言單元一 韓非《曾子殺豬》</h2>
+
+            <div class="level-content lvl1 active">
+                <div class="quiz-section">
+                    <h3>一、主旨</h3>
+                    <div class="quiz-sentence">本文記述了曾子斥責 <div class="drop-box" data-ans="妻子"></div> 而為兒子 <div class="drop-box" data-ans="殺豬"></div> 一事，帶出做人要 <div class="drop-box" data-ans="信守承諾／守信" style="min-width:130px;"></div> 的道理。</div>
+                    <div class="word-bank" data-words="妻子,殺豬,信守承諾／守信"></div>
+                </div>
+
+                <div class="quiz-section">
+                    <h3>二、內容分析（情節大意表）</h3>
+                    <div class="quiz-sentence">【起因】 曾子的妻子要 <div class="drop-box" data-ans="到市場"></div>，兒子 <div class="drop-box" data-ans="哭着要跟隨她去" style="min-width:130px;"></div>，她便哄騙兒子說回來後會 <div class="drop-box" data-ans="殺豬給他吃" style="min-width:100px;"></div>。</div>
+                    <div class="quiz-sentence">【經過】 曾子的妻子回來後，曾子打算為兒子 <div class="drop-box" data-ans="殺豬"></div>，但被妻子 <div class="drop-box" data-ans="阻止"></div>。曾子教訓她不要 <div class="drop-box" data-ans="欺騙兒子"></div>，否則兒子會 <div class="drop-box" data-ans="欺騙"></div> 別人和 <div class="drop-box" data-ans="不信任"></div> 母親。</div>
+                    <div class="quiz-sentence">【結果與道理】 曾子 <div class="drop-box" data-ans="把豬殺掉並烹煮了" style="min-width:140px;"></div>。做人要 <div class="drop-box" data-ans="信守承諾"></div>，父母在孩子面前要 <div class="drop-box" data-ans="以身作則"></div>。</div>
+                    <div class="word-bank" data-words="到市場,哭着要跟隨她去,殺豬給他吃,殺豬,阻止,欺騙兒子,欺騙,不信任,把豬殺掉並烹煮了,信守承諾,以身作則"></div>
+                </div>
+
+                <div class="quiz-section">
+                    <h3>三、寫作手法（人物描寫）</h3>
+                    <div class="quiz-sentence">【曾子的妻子】 描述她如何 <div class="drop-box" data-ans="哄騙"></div> 兒子，並指這是 <div class="drop-box" data-ans="開玩笑"></div>。阻礙 <div class="drop-box" data-ans="曾子殺豬"></div>，反映她為人 <div class="drop-box" data-ans="輕率"></div>。</div>
+                    <div class="quiz-sentence">【曾子】 看到妻子回來後，立刻 <div class="drop-box" data-ans="準備殺豬"></div>，最後更堅決 <div class="drop-box" data-ans="把豬殺掉並烹煮了" style="min-width:140px;"></div>。他對妻子的 <div class="drop-box" data-ans="斥責"></div> 說明了 <div class="drop-box" data-ans="不殺豬／不守承諾" style="min-width:130px;"></div> 的壞處，反映他為人 <div class="drop-box" data-ans="信守承諾／言出必行" style="min-width:140px;"></div>。</div>
+                    <div class="word-bank" data-words="哄騙,開玩笑,曾子殺豬,輕率,準備殺豬,把豬殺掉並烹煮了,斥責,不殺豬／不守承諾,信守承諾／言出必行"></div>
+                </div>
+                <button class="btn-reset" onclick="resetSection(this)">重置本頁</button>
+            </div>
+
+            <div class="level-content lvl2">
+                <div class="quiz-section">
+                    <h3>一、主旨</h3>
+                    <div class="quiz-sentence">本文記述了曾子斥責 <input type="text" class="blank-input" data-ans="妻子" style="width:60px;"> 而為兒子 <input type="text" class="blank-input" data-ans="殺豬" style="width:60px;"> 一事，帶出做人要 <input type="text" class="blank-input" data-ans="信守承諾／守信" style="width:140px;"> 的道理。</div>
+                    <h3>二、內容分析</h3>
+                    <div class="quiz-sentence">曾子的妻子要 <input type="text" class="blank-input" data-ans="到市場" style="width:80px;">，兒子 <input type="text" class="blank-input" data-ans="哭着要跟隨她去" style="width:150px;">，她便哄騙兒子說回來後會 <input type="text" class="blank-input" data-ans="殺豬給他吃" style="width:100px;">。</div>
+                    <div class="quiz-sentence">曾子打算為兒子 <input type="text" class="blank-input" data-ans="殺豬" style="width:60px;">，幕後被妻子 <input type="text" class="blank-input" data-ans="阻止" style="width:60px;">。曾子教訓她不要 <input type="text" class="blank-input" data-ans="欺騙兒子" style="width:90px;">，否則兒子會 <input type="text" class="blank-input" data-ans="欺騙" style="width:60px;"> 別人和 <input type="text" class="blank-input" data-ans="不信任" style="width:70px;"> 母親。</div>
+                    <div class="quiz-sentence">曾子 <input type="text" class="blank-input" data-ans="把豬殺掉並烹煮了" style="width:160px;">。做人要 <input type="text" class="blank-input" data-ans="信守承諾" style="width:90px;">，父母在孩子面前要 <input type="text" class="blank-input" data-ans="以身作則" style="width:90px;">。</div>
+                    <h3>三、寫作手法</h3>
+                    <div class="quiz-sentence"> 妻子如何 <input type="text" class="blank-input" data-ans="哄騙" style="width:60px;"> 兒子，向曾子指這是 <input type="text" class="blank-input" data-ans="開玩笑">。阻止 <input type="text" class="blank-input" data-ans="曾子殺豬" style="width:90px;">。反映她為人 <input type="text" class="blank-input" data-ans="輕率" style="width:60px;">。</div>
+                    <div class="quiz-sentence"> 曾子立刻 <input type="text" class="blank-input" data-ans="準備殺豬" style="width:90px;">，最後更堅決 <input type="text" class="blank-input" data-ans="把豬殺掉並烹煮了" style="width:160px;">。他對妻子的 <input type="text" class="blank-input" data-ans="斥責" style="width:60px;"> 說明了 <input type="text" class="blank-input" data-ans="不殺豬／不守承諾" style="width:140px;"> 的影響，反映為人 <input type="text" class="blank-input" data-ans="信守承諾／言出必行" style="width:160px;">。</div>
+                </div>
+                <button class="btn-reset" onclick="resetSection(this)">重置本頁</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="wy2" class="tab-content">
+        <div class="chapter-card wy2-card">
+            <h2>文言單元一 歐陽修《賣油翁》</h2>
+
+            <div class="level-content lvl1 active">
+                <div class="quiz-section">
+                    <h3>一、主旨</h3>
+                    <div class="quiz-sentence">本文通過敍述 <div class="drop-box" data-ans="賣油翁與陳堯咨" style="min-width:130px;"></div> 之間的故事，說明 <div class="drop-box" data-ans="任何技藝都是「熟能生巧」" style="min-width:190px;"></div> 的道理，並告誡人們學習時不要 <div class="drop-box" data-ans="驕傲自滿"></div>。</div>
+                    <div class="word-bank" data-words="賣油翁與陳堯咨,任何技藝都是「熟能生巧」,驕傲自滿"></div>
+                </div>
+
+                <div class="quiz-section">
+                    <h3>二、內容分析（情節圖表範疇）</h3>
+                    <div class="quiz-sentence">【核心】 人物有 <div class="drop-box" data-ans="賣油翁"></div> 和 <div class="drop-box" data-ans="陳堯咨"></div>。事在評價射箭與展示 <div class="drop-box" data-ans="酌油技術"></div>。</div>
+                    <div class="quiz-sentence">【情節】 陳堯咨在 <div class="drop-box" data-ans="家中的園地裏射箭" style="min-width:150px;"></div>，賣油翁經過時 <div class="drop-box" data-ans="停下來觀看" style="min-width:100px;"></div>。雖然陳堯咨箭術十分 <div class="drop-box" data-ans="精湛"></div>，但是賣油翁認為這只因為 <div class="drop-box" data-ans="技藝純熟"></div>，令陳堯咨感到 <div class="drop-box" data-ans="生氣"></div>。最後賣油翁展示 <div class="drop-box" data-ans="斟油技術"></div> 證明看法，陳堯咨只能 <div class="drop-box" data-ans="笑着打發賣油翁離開" style="min-width:160px;"></div>。</div>
+                    <div class="word-bank" data-words="賣油翁,陳堯咨,酌油技術,家中的園地裏射箭,停下來觀看,精湛,技藝純熟,生氣,斟油技術,笑着打發賣油翁離開"></div>
+                </div>
+
+                <div class="quiz-section">
+                    <h3>三、寫作手法（人物描寫）</h3>
+                    <div class="quiz-sentence">【核心對話】 陳堯咨怒斥：「 <div class="drop-box" data-ans="爾安敢輕吾射！" style="min-width:140px;"></div> 」。賣油翁評價射箭：「 <div class="drop-box" data-ans="無他，但手熟爾。" style="min-width:150px;"></div> 」，評價倒油：「 <div class="drop-box" data-ans="我亦無他，惟手熟爾。" style="min-width:160px;"></div> 」。</div>
+                    <div class="quiz-sentence">【細節表情】 賣油翁觀看時先是 <div class="drop-box" data-ans="斜着眼睛"></div> 看，後來 <div class="drop-box" data-ans="微微點頭"></div>。展示的是 <div class="drop-box" data-ans="瀝油技術"></div>。陳堯咨的神態由 <div class="drop-box" data-ans="忿然／憤怒" style="min-width:100px;"></div> 轉為 <div class="drop-box" data-ans="面露笑容"></div>。</div>
+                    <div class="word-bank" data-words="爾安敢輕吾射！,無他，但手熟爾。,我亦無他，惟手熟爾。,斜着眼睛,微微點頭,瀝油技術,忿然／憤怒,面露笑容"></div>
+                </div>
+                <button class="btn-reset" onclick="resetSection(this)">重置本頁</button>
+            </div>
+
+            <div class="level-content lvl2">
+                <div class="quiz-section">
+                    <h3>一、主旨</h3>
+                    <div class="quiz-sentence">本文通過敍述 <input type="text" class="blank-input" data-ans="賣油翁與陳堯咨" style="width:140px;"> 之間的故事，說明 <input type="text" class="blank-input" data-ans="任何技藝都是「熟能生巧」" style="width:200px;"> 的道理，並告誡人們學習時不要 <input type="text" class="blank-input" data-ans="驕傲自滿" style="width:90px;">。</div>
+                    <h3>二、內容分析</h3>
+                    <div class="quiz-sentence">人物：<input type="text" class="blank-input" data-ans="賣油翁" style="width:70px;"> 和 <input type="text" class="blank-input" data-ans="陳堯咨" style="width:70px;">。事：展示 <input type="text" class="blank-input" data-ans="酌油技術" style="width:90px;">。</div>
+                    <div class="quiz-sentence">陳堯咨在 <input type="text" class="blank-input" data-ans="家中的園地裏射箭" style="width:160px;">，賣油翁經過時 <input type="text" class="blank-input" data-ans="停下來觀看" style="width:100px;">。</div>
+                    <div class="quiz-sentence">陳堯咨的箭術十分 <input type="text" class="blank-input" data-ans="精湛" style="width:60px;">，但是賣油翁認為這只因為 <input type="text" class="blank-input" data-ans="技藝純熟" style="width:90px;">，令陳堯咨感到 <input type="text" class="blank-input" data-ans="生氣" style="width:60px;">。</div>
+                    <div class="quiz-sentence">賣油翁展示 <input type="text" class="blank-input" data-ans="斟油技術" style="width:90px;">。陳堯咨 <input type="text" class="blank-input" data-ans="笑着打發賣油翁離開" style="width:180px;">。</div>
+                    <h3>三、寫作手法</h3>
+                    <div class="quiz-sentence"> 陳堯咨怒斥：「 <input type="text" class="blank-input" data-ans="爾安敢輕吾射！" style="width:150px;"> 」</div>
+                    <div class="quiz-sentence"> 賣油翁評價射箭：「 <input type="text" class="blank-input" data-ans="無他，但手熟爾。" style="width:160px;"> 」，評價倒油：「 <input type="text" class="blank-input" data-ans="我亦無他，惟手熟爾。" style="width:180px;"> 」</div>
+                    <div class="quiz-sentence"> 賣油翁先是 <input type="text" class="blank-input" data-ans="斜着眼睛" style="width:90px;"> 看，後來 <input type="text" class="blank-input" data-ans="微微點頭" style="width:90px;">。展示 <input type="text" class="blank-input" data-ans="瀝油技術" style="width:90px;">。</div>
+                    <div class="quiz-sentence"> 神態由 <input type="text" class="blank-input" data-ans="忿然／憤怒" style="width:100px;"> 轉為 <input type="text" class="blank-input" data-ans="面露笑容" style="width:90px;">。</div>
+                </div>
+                <button class="btn-reset" onclick="resetSection(this)">重置本頁</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="dashboard-section">
+        <h2>📊 數據榮譽中心（本地硬碟持久儲存）</h2>
+        <div class="dashboard-grid">
+            
+            <div class="data-card">
+                <h4>🏆 當前課文與難度 — 頂尖排行榜 Top 3</h4>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%">名次</th>
+                            <th style="width: 45%">挑戰者</th>
+                            <th style="width: 20%">最高分數</th>
+                            <th style="width: 20%">答對率</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-tbody">
+                        </tbody>
+                </table>
+            </div>
+
+            <div class="data-card">
+                <button class="btn-clear-data" onclick="clearAllData()">⚠️ 清除所有紀錄</button>
+                <h4>🕒 您的學習足跡 (History Logs)</h4>
+                <div class="history-log-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%">時間</th>
+                                <th style="width: 40%">單元課文/級別</th>
+                                <th style="width: 15%">得分</th>
+                                <th style="width: 20%">完成度</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ---------------------------------------------------
+    // 狀態與存儲核心管理 (Score & LocalStorage Engine)
+    // ---------------------------------------------------
+    let userScore = 0;
+    let currentNickname = localStorage.getItem('zh_quiz_nickname') || '匿名學霸';
+    let scoredElements = new Set(); 
+    let assistedElements = new Set();
+    
+    // 語音開關核心狀態（預設開啟，儲存在本地）
+    let ttsEnabled = localStorage.getItem('zh_quiz_tts') !== 'disabled';
+    
+    let rankingData = JSON.parse(localStorage.getItem('zh_quiz_rankings')) || {};
+    let historyLogs = JSON.parse(localStorage.getItem('zh_quiz_history')) || [];
+
+    // ---------------------------------------------------
+    // 導航與分頁切換
+    // ---------------------------------------------------
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.tab-content');
+    const lvlBtns = document.querySelectorAll('.lvl-btn');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.target).classList.add('active');
+            window.speechSynthesis.cancel(); // 切換時停止朗讀
+            updateDashboard();
+        });
+    });
+
+    lvlBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            lvlBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const targetLvl = btn.dataset.lvl;
+            
+            document.querySelectorAll('.level-content').forEach(lc => {
+                lc.classList.remove('active');
+                if(lc.classList.contains(targetLvl)) lc.classList.add('active');
+            });
+            window.speechSynthesis.cancel(); // 切換時停止朗讀
+            updateDashboard();
+        });
+    });
+
+    // ---------------------------------------------------
+    // 洗腦語音模組 (Web Speech TTS Engine)
+    // ---------------------------------------------------
+    function initTTSUi() {
+        const btn = document.getElementById('tts-toggle');
+        const status = document.getElementById('tts-status');
+        const icon = document.getElementById('tts-icon');
+        
+        if (ttsEnabled) {
+            btn.classList.add('enabled');
+            status.innerText = '開啟';
+            icon.innerText = '🔊';
+        } else {
+            btn.classList.remove('enabled');
+            status.innerText = '關閉';
+            icon.innerText = '🔇';
+            window.speechSynthesis.cancel();
+        }
+    }
+
+    function toggleTTS() {
+        ttsEnabled = !ttsEnabled;
+        localStorage.setItem('zh_quiz_tts', ttsEnabled ? 'enabled' : 'disabled');
+        initTTSUi();
+    }
+
+    // 洗腦朗讀核心：提取包含正確答案的完整句子文本並播放
+    function speakSentenceOfElement(element) {
+        if (!ttsEnabled) return;
+
+        // 找到當前空格所屬的完整句子容器 (.quiz-sentence)
+        const sentenceContainer = element.closest('.quiz-sentence');
+        if (!sentenceContainer) return;
+
+        // 複製一份文字內容，避免破壞原本網頁架構
+        let rawText = sentenceContainer.innerText;
+
+        // 清理掉多餘的提示或介面字眼（例如：Level 2 的 "❌ 正確：xxx"）
+        rawText = rawText.replace(/❌\s*正確：[^\n]+/g, '');
+        rawText = rawText.replace(/[\n\r]/g, ' ').trim();
+
+        // 停止當前正在播放的聲音，不堆疊，直接搶佔播放（形成快速回饋）
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(rawText);
+        
+        // 嘗試抓取系統的中文（廣東話優先，其次普通話）
+        const voices = window.speechSynthesis.getVoices();
+        let selectedVoice = voices.find(v => v.lang.includes('HK') || v.lang.includes('zh-HK'));
+        if (!selectedVoice) {
+            selectedVoice = voices.find(v => v.lang.includes('CN') || v.lang.includes('zh') || v.lang.includes('zh-CN'));
+        }
+        
+        if (selectedVoice) utterance.voice = selectedVoice;
+        
+        utterance.rate = 0.95; // 稍微慢一點點，字字清晰，加深洗腦效果
+        utterance.pitch = 1.0;
+        
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // 💡 針對 Chrome 等瀏覽器需要提前加載聲音庫的修正
+    if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = () => {};
+    }
+
+    // 修改暱稱
+    function changeNickname() {
+        const name = prompt("請輸入您的溫習暱稱（用於排行榜）：", currentNickname);
+        if(name && name.trim() !== "") {
+            currentNickname = name.trim();
+            localStorage.setItem('zh_quiz_nickname', currentNickname);
+            document.getElementById('user-name-display').innerText = currentNickname;
+            updateDashboard();
+        }
+    }
+
+    // 獲取當前唯一課文識別碼組合
+    function getCurrentScopeKey() {
+        const activeTab = document.querySelector('.tab-btn.active').dataset.target;
+        const activeLvl = document.querySelector('.lvl-btn.active').dataset.lvl;
+        return `${activeTab}_${activeLvl}`;
+    }
+
+    // ---------------------------------------------------
+    // 數據中心：保存、更新與渲染排行榜及歷史
+    // ---------------------------------------------------
+    function saveAndLogRecord(isFinishedEvent = false) {
+        const activeTab = document.querySelector('.tab-btn.active');
+        const activeLvl = document.querySelector('.lvl-btn.active');
+        const activeContent = document.querySelector('.tab-content.active .level-content.active');
+        
+        const dropBoxes = activeContent.querySelectorAll('.drop-box').length;
+        const blankInputs = activeContent.querySelectorAll('.blank-input').length;
+        const totalBlanks = dropBoxes + blankInputs;
+        const correctBlanks = activeContent.querySelectorAll('.state-correct').length;
+        
+        if (correctBlanks === 0) return; 
+
+        const rateStr = `${Math.round((correctBlanks / totalBlanks) * 100)}%`;
+        const scopeKey = getCurrentScopeKey();
+        const modeDesc = `${activeTab.innerText} (${activeLvl.innerText.split('：')[0]})`;
+
+        const now = new Date();
+        const timeStr = `${now.getMonth()+1}/${now.getDate()} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+        
+        if(isFinishedEvent) {
+            historyLogs.unshift({ time: timeStr, mode: modeDesc, score: userScore, rate: "100% (通關)" });
+        } else {
+            historyLogs.unshift({ time: timeStr, mode: modeDesc, score: userScore, rate: rateStr });
+        }
+        if(historyLogs.length > 30) historyLogs.pop(); 
+        localStorage.setItem('zh_quiz_history', JSON.stringify(historyLogs));
+
+        if(!rankingData[scopeKey]) rankingData[scopeKey] = [];
+        
+        const userExistIdx = rankingData[scopeKey].findIndex(r => r.name === currentNickname);
+        if(userExistIdx > -1) {
+            if(userScore > rankingData[scopeKey][userExistIdx].score) {
+                rankingData[scopeKey][userExistIdx] = { name: currentNickname, score: userScore, rate: rateStr };
+            }
+        } else {
+            rankingData[scopeKey].push({ name: currentNickname, score: userScore, rate: rateStr });
+        }
+
+        rankingData[scopeKey].sort((a,b) => b.score - a.score);
+        if(rankingData[scopeKey].length > 3) rankingData[scopeKey].pop(); 
+        
+        localStorage.setItem('zh_quiz_rankings', JSON.stringify(rankingData));
+        renderDashboardTables();
+    }
+
+    function renderDashboardTables() {
+        const scopeKey = getCurrentScopeKey();
+        const tbodyRank = document.getElementById('leaderboard-tbody');
+        tbodyRank.innerHTML = '';
+
+        const currentRanks = rankingData[scopeKey] || [];
+        for(let i=0; i<3; i++) {
+            const tr = document.createElement('tr');
+            const medal = i === 0 ? '🥇' : (i === 1 ? '🥈' : '🥉');
+            if(currentRanks[i]) {
+                tr.innerHTML = `<td class="rank-${i+1}">${medal}</td><td>${currentRanks[i].name}</td><td><b>${currentRanks[i].score}</b></td><td>${currentRanks[i].rate}</td>`;
+            } else {
+                tr.innerHTML = `<td style="color:#bdc3c7">${medal}</td><td style="color:#bdc3c7">虛位以待</td><td style="color:#bdc3c7">-</td><td style="color:#bdc3c7">-</td>`;
+            }
+            tbodyRank.appendChild(tr);
+        }
+
+        const tbodyHist = document.getElementById('history-tbody');
+        tbodyHist.innerHTML = '';
+        historyLogs.forEach(log => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${log.time}</td><td>${log.mode}</td><td><span style="color:#27ae60">${log.score}</span></td><td>${log.rate}</td>`;
+            tbodyHist.appendChild(tr);
+        });
+    }
+
+    function clearAllData() {
+        if(confirm("確定要清除本機上所有的排行榜與學習歷史足跡嗎？此動作無法復原。")) {
+            localStorage.removeItem('zh_quiz_rankings');
+            localStorage.removeItem('zh_quiz_history');
+            rankingData = {};
+            historyLogs = [];
+            renderDashboardTables();
+        }
+    }
+
+    // ---------------------------------------------------
+    // 實時更新儀表板進度與計分
+    // ---------------------------------------------------
+    function updateDashboard() {
+        const activeTab = document.querySelector('.tab-btn.active');
+        const activeLvl = document.querySelector('.lvl-btn.active');
+        const activeContent = document.querySelector('.tab-content.active .level-content.active');
+        
+        if (!activeTab || !activeLvl || !activeContent) return;
+
+        document.getElementById('user-name-display').innerText = currentNickname;
+        document.getElementById('total-score').innerText = userScore;
+
+        const dropBoxes = activeContent.querySelectorAll('.drop-box');
+        const blankInputs = activeContent.querySelectorAll('.blank-input');
+        const totalBlanks = dropBoxes.length + blankInputs.length;
+        document.getElementById('total-count').innerText = totalBlanks;
+
+        const correctBlanks = activeContent.querySelectorAll('.state-correct').length;
+        document.getElementById('correct-count').innerText = correctBlanks;
+
+        const progressPercent = totalBlanks > 0 ? (correctBlanks / totalBlanks) * 100 : 0;
+        document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+        renderDashboardTables();
+
+        if (correctBlanks === totalBlanks && totalBlanks > 0) {
+            const finishedFlag = `done_${currentNickname}_${getCurrentScopeKey()}_${userScore}`;
+            if(window.lastFinishedFlag === finishedFlag) return;
+            window.lastFinishedFlag = finishedFlag;
+
+            saveAndLogRecord(true); 
+            setTimeout(() => {
+                alert(`🎉🎉🎉 完美通關！！\n恭喜 ${currentNickname} 成功制霸【${activeTab.innerText}】的 ${activeLvl.innerText.split('：')[0]}！\n最終榮譽積分：${userScore} 分！已成功同步紀錄至榮譽榜！`);
+            }, 400);
+        }
+    }
+
+    // ---------------------------------------------------
+    // LEVEL 1：動態詞條生成與拖放架構
+    // ---------------------------------------------------
+    let draggedElement = null;
+
+    function initDragAndDrop() {
+        document.querySelectorAll('.word-bank').forEach(bank => {
+            bank.innerHTML = ''; 
+            const wordsAttr = bank.getAttribute('data-words');
+            if (!wordsAttr) return;
+            
+            const wordsArr = wordsAttr.split(',').sort(() => Math.random() - 0.5);
+            
+            wordsArr.forEach(word => {
+                const tag = document.createElement('div');
+                tag.className = 'word-tag';
+                tag.draggable = true;
+                tag.innerText = word;
+                
+                tag.addEventListener('dragstart', (e) => {
+                    draggedElement = tag;
+                    tag.classList.add('dragged');
+                    e.dataTransfer.setData('text/plain', word);
+                });
+                
+                tag.addEventListener('dragend', () => {
+                    tag.classList.remove('dragged');
+                });
+                
+                bank.appendChild(tag);
+            });
+        });
+
+        document.querySelectorAll('.drop-box').forEach((box, index) => {
+            if(!box.id) box.id = `dropbox-${box.getAttribute('data-ans').substring(0,2)}-${index}`;
+
+            box.addEventListener('dragover', (e) => { e.preventDefault(); box.classList.add('over'); });
+            box.addEventListener('dragleave', () => { box.classList.remove('over'); });
+            
+            box.addEventListener('drop', (e) => {
+                e.preventDefault();
+                box.classList.remove('over');
+                const droppedText = e.dataTransfer.getData('text/plain');
+                box.innerText = droppedText;
+                checkSingleElement(box, droppedText);
+            });
+
+            box.addEventListener('click', () => {
+                if (draggedElement) {
+                    const clickText = draggedElement.innerText;
+                    box.innerText = clickText;
+                    checkSingleElement(box, clickText);
+                    draggedElement = null;
+                } else if(box.innerText !== "") {
+                    if(scoredElements.has(box.id)) {
+                        userScore -= 10;
+                        scoredElements.delete(box.id);
+                    }
+                    box.innerText = "";
+                    box.className = "drop-box";
+                    window.speechSynthesis.cancel();
+                    updateDashboard();
+                }
+            });
+        });
+    }
+
+    // ---------------------------------------------------
+    // LEVEL 2：鍵盤輸入即時自動核對
+    // ---------------------------------------------------
+    function initLevel2Typing() {
+        document.querySelectorAll('.blank-input').forEach((input, index) => {
+            if(!input.id) input.id = `input-${input.getAttribute('data-ans').substring(0,2)}-${index}`;
+
+            input.addEventListener('change', () => {
+                checkSingleElement(input, input.value.trim());
+            });
+            input.addEventListener('keyup', (e) => {
+                if(e.key === 'Enter') checkSingleElement(input, input.value.trim());
+            });
+        });
+    }
+
+    // ---------------------------------------------------
+    // 萬能單格精確校對匹配核心 + 動態計分機制
+    // ---------------------------------------------------
+    function checkSingleElement(element, value) {
+        const isInput = (element.tagName === "INPUT");
+        const elementId = element.id;
+        
+        if (!value) {
+            element.className = isInput ? "blank-input" : "drop-box";
+            removeErrorMsg(element);
+            if(scoredElements.has(elementId)) {
+                userScore -= isInput ? (assistedElements.has(elementId) ? 5 : 20) : 10;
+                scoredElements.delete(elementId);
+                assistedElements.delete(elementId);
+            }
+            updateDashboard();
+            return;
+        }
+        
+        const targetAnsStr = element.getAttribute('data-ans');
+        const validAnswers = targetAnsStr.split('／').map(a => a.trim());
+        
+        if (targetAnsStr === "酌油技術" || targetAnsStr === "斟油技術") {
+            validAnswers.push("酌油技術", "斟油技術", "瀝油技術");
+        }
+        if (targetAnsStr === "信守承諾／守信") {
+            validAnswers.push("信守承諾", "守信");
+        }
+
+        const isCorrect = validAnswers.includes(value);
+        const baseClass = isInput ? "blank-input" : "drop-box";
+
+        if (isCorrect) {
+            element.className = `${baseClass} state-correct`;
+            element.title = "完全正確！";
+            removeErrorMsg(element); 
+
+            if (!scoredElements.has(elementId)) {
+                if (isInput) {
+                    if (assistedElements.has(elementId)) {
+                        userScore += 5; 
+                    } else {
+                        userScore += 20; 
+                    }
+                } else {
+                    userScore += 10; 
+                }
+                scoredElements.add(elementId);
+            }
+            
+            // 🎯 洗腦關鍵：答對時，立即抓取該整句進行朗讀
+            speakSentenceOfElement(element);
+
+        } else {
+            element.className = `${baseClass} state-wrong`;
+            element.title = "答案不對，再試試！";
+            
+            if(scoredElements.has(elementId)) {
+                userScore -= isInput ? (assistedElements.has(elementId) ? 5 : 20) : 10;
+                scoredElements.delete(elementId);
+            }
+
+            if (isInput) {
+                showErrorMsg(element, targetAnsStr);
+                assistedElements.add(elementId); 
+            }
+        }
+        updateDashboard();
+    }
+
+    function showErrorMsg(inputElement, correctText) {
+        removeErrorMsg(inputElement); 
+        const msgSpan = document.createElement('span');
+        msgSpan.className = 'error-hint-msg';
+        msgSpan.innerText = `❌ 正確：${correctText}`;
+        inputElement.parentNode.insertBefore(msgSpan, inputElement.nextSibling);
+    }
+
+    function removeErrorMsg(inputElement) {
+        const nextEl = inputElement.nextSibling;
+        if (nextEl && nextEl.className === 'error-hint-msg') {
+            nextEl.remove();
+        }
+    }
+
+    // 重置重做與儲存當前進度紀錄
+    function resetSection(btn) {
+        const parent = btn.parentElement;
+        
+        saveAndLogRecord(false);
+        window.speechSynthesis.cancel();
+
+        parent.querySelectorAll('.drop-box, .blank-input').forEach(el => {
+            if(scoredElements.has(el.id)) {
+                const isInput = (el.tagName === "INPUT");
+                userScore -= isInput ? (assistedElements.has(el.id) ? 5 : 20) : 10;
+                scoredElements.delete(el.id);
+                assistedElements.delete(el.id);
+            }
+        });
+
+        parent.querySelectorAll('.drop-box').forEach(b => { b.innerText = ""; b.className = "drop-box"; b.title=""; });
+        parent.querySelectorAll('.blank-input').forEach(i => { i.value = ""; i.className = "blank-input"; i.title=""; removeErrorMsg(i); });
+        
+        initDragAndDrop();
+        updateDashboard();
+    }
+
+    // 初始化啟動
+    window.onload = () => {
+        if(!localStorage.getItem('zh_quiz_nickname')) {
+            const name = prompt("歡迎使用中一中文科智庫系統！請給自己取個響亮的溫習暱稱吧：", "學霸一號");
+            if(name && name.trim() !== "") currentNickname = name.trim();
+            localStorage.setItem('zh_quiz_nickname', currentNickname);
+        }
+
+        initTTSUi();
+        initDragAndDrop();
+        initLevel2Typing();
+        updateDashboard();
+        
+        document.addEventListener('click', (e) => {
+            if(e.target.classList.contains('word-tag')) {
+                document.querySelectorAll('.word-tag').forEach(t => t.style.border = "1px solid #a0aec0");
+                draggedElement = e.target;
+                e.target.style.border = "2px solid #e67e22";
+            }
+        });
+    };
+</script>
+
+</body>
+</html>
