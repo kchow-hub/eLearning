@@ -1,0 +1,1063 @@
+html_content_v4 = """<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>聖羅撒書院 中一宗教教育科期終複習遊戲</title>
+    <style>
+        :root {
+            --primary: #5c3c92;
+            --primary-light: #e6e1f2;
+            --secondary: #d71391;
+            --accent: #ffbc00;
+            --bg: #f9f7fc;
+            --card-bg: #ffffff;
+            --text: #2d2438;
+            --text-light: #6b5c7b;
+            --success: #2ec4b6;
+            --error: #e71d36;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn-icon {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-icon.active {
+            background: var(--accent);
+            color: var(--text);
+        }
+
+        main {
+            flex: 1;
+            padding: 20px;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 6px 18px rgba(92, 60, 146, 0.06);
+            border: 1px solid rgba(92, 60, 146, 0.08);
+        }
+
+        .menu-title {
+            text-align: center;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .menu-subtitle {
+            text-align: center;
+            color: var(--text-light);
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .section-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        @media (min-width: 600px) {
+            .section-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .menu-card {
+            background: white;
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .menu-card:active, .menu-card:hover {
+            border-color: var(--primary);
+            background-color: rgba(92, 60, 146, 0.02);
+            transform: translateY(-2px);
+        }
+
+        .menu-card h3 {
+            margin: 0;
+            color: var(--primary);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .level-container {
+            display: flex;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .btn-level {
+            flex: 1;
+            background-color: var(--primary-light);
+            border: none;
+            color: var(--primary);
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-level:active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-main {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .btn-main:active {
+            transform: scale(0.98);
+        }
+
+        .btn-back {
+            background-color: transparent;
+            border: 1px solid var(--text-light);
+            color: var(--text-light);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            align-self: flex-start;
+        }
+
+        /* 遊戲介面樣式 */
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background-color: var(--primary-light);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--secondary);
+            transition: width 0.3s ease;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 15px;
+        }
+
+        .question-box {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            font-weight: 600;
+            color: var(--text);
+            padding: 15px;
+            background-color: rgba(92, 60, 146, 0.03);
+            border-radius: 10px;
+            border-left: 5px solid var(--primary);
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background-color: white;
+            border: 2px solid #e2dbe8;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: left;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .option-btn:active {
+            background-color: #f1ecf7;
+        }
+
+        .option-btn.correct {
+            border-color: var(--success);
+            background-color: rgba(46, 196, 182, 0.1);
+            color: #1b746c;
+            font-weight: bold;
+        }
+
+        .option-btn.incorrect {
+            border-color: var(--error);
+            background-color: rgba(231, 29, 54, 0.1);
+            color: #a61224;
+            opacity: 0.7;
+        }
+
+        /* 填充題樣式 */
+        .fib-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .fib-input {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            border: 2px solid #e2dbe8;
+            border-radius: 12px;
+            outline: none;
+            text-align: center;
+        }
+
+        .fib-input:focus {
+            border-color: var(--primary);
+        }
+
+        .feedback-box {
+            display: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 16px;
+        }
+
+        .feedback-box.correct {
+            display: block;
+            background-color: rgba(46, 196, 182, 0.15);
+            color: #1b746c;
+        }
+
+        .feedback-box.incorrect {
+            display: block;
+            background-color: rgba(231, 29, 54, 0.15);
+            color: #a61224;
+        }
+
+        /* 金句清單瀏覽 */
+        .list-item {
+            padding: 15px;
+            border-bottom: 1px solid var(--primary-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-text {
+            flex: 1;
+            line-height: 1.5;
+        }
+
+        .list-text strong {
+            color: var(--primary);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .btn-speaker {
+            background: var(--primary-light);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--primary);
+        }
+
+        /* 進度排行榜 */
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--primary-light);
+        }
+
+        .leaderboard-table th {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .badge {
+            background-color: var(--secondary);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        /* 自定義 POP-UP 彈窗樣式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none; /* hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(3px);
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 85%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-title {
+            margin-top: 0;
+            font-size: 22px;
+            color: var(--error);
+        }
+        .modal-body {
+            font-size: 18px;
+            margin: 20px 0;
+            color: var(--text);
+            line-height: 1.5;
+        }
+        .modal-answer-highlight {
+            display: block;
+            margin-top: 10px;
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary);
+            background: var(--primary-light);
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .modal-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .modal-btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>聖羅撒書院 中一宗教科複習</h1>
+        <div class="controls">
+            <button id="tts-toggle" class="btn-icon active" onclick="toggleTTS()">🔊 朗讀: 開</button>
+            <button id="brainwash-toggle" class="btn-icon active" onclick="toggleBrainwash()">🔄 洗腦: 開</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="screen-menu" class="screen active">
+            <div class="card">
+                <h2 class="menu-title">⛪ 期終考試全方位洗腦複習</h2>
+                <p class="menu-subtitle">專為 iPad 優化 • 包含全庫 62 道核心題目</p>
+                
+                <div class="section-grid">
+                    <div class="menu-card">
+                        <h3>🛑 下學期 1-10 句聖經金句</h3>
+                        <p style="margin:0; font-size:12px; color:var(--text-light)">依章節提供全方位記憶演練</p>
+                        <div class="level-container">
+                            <button class="btn-level" onclick="startVerses(0)">Lv0 朗讀</button>
+                            <button class="btn-level" onclick="startVerses(1)">Lv1 選擇</button>
+                            <button class="btn-level" onclick="startVerses(2)">Lv2 填充</button>
+                        </div>
+                    </div>
+
+                    <div class="menu-card" onclick="startStandardSection(2)">
+                        <h3>💜 主題二：將臨期常識</h3>
+                        <p style="margin:0; font-size:12px; color:var(--text-light)">花環、主日進程與核心内涵 (13題)</p>
+                        <div class="level-container">
+                            <button class="btn-level" style="max-width:80px">開始複習</button>
+                        </div>
+                    </div>
+
+                    <div class="menu-card" onclick="startStandardSection(3)">
+                        <h3>✝️ 主題三：四旬期常識</h3>
+                        <p style="margin:0; font-size:12px; color:var(--text-light)">聖灰、三大典故、梵二積極精神 (16題)</p>
+                        <div class="level-container">
+                            <button class="btn-level" style="max-width:80px">開始複習</button>
+                        </div>
+                    </div>
+
+                    <div class="menu-card" onclick="startStandardSection(4)">
+                        <h3>👑 主題四：復活期與聖周時間線</h3>
+                        <p style="margin:0; font-size:12px; color:var(--text-light)">聖周時序、建立聖體、受難與復活高峰 (7題)</p>
+                        <div class="level-container">
+                            <button class="btn-level" style="max-width:80px">開始複習</button>
+                        </div>
+                    </div>
+
+                    <div class="menu-card" onclick="startStandardSection(5)">
+                        <h3>❤️ 主題五：耶穌聖心常識</h3>
+                        <p style="margin:0; font-size:12px; color:var(--text-light)">聖女瑪加利大、視覺象徵、補贖實踐 (9題)</p>
+                        <div class="level-container">
+                            <button class="btn-level" style="max-width:80px">開始複習</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-top:0; color:var(--primary); display:flex; justify-content:space-between; align-items:center;">
+                    📊 學習進度排行榜 
+                    <button style="font-size:12px; background:none; border:none; color:var(--secondary); cursor:pointer;" onclick="clearRecords()">清除記錄</button>
+                </h3>
+                <div id="leaderboard-container"></div>
+            </div>
+        </div>
+
+        <div id="screen-list" class="screen">
+            <button class="btn-back" onclick="goBack()">← 返回主選單</button>
+            <div class="card">
+                <h2 style="color:var(--primary); margin-top:0;">📝 金句全文瀏覽與朗讀 (Level 0)</h2>
+                <p style="color:var(--text-light); font-size:13px; margin-bottom:20px;">點擊右側喇叭按鈕可聆聽自動朗讀，配合視覺進行高效背誦。</p>
+                <div id="full-list-content"></div>
+            </div>
+        </div>
+
+        <div id="screen-game" class="screen">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <button class="btn-back" onclick="goBack()">← 返回功能</button>
+                <span id="game-mode-badge" class="badge">選擇題</span>
+            </div>
+
+            <div class="card">
+                <div class="progress-bar-container">
+                    <div id="game-progress" class="progress-bar"></div>
+                </div>
+                <div class="game-stats">
+                    <span id="game-title">主題複習</span>
+                    <span id="game-count">題目: 0 / 0</span>
+                </div>
+
+                <div id="question-text" class="question-box">載入中...</div>
+
+                <div id="mc-container" class="options-container"></div>
+
+                <div id="fib-container" class="fib-container" style="display:none;">
+                    <p style="margin:0; font-size:13px; color:var(--text-light)">請輸入空格內缺失的正確中文詞彙（不需輸入標點符號）：</p>
+                    <input type="text" id="fib-input" class="fib-input" placeholder="在此輸入答案..." autocomplete="off">
+                    <button id="btn-fib-submit" class="btn-main" onclick="submitFIB()">提交答案</button>
+                </div>
+
+                <div id="feedback-box" class="feedback-box"></div>
+                
+                <button id="btn-next" class="btn-main" style="display:none; margin-top:20px;" onclick="advanceQuestion()">下一題 →</button>
+            </div>
+        </div>
+
+        <div id="screen-result" class="screen">
+            <div class="card" style="text-align:center; display:flex; flex-direction:column; gap:15px;">
+                <h2 style="color:var(--success); margin:0;">🎉 恭喜完成本單元！</h2>
+                <p id="result-meta" style="color:var(--text-light); margin:0;"></p>
+                
+                <div style="background-color:rgba(92, 60, 146, 0.04); padding:20px; border-radius:12px; margin:10px 0;">
+                    <div style="font-size:14px; color:var(--text-light)">單元得分率</div>
+                    <div id="result-score" style="font-size:48px; font-weight:bold; color:var(--primary);">100%</div>
+                    <div id="result-brainwash-stat" style="font-size:12px; color:var(--secondary); margin-top:5px;"></div>
+                </div>
+
+                <button class="btn-main" onclick="goBack()">返回主選單</button>
+            </div>
+        </div>
+    </main>
+
+    <div id="custom-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="modal-title" class="modal-title">❌ 答錯了</h2>
+            <div class="modal-body">
+                正確答案是：
+                <span id="modal-answer" class="modal-answer-highlight">正確答案</span>
+            </div>
+            <button class="modal-btn" onclick="closePopup()">我知道了，重新嘗試</button>
+        </div>
+    </div>
+
+    <script>
+        const db = {
+            verses: [
+                { id: 1, q: "【格前 2:9】天主為愛他的人所準備的，是眼所未見，耳所未聞，＿＿＿＿＿＿＿。", a: "人心所未想到的", o: ["人手所未造的", "人眼所未看全的", "世人所未曾聽的", "人心所未想到的"] },
+                { id: 2, q: "【若 8:12】耶穌又向眾人講說：「我是＿＿＿＿＿；跟隨我的，決不在黑暗中行走，必有生命的光。」", a: "世界的光", o: ["世界的光", "天上的光", "唯一的真理", "生命的光"] },
+                { id: 3, q: "【若 8:12】耶穌又向眾人講說：「我是世界的光；跟隨我的，決不在黑暗中行走，必有＿＿＿＿＿。」", a: "生命的光", o: ["真理的光", "世界的光", "永恆的福樂", "生命的光"] },
+                { id: 4, q: "【斐 4:7】這樣，天主那＿＿＿＿＿＿＿的平安，必要在基督耶穌內固守你們的心思念慮。", a: "超乎各種意想", o: ["無法動搖", "永不改變", "白白賜予", "超乎各種意想"] },
+                { id: 5, q: "【斐 4:7】這樣，天主那超乎各種意想的平安，必要在基督耶穌內固守你們的＿＿＿＿＿＿。", a: "心思念慮", o: ["靈魂生命", "日常言行", "心思念慮", "一言一行"] },
+                { id: 6, q: "【格前 2:5】為使你們的＿＿＿不是憑人的智慧，而是憑天主的德能。", a: "信德", o: ["愛德", "望德", "智慧", "信德"] },
+                { id: 7, q: "【格前 2:5】為使你們的信德不是憑人的智慧，而是憑天主的＿＿＿＿。", a: "德能", o: ["恩寵", "德能", "慈愛", "聖神"] },
+                { id: 8, q: "【瑪 7:8】因為凡是求的，就必得到；找的，就必找到；＿＿的，就必給他開。", a: "敲", o: ["問", "敲", "等", "聽"] },
+                { id: 9, q: "【若 15:7】你們如果＿＿＿＿＿，而我的話也存在你們內，如此，你們願意什麼，求罷！必給你們成就。", a: "住在我內", o: ["住在我內", "信賴我", "跟隨我", "聽從我"] },
+                { id: 10, q: "【若 15:7】你們如果住在我內，而＿＿＿＿也存在你們內，如此，你們願意什麼，求罷！必給你們成就。", a: "我的話", o: ["我的愛", "我的話", "我的平安", "我的恩寵"] },
+                { id: 11, q: "【瑪 4:4】他回答說：「經上記載：『人生活不只靠＿＿，而也靠天主口中所發的一切言語。』」", a: "餅", o: ["水", "財產", "智慧", "餅"] },
+                { id: 12, q: "【瑪 4:4】他回答說：「經上記載：『人生活不只靠餅，而也靠＿＿＿＿口中所發的一切言語。』」", a: "天主", o: ["天主", "先知", "耶穌", "宗徒"] },
+                { id: 13, q: "【若 6:35】耶穌回答說：「我就是＿＿＿＿＿＿＿；到我這裏來的，永不會饑餓；信從我的，總不會渴。」", a: "生命的食糧", o: ["世界的光", "生命的食糧", "生命的泉水", "真理的道路"] },
+                { id: 14, q: "【若 6:35】耶穌回答說：「我就是生命的食糧；到我這裏來的，永不會饑餓；信從我的，總不會＿＿＿。」", a: "渴", o: ["餓", "怕", "渴", "哭"] },
+                { id: 15, q: "【若 14:1】你們＿＿＿＿＿＿：你們要信賴天主，也要信賴我。", a: "心裏不要煩亂", o: ["應當常常喜樂", "不要害怕", "心裏不要煩亂", "要醒寤祈禱"] },
+                { id: 16, q: "【羅 8:25】但我們若希望那未看見的，必須＿＿＿＿＿。", a: "堅忍等待", o: ["醒寤祈禱", "真誠悔改", "堅忍等待", "全心信賴"] },
+                { id: 17, q: "【格前 1:3】願＿＿＿＿＿＿，由我們的父天主和主耶穌基督賜給你們。", a: "恩寵與平安", o: ["慈愛與正義", "喜樂與希望", "信德與愛德", "恩寵與平安"] }
+            ],
+            advent: [
+                { id: 18, q: "將臨期（Advent）是教會哪一個曆法的開端，也是新一年的開始？", a: "禮儀年曆", o: ["農曆", "禮儀年曆", "四季年曆", "公曆"] },
+                { id: 19, q: "將臨期是指在哪一個重要節日之前的四個星期？", a: "聖誕節", o: ["聖誕節", "復活節", "聖神降臨節", "聖母升天節"] },
+                { id: 20, q: "將臨期的核心意義，除了歡渡聖誕，更是為了預備基督的什麼？", a: "再來", o: ["受難", "再來", "降生歷史", "受洗"] },
+                { id: 21, q: "希伯來文「厄瑪奴耳」（Emmanuel）的字面意思是什麼？", a: "天主與我們同在", o: ["救主已經降生", "光榮的主", "厄瑪奴耳先知", "天主與我們同在"] },
+                { id: 22, q: "將臨期第一階段（首主日至12月16日）主要具有什麼特色？", a: "末世特色", o: ["末世特色", "慶祝特色", "功能特性", "喜樂特色"] },
+                { id: 23, q: "將臨期第二階段是從哪一天開始，直到12月24日？", a: "12月17日", o: ["12月1日", "12月16日", "12月17日", "12月20日"] },
+                { id: 24, q: "將臨期第一主日的主題是什麼？提醒我們要留心和時常準備。", a: "醒寤", o: ["醒寤", "悔改", "喜樂", "愛德"] },
+                { id: 25, q: "將臨期第二主日的主題是什麼？要求我們真誠祈禱、聆聽主的話。", a: "悔改", o: ["醒寤", "悔改", "喜樂", "和平"] },
+                { id: 26, q: "第三主日又稱為什麼主日？當天會點燃粉紅色蠟燭。", a: "喜樂主日", o: ["和平主日", "希望主日", "喜樂主日", "慈愛主日"] },
+                { id: 27, q: "第四主日的主題是厄瑪奴耳，此時教友應效法哪位聖人接受聖言？", a: "聖母", o: ["聖母", "聖若瑟", "聖保祿", "聖伯多祿"] },
+                { id: 28, q: "將臨花環的「圓形形象」象徵天主的什麼特質？", a: "無始無終及永恆", o: ["處事公正", "無始無終及永恆", "創造萬物", "包容一切"] },
+                { id: 29, q: "將臨花環中的四支蠟燭，分別是什麼顏色組合？", a: "三支紫色，一支粉紅色", o: ["四支紫色", "兩支紫色兩支粉紅", "三支粉紅一支紫色", "三支紫色，一支粉紅色"] },
+                { id: 30, q: "將臨花環中的「常青樹枝」象徵天主的什麼？", a: "永恆不變及新生命", o: ["復活的光榮", "純潔無瑕", "永恆不變及新生命", "對罪人的審判"] }
+            ],
+            lent: [
+                { id: 31, q: "四旬期是由哪一個特殊的星期三（瞻禮）正式開始？", a: "聖灰瞻禮", o: ["聖灰瞻禮", "聖枝主日", "聖周四", "復活慶典"] },
+                { id: 32, q: "四旬期一共維持四十天，在計算這四十天時，期間的星期幾是不計入內的？", a: "星期日", o: ["星期日", "星期一", "星期五", "星期六"] },
+                { id: 33, q: "撒灰禮儀中的聖灰，具有什麼和謙遜的象徵？", a: "悔改", o: ["喜樂", "光榮", "悔改", "重生"] },
+                { id: 34, q: "聖灰瞻禮所使用的聖灰，是取自前一年哪一個主日所用的聖枝？", a: "聖枝主日", o: ["聖枝主日", "復活主日", "聖周四", "將臨期第一主日"] },
+                { id: 35, q: "聖保祿在格後6:2中提到，四旬期是「＿＿＿＿＿」，要大家重新皈依上主。", a: "救恩的時期", o: ["歡樂的時間", "守齋的日子", "救恩的時期", "朝盛的季節"] },
+                { id: 36, q: "在「梵二」大公會議之前，四旬期在教會舊稱為什麼？", a: "封齋期", o: ["將臨期", "復活期", "封齋期", "補贖期"] },
+                { id: 37, q: "梵二之前的封齋期較為消極，當時主要強調教友要嚴厲做什麼來免除罪罰？", a: "守齋", o: ["樂捐", "慕道", "守齋", "重溫洗禮"] },
+                { id: 38, q: "梵二之後，四旬期強調整個教會一齊以哪兩件事來準備慶祝逾越奧蹟？", a: "慕道和更新", o: ["守齋和免罰", "慕道和更新", "祈禱和哀悼", "唱歌和讚美"] },
+                { id: 39, q: "梵二後，四旬期要求「教友」做什麼來重新經歷逾越奧蹟？", a: "重溫他們的洗禮", o: ["嚴厲守齋", "重溫他們的洗禮", "報名慕道班", "前往聖地朝盛"] },
+                { id: 40, q: "梅瑟在石版上寫下天主十誡前，曾在什麼山上經過四十日？", a: "西乃山上", o: ["哈勒布山", "加爾瓦略山", "西乃山上", "橄欖山"] },
+                { id: 41, q: "先知厄里亞行走了四十日的路程，最後到達了天主的聖山，那座山叫什麼？", a: "哈勒布", o: ["哈勒布", "西乃山", "加爾瓦略山", "塔波爾山"] },
+                { id: 42, q: "耶穌在公開傳教前，曾在曠野中經過四十日的什麼？", a: "禁食祈禱", o: ["顯現奇蹟", "講道教學", "禁食祈禱", "召叫宗徒"] },
+                { id: 43, q: "四旬期的四大具體信德行動包括：悔改、祈禱、克己、和什麼？", a: "樂捐", o: ["樂捐", "唱歌", "朝聖", "讀經"] },
+                { id: 44, q: "聖經提到樂捐時不要勉強，因為「＿＿＿＿＿＿＿＿」（格後 9:7）。", a: "天主愛樂捐的人", o: ["天主愛樂捐的人", "樂捐能免除罪罰", "不樂捐者受罰", "樂捐者得智慧"] },
+                { id: 45, q: "聖文德曾說：「天主的神佑賜予＿＿＿及＿＿＿的祈禱者。」", a: "謙虛、熱誠", o: ["驕傲、富有", "謙虛、熱誠", "冷淡、孤獨", "聰明、自負"] },
+                { id: 46, q: "雅各伯書 2:26 提到的一句名言：「信德沒有＿＿也是死的。」", a: "行為", o: ["祈禱", "守齋", "智慧", "行為"] }
+            ],
+            holyweek: [
+                { id: 47, q: "四旬期是在「聖周四」的什麼時候之前即告正式結束？", a: "黃昏前", o: ["黃昏前", "子夜前", "清晨前", "正午前"] },
+                { id: 48, q: "聖周（Holy Week）是由哪一個特殊的主日正式開啟？", a: "聖枝主日", o: ["復活主日", "將臨期第四主日", "喜樂主日", "聖枝主日"] },
+                { id: 49, q: "聖周四的「主的晚餐」，主要是在紀念哪一項重要聖事的建立？", a: "聖體聖事", o: ["聖體聖事", "聖洗聖事", "堅振聖事", "修和聖事"] },
+                { id: 50, q: "聖周五在禮儀中年曆上的正式名稱叫什麼？當天默想基督的苦難與死亡。", a: "救主受難紀念", o: ["主的晚餐", "復活慶典", "救主受難紀念", "聖枝主日"] },
+                { id: 51, q: "在聖周六深夜（或黃昏）舉行的隆重教會禮儀叫什麼？", a: "復活慶典", o: ["撒灰禮儀", "主的晚餐", "復活慶典", "將臨期禮儀"] },
+                { id: 52, q: "教會中慶祝耶穌戰勝死亡、光榮復活的最高峰節日是？", a: "復活主日", o: ["復活主日", "聖枝主日", "聖周四", "聖若瑟瞻禮"] },
+                { id: 53, q: "四旬期內有兩個特定瞻禮，三月十九日是聖若瑟瞻禮，那三月廿五日是什麼節日？", a: "預報救主降生節", o: ["預報救主降生節", "耶穌聖心節", "聖母升天節", "聖神降臨節"] }
+            ],
+            sacredheart: [
+                { id: 54, q: "耶穌敞開胸膛顯現給哪位聖女，從而流傳了恭敬耶穌聖心的敬禮？", a: "瑪加利大·亞拉高", o: ["瑪加利大·亞拉高", "聖德蘭", "聖葛萊蒂", "聖德肋撒"] },
+                { id: 55, q: "耶穌第一次向聖女顯現是在 1673 年的 11 月 27 日，當時聖女在什麼前跪禱？", a: "聖體前", o: ["聖堂門口", "苦像前", "聖體前", "聖母像前"] },
+                { id: 56, q: "聖女看見耶穌的聖心被什麼東西緊箍著，且血跡淋漓，象徵世人的冷酷？", a: "一棘茨", o: ["一棘茨", "一條金鍊", "一條鐵絲", "一條繩索"] },
+                { id: 57, q: "耶穌聖心的頂部有一個什麼標誌？且心中正發出烈火。", a: "十字架", o: ["十字架", "皇冠", "鴿子", "百合花"] },
+                { id: 58, q: "耶穌稱這位向世人披露聖心的聖女為自己「＿＿＿＿」。", a: "心的宗徒", o: ["愛的使者", "心的宗徒", "教會之光", "正義的先鋒"] },
+                { id: 59, q: "耶穌恩許會賜給恭敬耶穌聖心的人愛的許諾，這通常被稱為什麼？", a: "十二特恩", o: ["十诫", "十二特恩", "真福八端", "七恩賜"] },
+                { id: 60, q: "耶穌聖心瞻禮（聖心節）通常定於「耶穌聖體聖血節」後八天的星期幾？", a: "星期五", o: ["星期五", "星期一", "星期三", "星期日"] },
+                { id: 61, q: "教會將哪一個月份定為「聖心月」，鼓勵教友參與聖心敬禮？", a: "六月", o: ["六月", "三月", "五月", "十二月"] },
+                { id: 62, q: "在六月聖心月內，教友除了參與彌撒，還應勤念《耶穌聖心禱文》和什麼經文？", a: "慈悲串經", o: ["慈悲串經", "玫瑰經", "天主經", "聖母經"] }
+            ]
+        };
+
+        const sectionNames = {
+            verses: "下學期 1-10 句聖經金句",
+            advent: "主題二：將臨期常識",
+            lent: "主題三：四旬期常識",
+            holyweek: "主題四：復活期與聖周時間線",
+            sacredheart: "主題五：耶穌聖心常識"
+        };
+
+        const pureVersesList = [
+            { title: "主題 (格前 2:9)", text: "天主為愛他的人所準備的，是眼所未見，耳所未聞，人心所未想到的。" },
+            { title: "第 1 句 (若 8:12)", text: "耶穌又向眾人講說：「我是世界的光；跟隨我的，決不在黑暗中行走，必有生命的光。」" },
+            { title: "第 2 句 (斐 4:7)", text: "這樣，天主那超乎各種意想的平安，必要在基督耶穌內固守你們的心思念慮。" },
+            { title: "第 3 句 (格前 2:5)", text: "為使你們的信德不是憑人的智慧，而是憑天主的德能。" },
+            { title: "第 4 句 (瑪 7:8)", text: "因為凡是求的，就必得到；找的，就必找到；敲的，就必給他開。" },
+            { title: "第 5 句 (若 15:7)", text: "你們如果住在我內，而我的話也存在你們內，如此，你們願意什麼，求罷！必給你們成就。" },
+            { title: "第 6 句 (瑪 4:4)", text: "他回答說：「經上記載：『人生活不只靠餅，而也靠天主口中所發的一切言語。』」" },
+            { title: "第 7 句 (若 6:35)", text: "耶穌回答說：「我就是生命的食糧；到我這裏來的，永不會饑餓；信從我的，總不會渴。」" },
+            { title: "第 8 句 (若 14:1)", text: "你們心裏不要煩亂：你們要信賴天主，也要信賴我。" },
+            { title: "第 9 句 (羅 8:25)", text: "但我們若希望那未看見的，必須堅忍等待。" },
+            { title: "第 10 句 (格前 1:3)", text: "願恩寵與平安，由我們的父天主和主耶穌基督賜給你們。" }
+        ];
+
+        let currentPool = [];
+        let wrongQueue = [];
+        let currentIndex = 0;
+        let currentSection = '';
+        let currentLevel = 1; 
+        let firstTryCorrectCount = 0;
+        let totalQuestionsAttempted = 0;
+        
+        let hasAnsweredCurrent = false;
+        let currentQuestionCorrect = false;
+        let ttsEnabled = true;
+        let brainwashMode = true;
+
+        window.onload = function() {
+            renderLeaderboard();
+            if(localStorage.getItem('ttsEnabled') === 'false') toggleTTS();
+            if(localStorage.getItem('brainwashMode') === 'false') toggleBrainwash();
+        };
+
+        function toggleTTS() {
+            ttsEnabled = !ttsEnabled;
+            localStorage.setItem('ttsEnabled', ttsEnabled);
+            const btn = document.getElementById('tts-toggle');
+            if(ttsEnabled) {
+                btn.innerText = "🔊 朗讀: 開";
+                btn.classList.add('active');
+            } else {
+                btn.innerText = "🔇 朗讀: 關";
+                btn.classList.remove('active');
+                if(window.speechSynthesis) window.speechSynthesis.cancel();
+            }
+        }
+
+        function toggleBrainwash() {
+            brainwashMode = !brainwashMode;
+            localStorage.setItem('brainwashMode', brainwashMode);
+            const btn = document.getElementById('brainwash-toggle');
+            if(brainwashMode) {
+                btn.innerText = "🔄 洗腦: 開";
+                btn.classList.add('active');
+            } else {
+                btn.innerText = "➡️ 洗腦: 關";
+                btn.classList.remove('active');
+            }
+        }
+
+        function speak(text) {
+            if (!ttsEnabled || !window.speechSynthesis) return;
+            window.speechSynthesis.cancel(); 
+            
+            let cleanText = text
+                .replace(/＿＿＿＿＿＿＿/g, "這個地方")
+                .replace(/＿＿＿＿＿/g, "這裡")
+                .replace(/＿＿＿＿/g, "這裡")
+                .replace(/＿＿/g, "這裡")
+                .replace(/→/g, "")
+                .replace(/←/g, "");
+            
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'zh-HK'; 
+            utterance.rate = 0.95;    
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        function goBack() {
+            if(window.speechSynthesis) window.speechSynthesis.cancel();
+            showScreen('screen-menu');
+            renderLeaderboard();
+        }
+
+        function showPopup(title, answerText) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-answer').innerText = answerText;
+            document.getElementById('custom-modal').style.display = 'flex';
+        }
+
+        function closePopup() {
+            document.getElementById('custom-modal').style.display = 'none';
+            // 將焦點移回輸入框(如果是填充題)
+            if (currentLevel === 2) {
+                const input = document.getElementById('fib-input');
+                if (input && !input.disabled) {
+                    input.focus();
+                }
+            }
+        }
+
+        function startVerses(level) {
+            if (level === 0) {
+                const container = document.getElementById('full-list-content');
+                container.innerHTML = '';
+                pureVersesList.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'list-item';
+                    div.innerHTML = `
+                        <div class="list-text">
+                            <strong>${item.title}</strong>
+                            <span>${item.text}</span>
+                        </div>
+                        <button class="btn-speaker" onclick="speak('${item.text}')">🔊</button>
+                    `;
+                    container.appendChild(div);
+                });
+                showScreen('screen-list');
+            } else {
+                setupGame('verses', level);
+            }
+        }
+
+        function startStandardSection(secNum) {
+            const keys = ['','','advent','lent','holyweek','sacredheart'];
+            setupGame(keys[secNum], 1); 
+        }
+
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function setupGame(sectionId, level) {
+            currentSection = sectionId;
+            currentLevel = level;
+            currentPool = shuffle(JSON.parse(JSON.stringify(db[sectionId])));
+            wrongQueue = [];
+            currentIndex = 0;
+            firstTryCorrectCount = 0;
+            totalQuestionsAttempted = currentPool.length;
+
+            document.getElementById('game-title').innerText = sectionNames[sectionId];
+            document.getElementById('game-mode-badge').innerText = level === 1 ? "選擇題模式" : "不供詞填充題";
+            
+            if(level === 1) {
+                document.getElementById('mc-container').style.display = 'flex';
+                document.getElementById('fib-container').style.display = 'none';
+            } else {
+                document.getElementById('mc-container').style.display = 'none';
+                document.getElementById('fib-container').style.display = 'flex';
+                document.getElementById('fib-input').value = '';
+                document.getElementById('btn-fib-submit').style.display = 'block';
+            }
+
+            showScreen('screen-game');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            document.getElementById('feedback-box').style.display = 'none';
+            document.getElementById('btn-next').style.display = 'none';
+            hasAnsweredCurrent = false;
+            currentQuestionCorrect = false;
+            
+            let qItem;
+            let isReviewingWrong = false;
+            
+            if (currentIndex < currentPool.length) {
+                qItem = currentPool[currentIndex];
+                document.getElementById('game-count').innerText = `進度: ${currentIndex + 1} / ${currentPool.length}`;
+                let progressPercent = (currentIndex / currentPool.length) * 100;
+                document.getElementById('game-progress').style.width = `${progressPercent}%`;
+            } else if (brainwashMode && wrongQueue.length > 0) {
+                qItem = wrongQueue[0];
+                isReviewingWrong = true;
+                document.getElementById('game-count').innerText = `🔄 洗腦重練中: 剩餘 ${wrongQueue.length} 題`;
+                document.getElementById('game-progress').style.width = `100%`;
+            } else {
+                endGame();
+                return;
+            }
+
+            document.getElementById('question-text').innerText = qItem.q;
+            speak(qItem.q);
+
+            if (currentLevel === 1) {
+                const mcContainer = document.getElementById('mc-container');
+                mcContainer.innerHTML = '';
+                let shuffledOptions = shuffle([...qItem.o]);
+                shuffledOptions.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.innerText = opt;
+                    btn.onclick = function() { checkMCAnswer(btn, opt, qItem, isReviewingWrong); };
+                    mcContainer.appendChild(btn);
+                });
+            } else {
+                const input = document.getElementById('fib-input');
+                input.value = '';
+                input.disabled = false;
+                document.getElementById('btn-fib-submit').style.display = 'block';
+                input.focus();
+                input.onkeypress = function(e) {
+                    if(e.key === 'Enter') submitFIB();
+                };
+            }
+        }
+
+        function checkMCAnswer(selectedBtn, chosenOpt, qItem, isReviewingWrong) {
+            const feedback = document.getElementById('feedback-box');
+            if (chosenOpt === qItem.a) {
+                selectedBtn.classList.add('correct');
+                feedback.className = "feedback-box correct";
+                feedback.innerText = "做得好！答案正確！";
+                document.querySelectorAll('.option-btn').forEach(btn => btn.onclick = null);
+                
+                if (!hasAnsweredCurrent && !isReviewingWrong) firstTryCorrectCount++;
+                if (isReviewingWrong && !hasAnsweredCurrent) wrongQueue.shift(); 
+                
+                currentQuestionCorrect = true;
+                hasAnsweredCurrent = true;
+                speak("做得好！答案正確。");
+                document.getElementById('btn-next').style.display = 'block';
+            } else {
+                selectedBtn.classList.add('incorrect');
+                selectedBtn.onclick = null; 
+                
+                feedback.className = "feedback-box incorrect";
+                feedback.innerText = `答案不對。正確答案是【${qItem.a}】，請點選正確答案以繼續！`;
+                
+                if (!hasAnsweredCurrent) {
+                    if (brainwashMode) {
+                        if (!isReviewingWrong && !wrongQueue.some(item => item.id === qItem.id)) {
+                            wrongQueue.push(qItem);
+                        } else if (isReviewingWrong) {
+                            let initialWrong = wrongQueue.shift();
+                            wrongQueue.push(initialWrong);
+                        }
+                    }
+                    hasAnsweredCurrent = true; 
+                }
+                
+                // 觸發自定義彈出提示框
+                showPopup("❌ 答錯了", qItem.a);
+                speak(`答案不對。正確答案是：${qItem.a}。請點選正確答案以繼續。`);
+            }
+        }
+
+        function submitFIB() {
+            const input = document.getElementById('fib-input');
+            if (input.disabled) return; 
+            let userAns = input.value.trim();
+            if(!userAns) return;
+
+            let qItem;
+            let isReviewingWrong = false;
+            if (currentIndex < currentPool.length) {
+                qItem = currentPool[currentIndex];
+            } else if (brainwashMode && wrongQueue.length > 0) {
+                qItem = wrongQueue[0];
+                isReviewingWrong = true;
+            } else {
+                return;
+            }
+
+            const feedback = document.getElementById('feedback-box');
+            let cleanUser = userAns.replace(/[，。！？、：]/g, "");
+            let cleanCorrect = qItem.a.replace(/[，。！？、：]/g, "");
+
+            if (cleanUser === cleanCorrect) {
+                input.disabled = true;
+                document.getElementById('btn-fib-submit').style.display = 'none';
+                feedback.className = "feedback-box correct";
+                feedback.innerText = "非常聰明！完全正確！";
+                
+                if (!hasAnsweredCurrent && !isReviewingWrong) firstTryCorrectCount++;
+                if (isReviewingWrong && !hasAnsweredCurrent) wrongQueue.shift();
+                
+                currentQuestionCorrect = true;
+                hasAnsweredCurrent = true;
+                speak("非常聰明！完全正確。");
+                document.getElementById('btn-next').style.display = 'block';
+            } else {
+                feedback.className = "feedback-box incorrect";
+                feedback.innerText = `拼法不對。正確答案是【${qItem.a}】，請重新輸入一次！`;
+                
+                if (!hasAnsweredCurrent) {
+                    if (brainwashMode) {
+                        if (!isReviewingWrong && !wrongQueue.some(item => item.id === qItem.id)) {
+                            wrongQueue.push(qItem);
+                        } else if (isReviewingWrong) {
+                            let initialWrong = wrongQueue.shift();
+                            wrongQueue.push(initialWrong);
+                        }
+                    }
+                    hasAnsweredCurrent = true;
+                }
+                input.value = '';
+                
+                // 觸發自定義彈出提示框
+                showPopup("❌ 拼寫錯誤", qItem.a);
+                speak(`答案不對。正確答案是：${qItem.a}。請重新輸入一次。`);
+            }
+        }
+
+        function advanceQuestion() {
+            if (currentIndex < currentPool.length) {
+                currentIndex++;
+            }
+            showQuestion();
+        }
+
+        function endGame() {
+            if(window.speechSynthesis) window.speechSynthesis.cancel();
+            let scorePercent = Math.round((firstTryCorrectCount / totalQuestionsAttempted) * 100);
+            document.getElementById('result-meta').innerText = `單元：${sectionNames[currentSection]} (Lv ${currentLevel})`;
+            document.getElementById('result-score').innerText = `${scorePercent}%`;
+            
+            if(brainwashMode) {
+                document.getElementById('result-brainwash-stat').innerText = "✨ 已啟動洗腦模式，所有錯題均已重複練習至全對過關！";
+            } else {
+                document.getElementById('result-brainwash-stat').innerText = `全對 ${firstTryCorrectCount} 題 / 總數 ${totalQuestionsAttempted} 題`;
+            }
+
+            saveRecord(currentSection, currentLevel, scorePercent);
+            showScreen('screen-result');
+        }
+
+        function saveRecord(section, level, score) {
+            let records = JSON.parse(localStorage.getItem('st_rose_religious_records')) || {};
+            let key = `${section}_lv${level}`;
+            if (!records[key] || records[key] < score) {
+                records[key] = score; 
+                localStorage.setItem('st_rose_religious_records', JSON.stringify(records));
+            }
+        }
+
+        function renderLeaderboard() {
+            let records = JSON.parse(localStorage.getItem('st_rose_religious_records')) || {};
+            const container = document.getElementById('leaderboard-container');
+            
+            let html = `<table class="leaderboard-table">
+                <thead>
+                    <tr><th>單元範圍</th><th>複習模式</th><th>最高得分率</th></tr>
+                </thead>
+                <tbody>`;
+            
+            html += `<tr><td>${sectionNames.verses}</td><td>Level 1 (選擇題)</td><td>${records['verses_lv1'] !== undefined ? records['verses_lv1'] + '%' : '⏳ 未溫習'}</td></tr>`;
+            html += `<tr><td>${sectionNames.verses}</td><td>Level 2 (不供詞填充)</td><td>${records['verses_lv2'] !== undefined ? records['verses_lv2'] + '%' : '⏳ 未溫習'}</td></tr>`;
+            
+            const keys = ['advent', 'lent', 'holyweek', 'sacredheart'];
+            keys.forEach(k => {
+                html += `<tr><td>${sectionNames[k]}</td><td>全方位選擇題</td><td>${records[`${k}_lv1`] !== undefined ? records[`${k}_lv1`] + '%' : '⏳ 未溫習'}</td></tr>`;
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        function clearRecords() {
+            if(confirm("確定要重設並清除所有複習與得分記錄嗎？")) {
+                localStorage.removeItem('st_rose_religious_records');
+                renderLeaderboard();
+            }
+        }
+    </script>
+</body>
+</html>
+
