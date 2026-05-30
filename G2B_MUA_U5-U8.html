@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ICQM G2 音樂欣賞 - Hailey 專屬特訓版</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #fff5f8 0%, #ffeef2 100%);
+            --card-bg: #ffffff;
+            --primary-color: #ff69b4;
+            --primary-hover: #ff1493;
+            --primary-light: #fff0f5;
+            --text-color: #4a4a4a;
+            --sub-text: #8c969e;
+            --correct-color: #2ecc71;
+            --wrong-color: #e74c3c;
+            --yt-red: #FF0000;
+            --accent-purple: #9b59b6;
+            --accent-blue: #2980b9;
+        }
+        .boy-theme {
+            --bg-gradient: linear-gradient(135deg, #f0faff 0%, #e6f7ff 100%);
+            --primary-color: #0288d1;
+            --primary-hover: #01579b;
+            --primary-light: #e1f5fe;
+        }
+        * { box-sizing: border-box; font-family: 'PingFang HK', 'Heiti TC', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg-gradient); color: var(--text-color); margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .game-container { width: 100%; max-width: 550px; text-align: center; }
+        h1 { font-size: 22px; color: var(--primary-color); margin-bottom: 15px; }
+        .ui-card { background: var(--card-bg); border-radius: 20px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: left; }
+        
+        .setup-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        input[type="text"] { width: 100px; padding: 6px; border: 1px solid #ddd; border-radius: 8px; text-align: center; }
+        
+        .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        .menu-item-box { background: white; border: 1px solid #f0f0f0; border-radius: 15px; margin-bottom: 12px; display: flex; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+        .menu-content { flex: 1; padding: 15px; cursor: pointer; }
+        .yt-btn { width: 60px; background: var(--yt-red); display: flex; justify-content: center; align-items: center; cursor: pointer; color: white; font-size: 20px; text-decoration: none; }
+        .menu-btn-title { font-size: 15px; font-weight: bold; display: block; color: var(--primary-color); }
+        .menu-btn-sub { font-size: 11px; color: var(--sub-text); margin-top: 3px; display: block; }
+
+        .header-box { font-size: 11px; color: var(--sub-text); border-bottom: 2px solid var(--primary-light); padding-bottom: 10px; margin-bottom: 15px; line-height: 1.4; }
+        .question-box { font-size: 18px; font-weight: bold; line-height: 1.5; padding: 15px; border-left: 5px solid var(--primary-color); background: #fafafa; margin-bottom: 15px; }
+        .option-btn { width: 100%; background: white; border: 1px solid #eee; border-radius: 12px; padding: 14px; margin-bottom: 8px; font-weight: bold; cursor: pointer; font-size: 15px; }
+        .option-btn.correct { border-color: var(--correct-color); background: #e8f8f5; color: var(--correct-color); transform: scale(1.02); }
+        .option-btn.wrong { border-color: var(--wrong-color); background: #fdedec; color: var(--wrong-color); opacity: 0.7; }
+
+        .drag-container { display: flex; flex-direction: column; gap: 10px; margin: 15px 0; }
+        .drag-item { padding: 14px; background: #fdfdfd; border: 2px dashed #ccc; border-radius: 12px; font-weight: bold; text-align: center; cursor: grab; user-select: none; position: relative; transition: all 0.2s; }
+        .drag-item.dragging { opacity: 0.5; background: var(--primary-light); border-color: var(--primary-color); }
+        .drag-item.success { background: #e8f8f5; border-color: var(--correct-color); color: var(--correct-color); cursor: default; }
+
+        .instrument-img-box { width: 100%; text-align: center; margin-bottom: 15px; background: #ffffff; padding: 10px; border-radius: 15px; border: 1px solid #eee; display: flex; justify-content: center; align-items: center; min-height: 160px; }
+        .instrument-img { max-width: 100%; max-height: 180px; object-fit: contain; border-radius: 10px; }
+
+        .history-item { display: grid; grid-template-columns: 0.8fr 0.8fr 1.2fr 0.8fr 0.4fr; gap: 4px; padding: 8px 0; border-bottom: 1px solid #f9f9f9; font-size: 11px; align-items: center; }
+        .hidden { display: none !important; }
+        .icon-btn { background:#95a5a6; color:white; border:none; border-radius:12px; width:50px; cursor:pointer; font-size: 20px; display: flex; justify-content: center; align-items: center; }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div id="main-menu">
+            <h1 id="menu-title">你好，Hailey！🧸</h1>
+            
+            <div class="ui-card">
+                <div class="setup-row">
+                    <label>👤 名字：</label>
+                    <input type="text" id="name-input" value="Hailey" oninput="updateName()">
+                </div>
+                <div class="setup-row">
+                    <label>🎭 主題：</label>
+                    <div style="display:flex; gap:5px;">
+                        <button onclick="setTheme('girl')" id="girl-btn" style="padding:4px 10px; border-radius:12px; border:none; cursor:pointer;">🧸 女</button>
+                        <button onclick="setTheme('boy')" id="boy-btn" style="padding:4px 10px; border-radius:12px; border:none; cursor:pointer;">🚗 男</button>
+                    </div>
+                </div>
+                <div class="setup-row" style="margin-top:5px;">
+                    <label>📢 自動朗讀題目：</label>
+                    <label class="switch">
+                        <input type="checkbox" id="auto-read-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="menu-item-box" style="border: 2px solid var(--accent-purple); box-shadow: 0 4px 10px rgba(155,89,182,0.15);">
+                <div class="menu-content" onclick="startDragRevision()" style="background: #faf5ff;">
+                    <span class="menu-btn-title" style="color:var(--accent-purple)">✨ 挑戰一：樂器高低音拖拉排序</span>
+                    <span class="menu-btn-sub" style="color:#7f8c8d; font-weight:bold;">👑 依課本標準：全家族由高音至低音排序 👑</span>
+                </div>
+            </div>
+
+            <div class="menu-item-box" style="border: 2px solid var(--accent-blue); box-shadow: 0 4px 10px rgba(41,128,185,0.15);">
+                <div class="menu-content" onclick="startImgRevision()" style="background: #f4f9fd;">
+                    <span class="menu-btn-title" style="color:var(--accent-blue)">📸 挑戰二：看圖認樂器配對關卡</span>
+                    <span class="menu-btn-sub" style="color:#7f8c8d; font-weight:bold;">🎵 100% 修復網上圖片直連 • 中英文名對照 🎵</span>
+                </div>
+            </div>
+
+            <div class="menu-item-box">
+                <div class="menu-content" onclick="startLesson('lesson5')">
+                    <span class="menu-btn-title">第五課：《漫步》</span>
+                    <span class="menu-btn-sub">Mussorgsky • 5/4 & 6/4 拍 • 銅管排序</span>
+                </div>
+                <a href="https://www.youtube.com/watch?v=_5r8sa863Ts" target="_blank" class="yt-btn">▶️</a>
+            </div>
+
+            <div class="menu-item-box">
+                <div class="menu-content" onclick="startLesson('lesson6')">
+                    <span class="menu-btn-title">第六課：《雛雞之舞》</span>
+                    <span class="menu-btn-sub">木管家族 • 跳音 • 聖經金句</span>
+                </div>
+                <a href="https://youtu.be/VWwGK2x4_v0?si=9cqn1AiTF0Gq15Jw" target="_blank" class="yt-btn">▶️</a>
+            </div>
+
+            <div class="menu-item-box">
+                <div class="menu-content" onclick="startLesson('lesson7')">
+                    <span class="menu-btn-title">第七課：《威廉泰爾序曲》</span>
+                    <span class="menu-btn-sub">羅西尼 • 歌劇開場 • 39齣作品 • 2/4 拍</span>
+                </div>
+                <a href="https://www.youtube.com/watch?v=tJoDL1cSRjM" target="_blank" class="yt-btn">▶️</a>
+            </div>
+
+            <div class="menu-item-box">
+                <div class="menu-content" onclick="startLesson('lesson8')">
+                    <span class="menu-btn-title">第八課：《青少年管弦樂入門》</span>
+                    <span class="menu-btn-sub">布烈頓 • 四大樂器家族 • 總譜位置 • 莊嚴寬廣的快板</span>
+                </div>
+                <a href="https://www.youtube.com/watch?v=4vbvhU22uAM" target="_blank" class="yt-btn">▶️</a>
+            </div>
+
+            <div class="ui-card">
+                <div style="font-size:12px; font-weight:bold; margin-bottom:8px; display:flex; justify-content:space-between;">
+                    <span>📊 溫習紀錄 (日期 | 名字 | 課題 | 分數)</span>
+                    <button onclick="clearHistory()" style="color:red; background:none; border:none; cursor:pointer;">🗑️</button>
+                </div>
+                <div id="history-list"></div>
+            </div>
+        </div>
+
+        <div id="game-play" class="hidden ui-card">
+            <div id="lesson-header" class="header-box"></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:13px; font-weight:bold;">
+                <span id="progress-text">0 / 0</span>
+                <div style="color:#f39c12">⭐ <span id="star-count">0</span></div>
+            </div>
+            
+            <div id="image-area" class="instrument-img-box hidden">
+                <img id="match-img" class="instrument-img" src="" alt="樂器圖片">
+            </div>
+
+            <div class="question-box" id="question-text"></div>
+            <div id="options-grid"></div>
+            <div id="error-hint" style="display:none; color:red; font-size:14px; background:#fff0f0; padding:12px; border-radius:10px; margin-bottom:10px; font-weight:bold; border-left:4px solid red;">
+                💡 Hailey 沒關係，再記一下喔！正確答案是：<br><span id="correct-ans-hint" style="color:#27ae60; font-size:16px;"></span>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button class="icon-btn" onclick="goBack()" title="返回主頁">🏠</button>
+                <button class="icon-btn" onclick="speakCurrent()" style="background:#f39c12;" title="朗讀題目">📢</button>
+                <button id="next-btn" onclick="nextQuestion()" disabled style="flex:1; background:var(--primary-color); color:white; border:none; border-radius:12px; padding:12px; font-weight:bold; cursor:pointer;">下一題 👉</button>
+            </div>
+        </div>
+
+        <div id="drag-play" class="hidden ui-card">
+            <div class="header-box">👑 樂器家族特訓：拖拉排序關卡</div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:13px; font-weight:bold;">
+                <span id="drag-progress-text">1 / 4</span>
+                <div style="color:#f39c12">⭐ <span id="drag-star-count">0</span></div>
+            </div>
+            <div class="question-box" id="drag-question-text"></div>
+            
+            <div id="drag-zone" class="drag-container"></div>
+            
+            <div style="display:flex; gap:8px; margin-top:15px;">
+                <button class="icon-btn" onclick="goBack()">🏠</button>
+                <button id="drag-check-btn" onclick="checkDragOrder()" style="flex:1; background:var(--accent-purple); color:white; border:none; border-radius:12px; padding:12px; font-weight:bold; cursor:pointer;">檢查答案 🔍</button>
+                <button id="drag-next-btn" onclick="nextDragQuestion()" disabled style="flex:1; background:var(--primary-color); color:white; border:none; border-radius:12px; padding:12px; font-weight:bold; cursor:pointer;">下一題 👉</button>
+            </div>
+        </div>
+
+        <div id="game-over" class="hidden ui-card" style="text-align:center;">
+            <div id="medal-emoji" style="font-size:60px;">🏆</div>
+            <h2 id="medal-title">做得好！</h2>
+            <button onclick="goBack()" style="width:100%; background:var(--primary-color); color:white; border:none; border-radius:12px; padding:12px; font-weight:bold; cursor:pointer;">返回主選單</button>
+        </div>
+    </div>
+
+<script>
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(type) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        if(type === 'correct') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); 
+            osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+        } else {
+            osc.type = 'square'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+        }
+    }
+
+    const questionBank = {
+        "lesson5": {
+            "header": "【第五課：《圖畫展覽會．漫步》】 穆索斯基(1839-1881)<br>Pictures at an Exhibition, Promenade",
+            "title": "漫步",
+            "questions": [
+                { "q": "穆索斯基出生於哪一個國家？", "options": ["俄國", "法國", "德國"], "ans": "俄國" },
+                { "q": "穆索斯基幾歲開始跟母親學習鋼琴？", "options": ["六歲", "八歲", "十歲"], "ans": "六歲" },
+                { "q": "穆索斯基入讀什麼學校並加入軍隊？", "options": ["軍校", "醫學院", "藝術學院"], "ans": "軍校" },
+                { "q": "《圖畫展覽會》原本是一套什麼類型的作品？", "options": ["鋼琴組曲", "管弦樂曲", "合唱曲"], "ans": "鋼琴組曲" },
+                { "q": "誰將《漫步》改編成管弦樂版本？", "options": ["拉威爾 (Ravel)", "穆索斯基", "貝多芬"], "ans": "拉威爾 (Ravel)" },
+                { "q": "《漫步》的主題最初由幾支「小號」奏出？", "options": ["三支", "一支", "四支"], "ans": "三支" },
+                { "q": "銅管家族由高至低：小號 > 法國號 > ____ > 大號。", "options": ["長號", "小提琴", "單簧管"], "ans": "長號" },
+                { "q": "《漫步》中不斷交替變化的拍子記號是？", "options": ["5/4 與 6/4", "3/4 與 4/4", "2/4 與 3/4"], "ans": "5/4 與 6/4" },
+                { "q": "天父教導：「朋友乃時常親愛，____ 為患難而生」。", "options": ["弟兄", "家人", "鄰舍"], "ans": "弟兄" }
+            ]
+        },
+        "lesson6": {
+            "header": "【第六課：《圖畫展覽會．雛雞之舞》】 穆索斯基(1839-1881)<br>Pictures at an Exhibition, Ballet of the Unhatched Chicks",
+            "title": "雛雞之舞",
+            "questions": [
+                { "q": "《雛雞之舞》描寫雛雞在什麼地方跳舞？", "options": ["蛋殼中", "草地上", "雞舍裡"], "ans": "蛋殼中" },
+                { "q": "主題旋律是由長笛和哪一種木管樂器奏出？", "options": ["巴松管", "單簧管", "雙簧管"], "ans": "巴松管" },
+                { "q": "哪種奏法能表達雛雞「輕快、跳躍」的感覺？", "options": ["跳音 (staccato)", "連音 (legato)", "強音"], "ans": "跳音 (staccato)" },
+                { "q": "強弱記號「pp」的意思是？", "options": ["極弱", "極強", "中強"], "ans": "極弱" },
+                { "q": "木管樂器中，音域最高的是 ____。", "options": ["短笛", "巴松管", "長笛"], "ans": "短笛" },
+                { "q": "樂譜上出現的「C」字記號代表 ____ 拍子。", "options": ["四拍子", "三拍子", "二拍子"], "ans": "四拍子" },
+                { "q": "金句：「若有人在基督裡，他就是 ____」。", "options": ["新造的人", "快樂的人", "愛主的人"], "ans": "新造的人" },
+                { "q": "誰甘願釘在十字架上洗淨我們的罪？", "options": ["耶穌", "挪亞", "阿當"], "ans": "耶穌" }
+            ]
+        },
+        "lesson7": {
+            "header": "【第七課：《威廉泰爾序曲》】 羅西尼(1792-1868)<br>William Tell Overture",
+            "title": "威廉泰爾序曲",
+            "questions": [
+                { "q": "羅西尼出生於哪一個國家？", "options": ["意大利", "英國", "俄國"], "ans": "意大利" },
+                { "q": "羅西尼擅長創作甚麼音樂類型？", "options": ["歌劇", "音樂劇", "交響曲"], "ans": "歌劇" },
+                { "q": "羅西尼一生之中，他共創作了____齣歌劇作品？", "options": ["39齣", "29齣", "49齣"], "ans": "39齣" },
+                { "q": "羅西尼共創作了39齣作品，例如《灰姑娘》和______？", "options": ["《威廉泰爾》", "《天鵝湖》", "《圖畫展覽會》"], "ans": "《威廉泰爾》" },
+                { "q": "《威廉泰爾》是羅西尼最後的第幾齣歌劇作品？", "options": ["最後一齣", "第一齣", "第二齣"], "ans": "最後一齣" },
+                { "q": "序曲是在歌劇____所演奏的管弦樂曲。", "options": ["開場前", "中間部分", "結束後"], "ans": "開場前" },
+                { "q": "《威廉泰爾序曲》的主題旋律「<span style='color:red'>先</span>」以哪一種樂器奏出，用以描繪號角響起？", "options": ["小號", "長號", "法國號"], "ans": "小號" },
+                { "q": "小號屬於哪一個樂器組別？", "options": ["銅管樂器", "木管樂器", "弦樂器"], "ans": "銅管樂器" },
+                { "q": "《威廉泰爾序曲>的主題旋律「<span style='color:red'>後</span>」轉為甚麼樂器來製造緊張氣氛，代表軍隊前進？", "options": ["小提琴及單簧管", "長笛及巴松管", "雙簧管及大提琴"], "ans": "小提琴及單簧管" },
+                { "q": "銅管樂器排序由高音至低音，正確的順序是？", "options": ["小號 > 法國號 > 長號 > 大號", "大號 > 長號 > 法國號 > 小號", "小號 > 長號 > 法國號 > 大號"], "ans": "小號 > 法國號 > 長號 > 大號" },
+                { "q": "本曲中的強弱記號包括「ff」與「pp」，其中「<span style='color:red'>ff</span>」代表？", "options": ["極強", "極弱", "漸強"], "ans": "極強" },
+                { "q": "本曲中的強弱記號包括「ff」與「pp」，其中「<span style='color:red'>pp</span>」代表？", "options": ["極弱", "極強", "中強"], "ans": "極弱" },
+                { "q": "本曲的速度記號為<span style='color:red'>活潑的快板</span>，其意大利文稱號是？", "options": ["Allegro Vivace", "Andante", "Allegro"], "ans": "Allegro Vivace" },
+                { "q": "本曲採用的拍子記號是？", "options": ["2/4 拍", "3/4 拍", "4/4 拍"], "ans": "2/4 拍" },
+                { "q": "樂曲以跳音（staccato）描繪甚麼情景？", "options": ["馬匹奔馳", "雛雞跳舞", "軍隊休息"], "ans": "馬匹奔馳" },
+                { "q": "《威廉泰爾序曲》選段四是屬於大調還是小調？", "options": ["大調", "小調", "不確定"], "ans": "大調" },
+                { "q": "天父教導：「你當剛強壯膽！不要懼怕，也不要驚惶，因為你無論往哪裡去，____必與你同在。」", "options": ["耶和華你的神", "你的家人", "你的朋友"], "ans": "耶和華你的神" }
+            ]
+        },
+        "lesson8": {
+            "header": "【第八課：《青少年管弦樂入門》】 布烈頓(1913-1976)<br>Young Person's Guide to the Orchestra",
+            "title": "青少年管弦樂入門",
+            "questions": [
+                { "q": "《青少年管弦樂入門》是一首由_____作品。", "options": ["管弦樂", "中樂", "管樂"], "ans": "管弦樂" },
+                { "q": "管弦樂團的四個組別分別為：____、______、_____及____。", "options": ["弦樂器、木管樂器、銅管樂器、敲擊樂器", "鍵盤樂器、木管樂器、弦樂器、敲擊樂器", "弦樂器、彈撥樂器、銅管樂器、打擊樂器"], "ans": "弦樂器、木管樂器、銅管樂器、敲擊樂器" },
+                { "q": "弦樂器 <span style='color:blue'>(String Family)</span> 由<span style='color:red'>高音至低音</span>的正確排序是？", "options": ["小提琴 > 中提琴 > 大提琴 > 低音大提琴", "低音大提琴 > 大提琴 > 中提琴 > 小提琴", "小提琴 > 大提琴 > 中提琴 > 低音大提琴"], "ans": "小提琴 > 中提琴 > 大提琴 > 低音大提琴" },
+                { "q": "木管樂器 <span style='color:blue'>(Woodwind Family)</span> 由<span style='color:red'>高音至低音</span>的正確排序是？", "options": ["短笛 > 長笛 > 單簧管 > 雙簧管 > 巴松管", "巴松管 > 雙簧管 > 單簧管 > 長笛 > 短笛", "短笛 > 單簧管 > 長笛 > 雙簧管 > 巴松管"], "ans": "短笛 > 長笛 > 單簧管 > 雙簧管 > 巴松管" },
+                { "q": "銅管樂器 <span style='color:blue'>(Brass Family)</span> 由<span style='color:red'>高音至低音</span>的正確排序是？", "options": ["小號 > 法國號 > 長號 > 大號", "大號 > 長號 > 法國號 > 小號", "小號 > 長號 > 大號 > 法國號"], "ans": "小號 > 法國號 > 長號 > 大號" },
+                { "q": "敲擊樂器 <span style='color:blue'>(Percussion Family)</span> 中，哪一組全部屬於<span style='color:red'>有固定音高</span>？", "options": ["定音鼓、木琴", "大鼓、小鼓", "木琴、小鼓"], "ans": "定音鼓、木琴" },
+                { "q": "敲擊樂器 <span style='color:blue'>(Percussion Family)</span> 中，哪一組全部屬於<span style='color:red'>無固定音高</span>？", "options": ["大鼓、小鼓", "定音鼓、木琴", "定音鼓、大鼓"], "ans": "大鼓、小鼓" },
+                { "q": "本曲的主題旋律速度記號為<span style='color:red'>莊嚴寬廣的快板</span>，其意大利文是？", "options": ["Allegro Maestoso e largamente", "Allegro Vivace", "Andante"], "ans": "Allegro Maestoso e largamente" },
+                { "q": "樂曲開始時採用的強弱記號是 <span style='color:red'>強音(f)</span>，它的拍子是多少拍子？", "options": ["三拍子", "四拍子", "二拍子"], "ans": "三拍子" },
+                { "q": "配合 YouTube 0:06-0:27 選段，這段主題是由管弦樂團的哪一個部分演奏？", "options": ["全體管弦樂團 (Full Orchestra)", "單獨木管樂器組", "單獨弦樂器組"], "ans": "全體管弦樂團 (Full Orchestra)" },
+                { "q": "在總譜排列的位置中，最頂層的組別通常是哪一種？", "options": ["木管樂器", "銅管樂器", "弦樂器"], "ans": "木管樂器" },
+                { "q": "布烈頓出生於哪一個國家？", "options": ["英國", "俄國", "挪威"], "ans": "英國" },
+                { "q": "布烈頓考入英國皇家音樂學院學習什麼？", "options": ["作曲和鋼琴", "小提琴和長笛", "聲樂和指揮"], "ans": "作曲和鋼琴" },
+                { "q": "布烈頓曾因戰爭移居哪一個國家，三年後返回英國？", "options": ["美國", "法國", "德國"], "ans": "美國" },
+                { "q": "天父教導：「全身都靠他聯絡得合式，百節各按各職，照著各體的功用彼此相助，便叫身體漸漸增長，在____中建立自己。」", "options": ["愛", "信", "望"], "ans": "愛" }
+            ]
+        }
+    };
+
+    // 樂器家族特別複習（全部對齊課本：由高音至低音）
+    const dragBank = [
+        { "title": "請由<span style='color:red; font-weight:bold;'>高音至低音</span>拖拉排列 弦樂器 (String Family)：", "correct": ["小提琴 Violin", "中提琴 Viola", "大提琴 Cello", "低音大提琴 Double Bass"] },
+        { "title": "請由<span style='color:red; font-weight:bold;'>高音至低音</span>拖拉排列 木管樂器 (Woodwind Family)：", "correct": ["短笛 Piccolo", "長笛 Flute", "單簧管 Clarinet", "雙簧管 Oboe", "巴松管 Bassoon"] },
+        { "title": "請由<span style='color:red; font-weight:bold;'>高音至低音</span>拖拉排列 銅管樂器 (Brass Family)：", "correct": ["小號 Trumpet", "法國號 French Horn", "長號 Trombone", "大號 Tuba"] },
+        { "title": "請由<span style='color:red; font-weight:bold;'>高音至低音</span>拖拉排列 敲擊樂器 (Percussion Family)：", "correct": ["定音鼓 Timpani", "木琴 Xylophone", "大鼓 Bass Drum", "小鼓 Snare Drum"] }
+    ];
+
+    // 全面修復：網上直連高清不失效圖源
+    const imgMatchBank = [
+        { "q": "請認出圖片中的樂器（中英文對照）：", "img": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Violin_VL100.jpg/320px-Violin_VL100.jpg", "options": ["小提琴 Violin", "大提琴 Cello", "長笛 Flute"], "ans": "小提琴 Violin" },
+        { "q": "請認出圖片中的樂器（中英文對照）：", "img": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Trumpet_Yamaha_YTR-8335GS.jpg/400px-Trumpet_Yamaha_YTR-8335GS.jpg", "options": ["小號 Trumpet", "法國號 French Horn", "長號 Trombone"], "ans": "小號 Trumpet" },
+        { "q": "請認出圖片中的樂器（中英文對照）：", "img": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Modern_Flute.jpg/500px-Modern_Flute.jpg", "options": ["長笛 Flute", "單簧管 Clarinet", "巴松管 Bassoon"], "ans": "長笛 Flute" },
+        { "q": "請認出圖片中的樂器（中英文對照）：", "img": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Timpani_Yamaha_TP7026_01.jpg/450px-Timpani_Yamaha_TP7026_01.jpg", "options": ["定音鼓 Timpani", "木琴 Xylophone", "大鼓 Bass Drum"], "ans": "定音鼓 Timpani" }
+    ];
+
+    let currentQList = [], currentIndex = 0, stars = 0, childName = "Hailey", currentKey = "", currentMode = "";
+    let dragIndex = 0;
+    let history = JSON.parse(localStorage.getItem('mu_v18_hist') || "[]");
+
+    window.onload = () => {
+        const n = localStorage.getItem('mu_name'); if(n) { childName = n; document.getElementById('name-input').value = n; }
+        setTheme(localStorage.getItem('mu_theme') || 'girl');
+        renderHistory();
+    };
+
+    function updateName() { childName = document.getElementById('name-input').value || "Hailey"; localStorage.setItem('mu_name', childName); updateTitle(); }
+    function setTheme(t) {
+        document.body.className = t === 'boy' ? 'boy-theme' : '';
+        localStorage.setItem('mu_theme', t); updateTitle();
+        document.getElementById('girl-btn').style.background = (t==='girl') ? '#ff69b4' : '#eee';
+        document.getElementById('girl-btn').style.color = (t==='girl') ? 'white' : '#4a4a4a';
+        document.getElementById('boy-btn').style.background = (t==='boy') ? '#0288d1' : '#eee';
+        document.getElementById('boy-btn').style.color = (t==='boy') ? 'white' : '#4a4a4a';
+    }
+    function updateTitle() { const icon = document.body.classList.contains('boy-theme') ? "🚗" : "🧸"; document.getElementById('menu-title').innerText = `你好，${childName}！${icon}`; }
+
+    // 啟動拖拉排序複習
+    function startDragRevision() {
+        currentMode = "drag_revision";
+        dragIndex = 0; stars = 0;
+        document.getElementById('main-menu').classList.add('hidden');
+        document.getElementById('drag-play').classList.remove('hidden');
+        loadDragQuestion();
+    }
+
+    // 啟動圖片配對複習
+    function startImgRevision() {
+        currentMode = "img_revision";
+        currentQList = [...imgMatchBank];
+        currentIndex = 0; stars = 0;
+        document.getElementById('lesson-header').innerHTML = "📸 樂器家族特訓：網上圖片配對關卡";
+        document.getElementById('main-menu').classList.add('hidden');
+        document.getElementById('game-play').classList.remove('hidden');
+        document.getElementById('image-area').classList.remove('hidden');
+        loadQuestion();
+    }
+
+    // 載入拖拉題目
+    function loadDragQuestion() {
+        const data = dragBank[dragIndex];
+        document.getElementById('drag-progress-text').innerText = `${dragIndex + 1} / ${dragBank.length}`;
+        document.getElementById('drag-star-count').innerText = stars;
+        document.getElementById('drag-question-text').innerHTML = data.title;
+        document.getElementById('drag-next-btn').disabled = true;
+        document.getElementById('drag-check-btn').disabled = false;
+
+        const zone = document.getElementById('drag-zone');
+        zone.innerHTML = '';
+
+        let shuffled = [...data.correct].sort(() => Math.random() - 0.5);
+        shuffled.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'drag-item';
+            div.innerText = item;
+            div.draggable = true;
+            
+            div.addEventListener('dragstart', () => div.classList.add('dragging'));
+            div.addEventListener('dragend', () => div.classList.remove('dragging'));
+            zone.appendChild(div);
+        });
+
+        zone.addEventListener('dragover', e => {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(zone, e.clientY);
+            const dragging = document.querySelector('.dragging');
+            if (dragging) {
+                if (afterElement == null) zone.appendChild(dragging);
+                else zone.insertBefore(dragging, afterElement);
+            }
+        });
+
+        setupTouchSupport(zone);
+    }
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.drag-item:not(.dragging)')];
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else { return closest; }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    function setupTouchSupport(container) {
+        container.addEventListener('touchmove', e => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const dragging = document.querySelector('.dragging');
+            if (!dragging) {
+                const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (target && target.classList.contains('drag-item')) target.classList.add('dragging');
+                return;
+            }
+            const afterElement = getDragAfterElement(container, touch.clientY);
+            if (afterElement == null) container.appendChild(dragging);
+            else container.insertBefore(dragging, afterElement);
+        }, { passive: false });
+        container.addEventListener('touchend', () => {
+            const dragging = document.querySelector('.dragging');
+            if (dragging) dragging.classList.remove('dragging');
+        });
+    }
+
+    // 檢查拖拉答案
+    function checkDragOrder() {
+        const items = [...document.querySelectorAll('#drag-zone .drag-item')].map(el => el.innerText);
+        const correct = dragBank[dragIndex].correct;
+        let isAllCorrect = true;
+
+        items.forEach((item, idx) => {
+            if (item !== correct[idx]) isAllCorrect = false;
+        });
+
+        if (isAllCorrect) {
+            playSound('correct');
+            stars++;
+            document.getElementById('drag-star-count').innerText = stars;
+            document.querySelectorAll('#drag-zone .drag-item').forEach(el => { el.classList.add('success'); el.draggable = false; });
+            document.getElementById('drag-check-btn').disabled = true;
+            document.getElementById('drag-next-btn').disabled = false;
+        } else {
+            playSound('wrong');
+            // 錯題提示正確答案
+            alert(`順序不對喔！\n💡 正確標準答案是：\n${correct.join(' > ')}`);
+        }
+    }
+
+    function nextDragQuestion() {
+        dragIndex++;
+        if (dragIndex < dragBank.length) {
+            loadDragQuestion();
+        } else {
+            showEnd();
+        }
+    }
+
+    // 載入一般課堂
+    function startLesson(key) {
+        currentMode = "normal_lesson";
+        currentKey = key;
+        currentQList = [...questionBank[key].questions].sort(() => Math.random() - 0.5);
+        currentIndex = 0; stars = 0;
+        document.getElementById('lesson-header').innerHTML = questionBank[key].header;
+        document.getElementById('image-area').classList.add('hidden');
+        document.getElementById('main-menu').classList.add('hidden');
+        document.getElementById('game-play').classList.remove('hidden');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const q = currentQList[currentIndex];
+        document.getElementById('progress-text').innerText = `${currentIndex + 1} / ${currentQList.length}`;
+        document.getElementById('star-count').innerText = stars;
+        document.getElementById('question-text').innerHTML = q.q;
+        document.getElementById('next-btn').disabled = true;
+        document.getElementById('error-hint').style.display = 'none';
+
+        if (currentMode === "img_revision" && q.img) {
+            document.getElementById('image-area').classList.remove('hidden');
+            document.getElementById('match-img').src = q.img;
+        } else {
+            document.getElementById('image-area').classList.add('hidden');
+        }
+
+        const grid = document.getElementById('options-grid'); grid.innerHTML = '';
+        
+        [...q.options].sort(() => Math.random() - 0.5).forEach(opt => {
+            const btn = document.createElement('button'); btn.className = 'option-btn'; btn.innerText = opt;
+            btn.onclick = () => {
+                if (opt === q.ans) {
+                    btn.classList.add('correct'); stars++; 
+                    playSound('correct');
+                    document.getElementById('next-btn').disabled = false; 
+                    Array.from(grid.children).forEach(b => b.onclick = null);
+                } else {
+                    btn.classList.add('wrong');
+                    playSound('wrong');
+                    // 錯題提示正確答案
+                    document.getElementById('correct-ans-hint').innerText = q.ans;
+                    document.getElementById('error-hint').style.display = 'block';
+                    speakText(`不對喔，正確答案是：${q.ans}`);
+                }
+            };
+            grid.appendChild(btn);
+        });
+        if(document.getElementById('auto-read-toggle').checked) { setTimeout(speakCurrent, 600); }
+    }
+
+    function speakCurrent() { 
+        let tempDiv = document.createElement("div");
+        tempDiv.innerHTML = currentQList[currentIndex].q;
+        let plainText = tempDiv.textContent || tempDiv.innerText || "";
+        let textToRead = plainText.replace(/____/g, "什麼什麼").replace(/______/g, "什麼什麼");
+        speakText(textToRead);
+    }
+
+    function speakText(msg) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(msg);
+        u.lang = 'zh-HK';
+        window.speechSynthesis.speak(u);
+    }
+    
+    function nextQuestion() { 
+        currentIndex++; 
+        if (currentIndex < currentQList.length) {
+            loadQuestion(); 
+        } else {
+            showEnd(); 
+        }
+    }
+
+    function showEnd() {
+        document.getElementById('game-play').classList.add('hidden');
+        document.getElementById('drag-play').classList.add('hidden');
+        document.getElementById('game-over').classList.remove('hidden');
+        
+        let totalMax = currentQList.length;
+        let currentTitle = "";
+        
+        if (currentMode === "drag_revision") {
+            totalMax = dragBank.length;
+            currentTitle = "家族高低音排序";
+        } else if (currentMode === "img_revision") {
+            totalMax = imgMatchBank.length;
+            currentTitle = "看圖配對樂器";
+        } else {
+            currentTitle = questionBank[currentKey].title;
+        }
+
+        const ratio = stars / totalMax;
+        const medal = ratio === 1 ? "🏆" : ratio >= 0.8 ? "🥇" : "🥈";
+        document.getElementById('medal-emoji').innerText = medal;
+        document.getElementById('medal-title').innerText = `${childName} 得到 ${stars} 顆星！`;
+        
+        const now = new Date();
+        history.unshift({ date: `${now.getMonth()+1}/${now.getDate()}`, name: childName, lesson: currentTitle, score: `${stars}/${totalMax}`, medal: medal });
+        localStorage.setItem('mu_v18_hist', JSON.stringify(history.slice(0, 10)));
+        renderHistory();
+    }
+
+    function renderHistory() {
+        const list = document.getElementById('history-list');
+        list.innerHTML = history.map(h => `<div class="history-item"><span>${h.date}</span><span style="font-weight:bold;color:var(--primary-color)">${h.name}</span><span>${h.lesson}</span><span style="color:#f39c12;font-weight:bold">${h.score}</span><span>${h.medal}</span></div>`).join('');
+    }
+    function clearHistory() { if(confirm("清除紀錄？")) { history = []; localStorage.removeItem('mu_v18_hist'); renderHistory(); } }
+    function goBack() { window.speechSynthesis.cancel(); document.getElementById('game-play').classList.add('hidden'); document.getElementById('drag-play').classList.add('hidden'); document.getElementById('game-over').classList.add('hidden'); document.getElementById('main-menu').classList.remove('hidden'); }
+</script>
+</body>
+</html>
