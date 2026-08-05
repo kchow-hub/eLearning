@@ -84,7 +84,7 @@
     .badge-red { background: #f8d7da; color: #842029; }
     .badge-green { background: #d1e7dd; color: #0f5132; }
 
-    /* 列印專用 CSS (@media print) - 嚴格修復 */
+    /* 列印專用 CSS (@media print) - 嚴格 1 天 1 頁 */
     @media print {
       @page {
         size: A4 portrait;
@@ -92,7 +92,7 @@
       }
       
       body { background: white !important; font-size: 8.5pt; margin: 0; padding: 0; }
-      .navbar, .no-print, #daily-entry { display: none !important; } /* 隱藏輸入表單 */
+      .navbar, .no-print, #daily-entry { display: none !important; } /* 完全隱藏表單 */
       
       .container { max-width: 100% !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
       
@@ -288,7 +288,7 @@
   </div>
 
   <script>
-    // 預設數據
+    // 預設數據 (單項拆解 + Home 標籤 + 79kg 精算運動量 + 08/05 完整飲食)
     let journalData = {
       "2026-08-01": {
         sleep: "1:30 AM 入睡", water: "未詳細紀錄", bowel: "未詳細紀錄", remark: "燉奶用全脂奶製作，下次計劃改用脫脂奶；太興晚餐去皮切雞表現極佳。",
@@ -382,14 +382,18 @@
         ]
       },
       "2026-08-05": {
-        sleep: "進行中", water: "進行中", bowel: "進行中", remark: "早餐使用 Walden Farms 0卡0糖 Ketchup，自製高蛋白高纖三文治。",
+        sleep: "約 12:00 AM 入睡 (預計)", water: "5 杯 (約 1000ml)", bowel: "2 次 (早上 1 次 + 中午 1 次，質地正常)", remark: "Home Office；早餐使用 Walden Farms 0卡0糖 Ketchup 自製高蛋白三文治；午餐 16 穀米飯高纖低 GI。",
         foods: [
-          { meal: "早餐", time: "8:30am", loc: "Home", name: "無糖豆漿 1杯 (250ml)", kcal: 85, protein: 7.5 },
+          { meal: "早餐", time: "9:00am", loc: "Home", name: "無糖豆漿 1杯 (250ml)", kcal: 85, protein: 7.5 },
           { meal: "早餐", time: "", loc: "", name: "麥方包 2片 (約60g)", kcal: 160, protein: 7 },
           { meal: "早餐", time: "", loc: "", name: "烚雞蛋 2隻", kcal: 150, protein: 13 },
           { meal: "早餐", time: "", loc: "", name: "番茄 2片", kcal: 8, protein: 0.3 },
           { meal: "早餐", time: "", loc: "", name: "生菜 1大片", kcal: 4, protein: 0.2 },
-          { meal: "早餐", time: "", loc: "", name: "Walden Farms Ketchup (0卡無糖)", kcal: 0, protein: 0 }
+          { meal: "早餐", time: "", loc: "", name: "Walden Farms Ketchup (0卡無糖)", kcal: 0, protein: 0 },
+          { meal: "午餐", time: "12:30pm", loc: "Home", name: "雞胸肉 (Raw 160g)", kcal: 185, protein: 37 },
+          { meal: "午餐", time: "", loc: "", name: "菜心 1.5碗 (約180g)", kcal: 40, protein: 3.5 },
+          { meal: "午餐", time: "", loc: "", name: "清炒健康少油 (約1茶匙)", kcal: 40, protein: 0 },
+          { meal: "午餐", time: "", loc: "", name: "16 穀米飯 1 1/3碗 (約200g)", kcal: 275, protein: 6.5 }
         ],
         sports: []
       }
