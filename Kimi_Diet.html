@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kimi 智能飲食與健康日記系統</title>
+  <style>
+    :root {
+      --primary: #0f5132;
+      --primary-light: #e8f5e9;
+      --accent: #198754;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --border: #dee2e6;
+      --text: #212529;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang HK", "Microsoft JhengHei", sans-serif;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body { margin: 0; padding: 0; background-color: var(--bg); color: var(--text); font-size: 13px; }
+
+    /* MENU 導航列 */
+    .navbar {
+      background-color: var(--primary);
+      color: white;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .navbar .logo { font-size: 18px; font-weight: bold; }
+    .nav-menu { display: flex; gap: 10px; }
+    .nav-btn {
+      background: rgba(255,255,255,0.15);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover, .nav-btn.active { background-color: white; color: var(--primary); }
+
+    .container { max-width: 920px; margin: 20px auto; padding: 0 15px; }
+
+    /* TAB 頁面切換 */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* 卡片樣式 */
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 18px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .card-title { font-size: 15px; font-weight: bold; color: var(--primary); border-left: 4px solid var(--primary); padding-left: 10px; margin-bottom: 12px; }
+
+    /* 表單元件 */
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 12px; }
+    .form-control { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 5px; font-size: 12px; }
+    .form-row { display: flex; gap: 10px; }
+    .form-row .form-group { flex: 1; }
+
+    /* 表格樣式 */
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; }
+    th, td { border: 1px solid var(--border); padding: 5px 7px; text-align: left; }
+    th { background-color: var(--primary); color: white; text-align: center; font-weight: 600; }
+    tr:nth-child(even) { background-color: #f8f9fa; }
+    
+    .subtotal-row td { background-color: #e8f5e9 !important; font-weight: bold; color: var(--primary); }
+    .daily-total-row td { background-color: #fff3cd !important; font-weight: bold; color: #664d03; border-top: 1.5px solid #ffecb5; }
+    .sleep-row td { background-color: #f1f3f5 !important; font-weight: bold; color: #343a40; }
+
+    .text-center { text-align: center; }
+    .badge { padding: 2px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
+    .badge-red { background: #f8d7da; color: #842029; }
+    .badge-green { background: #d1e7dd; color: #0f5132; }
+
+    /* 列印專用 CSS (@media print) */
+    @media print {
+      body { background: white; font-size: 8.5pt; }
+      .navbar, .no-print { display: none !important; }
+      .container { max-width: 100%; margin: 0; padding: 0; }
+      .tab-content { display: block !important; }
+      .page-break { page-break-after: always; break-after: page; padding-top: 5px; }
+      .card { border: none; box-shadow: none; padding: 0; margin-bottom: 10px; }
+      th { background-color: var(--primary) !important; color: white !important; }
+      .subtotal-row td { background-color: #e8f5e9 !important; }
+      .daily-total-row td { background-color: #fff3cd !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MENU 導航 -->
+  <nav class="navbar">
+    <div class="logo">🥗 Kimi 飲食與健康日記</div>
+    <div class="nav-menu">
+      <button class="nav-btn active" onclick="switchTab('daily-entry')">📝 今日輸入 / 紀錄</button>
+      <button class="nav-btn" onclick="switchTab('history-view')">📅 日曆日誌 (選取列印)</button>
+      <button class="nav-btn" onclick="switchTab('weekly-summary')">📊 每周總結周報</button>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- ================= TAB 1: 今日輸入 / 編輯 ================= -->
+    <div id="daily-entry" class="tab-content active">
+      <div class="card">
+        <div class="card-title">📝 選擇日期與填寫基本資料</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>選擇紀錄日期：</label>
+            <input type="date" id="entry-date" class="form-control" value="2026-08-05" onchange="loadDateData()">
+          </div>
+          <div class="form-group">
+            <label>睡眠時間 (e)：</label>
+            <input type="text" id="entry-sleep" class="form-control" placeholder="例: 1:30 AM 入睡">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>全日飲水量 (ml / 杯)：</label>
+            <input type="text" id="entry-water" class="form-control" placeholder="例: 5 杯 (約 1000ml)">
+          </div>
+          <div class="form-group">
+            <label>排便次數 (次)：</label>
+            <input type="text" id="entry-bowel" class="form-control" placeholder="例: 2 次 (質地正常)">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>備註 Remark (g) (便秘/患病/PMS/肚脹/出差狀況)：</label>
+          <input type="text" id="entry-remark" class="form-control" placeholder="例: 無便秘，無肚脹，深圳出差勞累">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🍳 新增食物項目 (單項拆解)</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>餐節：</label>
+            <select id="food-meal" class="form-control">
+              <option value="早餐">早餐</option>
+              <option value="午餐">午餐</option>
+              <option value="下午茶/加餐">下午茶/加餐</option>
+              <option value="晚餐">晚餐</option>
+              <option value="夜宵/運動後">夜宵/運動後</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>時間 (a)：</label>
+            <input type="text" id="food-time" class="form-control" placeholder="例: 8:30am">
+          </div>
+          <div class="form-group">
+            <label>地點 (b)：</label>
+            <input type="text" id="food-location" class="form-control" placeholder="例: Home / 外 / 深圳">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" style="flex: 2;">
+            <label>食物類別及煮法 (c/d)：</label>
+            <input type="text" id="food-name" class="form-control" placeholder="例: 無糖豆漿 1杯 (250ml)">
+          </div>
+          <div class="form-group">
+            <label>單項熱量 (kcal)：</label>
+            <input type="number" id="food-kcal" class="form-control" placeholder="例: 85">
+          </div>
+          <div class="form-group">
+            <label>單項蛋白質 (g)：</label>
+            <input type="number" step="0.1" id="food-protein" class="form-control" placeholder="例: 7.5">
+          </div>
+        </div>
+        <button class="nav-btn" style="background: var(--primary); width: 100%; margin-top: 5px;" onclick="addFoodItem()">➕ 新增單項食物至今日清單</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🏃 新增運動 / 行程消耗 (f)</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>運動時間 / 距離：</label>
+            <input type="text" id="sport-time" class="form-control" placeholder="例: 30 Mins / 出差日常步行">
+          </div>
+          <div class="form-group">
+            <label>運動類別：</label>
+            <input type="text" id="sport-type" class="form-control" placeholder="例: 跑步機慢跑 / 深圳來回轉乘">
+          </div>
+          <div class="form-group">
+            <label>心跳率 (bpm)：</label>
+            <input type="text" id="sport-hr" class="form-control" placeholder="例: 120-140 bpm">
+          </div>
+          <div class="form-group">
+            <label>估算消耗 Outtake (kcal)：</label>
+            <input type="number" id="sport-kcal" class="form-control" placeholder="例: 335">
+          </div>
+        </div>
+        <button class="nav-btn" style="background: var(--accent); width: 100%; margin-top: 5px;" onclick="addSportItem()">➕ 新增運動紀錄</button>
+      </div>
+    </div>
+
+    <!-- ================= TAB 2: 日曆與歷史日誌 (可選列印) ================= -->
+    <div id="history-view" class="tab-content">
+      <div class="card no-print">
+        <div class="card-title">📅 選擇列印日期 (1 天 1 頁 A4)</div>
+        <p style="font-size: 12px; color: #666;">請勾選你想列印給營養師的日期，點擊列印按鈕後系統會自動進行分頁排版。</p>
+        <div id="date-checkboxes" style="display: flex; gap: 15px; flex-wrap: wrap; margin: 10px 0;">
+          <!-- 動態產生 Checkboxes -->
+        </div>
+        <button class="nav-btn" style="background: var(--primary); padding: 10px 20px;" onclick="printSelectedDays()">🖨️ 列印選取日誌 (1天1頁 A4)</button>
+      </div>
+
+      <div id="journal-render-area">
+        <!-- 動態渲染選取的日誌頁面 -->
+      </div>
+    </div>
+
+    <!-- ================= TAB 3: 每周總結周報 ================= -->
+    <div id="weekly-summary" class="tab-content">
+      <div class="card no-print">
+        <button class="nav-btn" style="background: var(--primary); padding: 8px 16px; float: right;" onclick="window.print()">🖨️ 列印周報 (1 頁 PDF)</button>
+        <div class="card-title">📊 每周總結周報 (2026/08/01 - 2026/08/07)</div>
+      </div>
+
+      <div class="card page-break">
+        <div style="text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 8px; margin-bottom: 12px;">
+          <h2 style="margin: 0; color: var(--primary);">Diary 飲食與健康 Weekly Summary 週報</h2>
+          <div style="font-size: 11px; color: #555; margin-top: 4px;">客戶：Kimi (155cm / 79kg) &nbsp;|&nbsp; 供專業營養師諮詢與進度評估</div>
+        </div>
+
+        <div style="font-weight: bold; color: var(--primary); margin-bottom: 6px;">📊 七日數據總覽比較表</div>
+        <table>
+          <thead>
+            <tr>
+              <th style="text-align:center;">日期</th>
+              <th style="text-align:center;">總攝取 Intake (kcal)</th>
+              <th style="text-align:center;">蛋白質 (g)</th>
+              <th>運動與活動 Outtake (kcal)</th>
+              <th style="text-align:center;">飲水量</th>
+              <th style="text-align:center;">排便</th>
+              <th style="text-align:center;">睡眠 (e)</th>
+            </tr>
+          </thead>
+          <tbody id="weekly-table-body">
+            <!-- 動態載入 -->
+          </tbody>
+        </table>
+
+        <div style="border: 1px solid #c3e6cb; background: #f4faf6; border-radius: 6px; padding: 12px; margin-top: 15px; line-height: 1.5; font-size: 11px;">
+          <div style="font-weight: bold; color: var(--primary); margin-bottom: 5px;">💡 本週營養師觀測重點摘要 (Weekly Review Notes)</div>
+          1. <b>蛋白質達標狀況：</b> 全週平均每日蛋白質攝取維持於 <b>90g – 125g</b>，重訓與出差日修復能量充足。<br>
+          2. <b>熱量與油脂控制：</b> 避開隱形油脂（火鍋湯底皆未飲用、沙律醬使用 Walden Farms 0kcal 代替）。<br>
+          3. <b>出差與動態消耗：</b> 深圳出差單程轉乘與步行帶來約 <b>320 – 350 kcal Active Burn (79kg精算)</b>，運動量顯著提升。<br>
+          4. <b>水分與腸道：</b> 出差日水分需保持 1,500ml 以上；排便次數良好，無便秘、PMS 或肚脹腹痛等不適。
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // 預設數據 (單項細分 + Home 標籤 + 79kg 精算運動量)
+    let journalData = {
+      "2026-08-01": {
+        sleep: "1:30 AM 入睡", water: "未詳細紀錄", bowel: "未詳細紀錄", remark: "燉奶用全脂奶製作，下次計劃改用脫脂奶；太興晚餐去皮切雞表現極佳。",
+        foods: [
+          { meal: "早餐", time: "10:30am", loc: "Home/外", name: "無糖杏仁奶 1杯 (250ml)", kcal: 40, protein: 1 },
+          { meal: "早餐", time: "", loc: "", name: "華御結吞拿魚沙律飯團 1個", kcal: 200, protein: 12.5 },
+          { meal: "午餐", time: "12:30pm", loc: "外 (牛氣)", name: "昆布湯底 (僅涮煮未飲用)", kcal: 0, protein: 0 },
+          { meal: "午餐", time: "", loc: "", name: "烏冬 1碗 (約180g)", kcal: 180, protein: 4.5 },
+          { meal: "午餐", time: "", loc: "", name: "豬肉 8片 (約80g)", kcal: 180, protein: 17 },
+          { meal: "午餐", time: "", loc: "", name: "雞肉 2件 (約40g)", kcal: 70, protein: 11 },
+          { meal: "午餐", time: "", loc: "", name: "蔬菜 2碗 (約200g)", kcal: 50, protein: 3.5 },
+          { meal: "午餐", time: "", loc: "", name: "芋絲 3粒 (約30g)", kcal: 18, protein: 0 },
+          { meal: "午餐", time: "", loc: "", name: "調味 (蒜蓉1湯匙/辣椒1茶匙/豉油1湯匙)", kcal: 25, protein: 1 },
+          { meal: "午餐", time: "", loc: "", name: "無糖急凍芒果雪條 1支", kcal: 50, protein: 0.5 },
+          { meal: "午餐", time: "", loc: "", name: "無糖綠茶 1罐 + 自沖烏龍茶 2杯", kcal: 0, protein: 0 },
+          { meal: "晚餐", time: "7:30pm", loc: "外 (太興)", name: "切雞去皮 (約120g)", kcal: 160, protein: 24 },
+          { meal: "晚餐", time: "", loc: "", name: "米粉 1/3碗 (約60g)", kcal: 50, protein: 1.5 },
+          { meal: "晚餐", time: "", loc: "", name: "無糖凍檸茶 1杯", kcal: 0, protein: 0 },
+          { meal: "夜宵/運動後", time: "9:30pm", loc: "Home", name: "全脂奶蛋白燉奶 1碗 (200ml全脂奶+蛋白)", kcal: 200, protein: 16.5 }
+        ],
+        sports: [
+          { time: "30 Mins", type: "跑步機慢跑", hr: "120-140 bpm", kcal: 280 }
+        ]
+      },
+      "2026-08-02": {
+        sleep: "約 12:00 AM 入睡", water: "未詳細紀錄", bowel: "未詳細紀錄", remark: "跟餐單感覺成日食嘢，但實際熱量極乾淨；高蛋白高纖飽腹感強。",
+        foods: [
+          { meal: "早餐", time: "9:30am", loc: "Home", name: "麥方包 2片 (約60g)", kcal: 160, protein: 7 },
+          { meal: "早餐", time: "", loc: "", name: "脫脂奶 1杯 (250ml)", kcal: 85, protein: 8.5 },
+          { meal: "早餐", time: "", loc: "", name: "無油炒蛋 2隻", kcal: 150, protein: 13 },
+          { meal: "午餐", time: "12:30pm", loc: "外 (千海)", name: "椰子雞湯底 (僅涮煮未飲用)", kcal: 0, protein: 0 },
+          { meal: "午餐", time: "", loc: "", name: "大頭蝦 15隻 (約220-250g)", kcal: 130, protein: 25 },
+          { meal: "午餐", time: "", loc: "", name: "螺肉 約20粒 (約80-100g)", kcal: 80, protein: 13.5 },
+          { meal: "午餐", time: "", loc: "", name: "細花蟹 3隻 (約60-90g)", kcal: 75, protein: 11.5 },
+          { meal: "午餐", time: "", loc: "", name: "雞肉 1口 (約10g)", kcal: 18, protein: 2 },
+          { meal: "午餐", time: "", loc: "", name: "莧菜 1.5碗", kcal: 40, protein: 3.5 },
+          { meal: "午餐", time: "", loc: "", name: "生菜 4-5條", kcal: 8, protein: 1 },
+          { meal: "午餐", time: "", loc: "", name: "烏冬 6條 (約25-30g)", kcal: 28, protein: 1 },
+          { meal: "午餐", time: "", loc: "", name: "火龍果 1小片 + 無糖冷泡茶", kcal: 12, protein: 0 },
+          { meal: "下午茶/加餐", time: "6:20pm", loc: "Home", name: "麥方包 1片 (Pre-workout)", kcal: 80, protein: 3.5 },
+          { meal: "下午茶/加餐", time: "", loc: "", name: "脫脂奶 1杯 (250ml)", kcal: 85, protein: 8.5 },
+          { meal: "夜宵/運動後", time: "8:30pm", loc: "Home", name: "Graham’s Protein 25 乳酪 1杯 (200g)", kcal: 180, protein: 24.8 },
+          { meal: "夜宵/運動後", time: "", loc: "", name: "麥方包 1片 (Post-workout)", kcal: 80, protein: 3.5 }
+        ],
+        sports: [
+          { time: "60 Mins", type: "一對一健身教練課 (重訓)", hr: "120-150 bpm", kcal: 410 }
+        ]
+      },
+      "2026-08-03": {
+        sleep: "12:30 AM 入睡", water: "約 450-500 ml", bowel: "2 次 (8:30am, 11:00am，質地正常)", remark: "全日深圳出差極忙極攰；晚餐粉麵單一次完食。",
+        foods: [
+          { meal: "早餐", time: "8:30am", loc: "Home", name: "麥方包 2片", kcal: 160, protein: 7 },
+          { meal: "早餐", time: "", loc: "", name: "脫脂奶 1杯 (250ml)", kcal: 85, protein: 8.5 },
+          { meal: "早餐", time: "", loc: "", name: "烚雞蛋 2隻", kcal: 150, protein: 13 },
+          { meal: "早餐", time: "10:00am", loc: "外 (麥當勞)", name: "無糖杏仁奶咖啡 1杯", kcal: 30, protein: 0.5 },
+          { meal: "午餐", time: "12:00pm", loc: "外 (深圳)", name: "煎黃花魚 1條 (細條少油)", kcal: 165, protein: 19 },
+          { meal: "午餐", time: "", loc: "", name: "炒雜菜 1.5碗 (菜心/豆角/苦瓜)", kcal: 90, protein: 3.5 },
+          { meal: "午餐", time: "", loc: "", name: "雞肉冬菇 (約40g)", kcal: 70, protein: 7 },
+          { meal: "午餐", time: "", loc: "", name: "白飯 1碗 (約150g)", kcal: 220, protein: 4.5 },
+          { meal: "午餐", time: "", loc: "", name: "清湯 1杯", kcal: 5, protein: 0 },
+          { meal: "晚餐", time: "8:00pm", loc: "外 (返港)", name: "米粉 1碗 (約200g)", kcal: 200, protein: 4.5 },
+          { meal: "晚餐", time: "", loc: "", name: "白魚蛋 3粒 (約60g)", kcal: 65, protein: 6.5 },
+          { meal: "晚餐", time: "", loc: "", name: "雲吞 4粒 (約100g)", kcal: 170, protein: 13 },
+          { meal: "晚餐", time: "", loc: "", name: "灼菜心 1碗", kcal: 70, protein: 3.5 },
+          { meal: "晚餐", time: "", loc: "", name: "無糖凍檸茶 1杯", kcal: 0, protein: 0 }
+        ],
+        sports: [
+          { time: "20 Mins", type: "午餐後散步", hr: "90-110 bpm", kcal: 85 },
+          { time: "全日", type: "深圳來回出差轉乘步行 (79kg精算)", hr: "90-110 bpm", kcal: 335 }
+        ]
+      },
+      "2026-08-04": {
+        sleep: "1:30 AM 入睡", water: "4-5 杯 (約 800-1000ml)", bowel: "3 次 (早上, 中午, 晚飯後胃結腸反射)", remark: "晚餐後排便為健康腸道反射；無便秘，無肚脹。",
+        foods: [
+          { meal: "早餐", time: "8:00am", loc: "Home", name: "麥方包 2片", kcal: 160, protein: 7 },
+          { meal: "早餐", time: "", loc: "", name: "無油炒蛋 2隻", kcal: 150, protein: 13 },
+          { meal: "早餐", time: "", loc: "", name: "脫脂奶 1杯 (250ml)", kcal: 85, protein: 8.5 },
+          { meal: "午餐", time: "12:15pm", loc: "外 (美團)", name: "三文魚 100g", kcal: 215, protein: 23.5 },
+          { meal: "午餐", time: "", loc: "", name: "黑米飯 1碗 (約150g)", kcal: 220, protein: 5.5 },
+          { meal: "午餐", time: "", loc: "", name: "炒雜菜 (西蘭花/椰菜花/粟米/杏鮑菇/青瓜)", kcal: 135, protein: 7 },
+          { meal: "午餐", time: "", loc: "", name: "炒蛋 1隻", kcal: 75, protein: 6.5 },
+          { meal: "下午茶/加餐", time: "3:30pm", loc: "外 (Office)", name: "綜合堅果乾果 15-20g", kcal: 100, protein: 2.5 },
+          { meal: "晚餐", time: "8:00pm", loc: "外", name: "米粉 1碗 (約200g)", kcal: 200, protein: 4.5 },
+          { meal: "晚餐", time: "", loc: "", name: "白魚蛋 3粒 (約60g)", kcal: 65, protein: 6.5 },
+          { meal: "晚餐", time: "", loc: "", name: "雲吞 4粒 (約100g)", kcal: 170, protein: 13 },
+          { meal: "晚餐", time: "", loc: "", name: "灼菜心 1碗", kcal: 70, protein: 3.5 },
+          { meal: "晚餐", time: "", loc: "", name: "無糖凍檸茶 1杯", kcal: 0, protein: 0 }
+        ],
+        sports: [
+          { time: "全日", type: "深圳來回出差轉乘步行 (79kg精算)", hr: "90-110 bpm", kcal: 335 }
+        ]
+      },
+      "2026-08-05": {
+        sleep: "進行中", water: "進行中", bowel: "進行中", remark: "早餐使用 Walden Farms 0卡0糖 Ketchup，自製高蛋白高纖三文治。",
+        foods: [
+          { meal: "早餐", time: "8:30am", loc: "Home", name: "無糖豆漿 1杯 (250ml)", kcal: 85, protein: 7.5 },
+          { meal: "早餐", time: "", loc: "", name: "麥方包 2片 (約60g)", kcal: 160, protein: 7 },
+          { meal: "早餐", time: "", loc: "", name: "烚雞蛋 2隻", kcal: 150, protein: 13 },
+          { meal: "早餐", time: "", loc: "", name: "番茄 2片", kcal: 8, protein: 0.3 },
+          { meal: "早餐", time: "", loc: "", name: "生菜 1大片", kcal: 4, protein: 0.2 },
+          { meal: "早餐", time: "", loc: "", name: "Walden Farms Ketchup (0卡無糖)", kcal: 0, protein: 0 }
+        ],
+        sports: []
+      }
+    };
+
+    // 本地 LocalStorage 載入
+    if (localStorage.getItem("kimi_journal_v2")) {
+      journalData = JSON.parse(localStorage.getItem("kimi_journal_v2"));
+    }
+
+    function saveToStorage() {
+      localStorage.setItem("kimi_journal_v2", JSON.stringify(journalData));
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+
+      if (tabId === 'history-view') renderHistoryView();
+      if (tabId === 'weekly-summary') renderWeeklySummary();
+    }
+
+    function loadDateData() {
+      const date = document.getElementById('entry-date').value;
+      if (!journalData[date]) {
+        journalData[date] = { sleep: "", water: "", bowel: "", remark: "", foods: [], sports: [] };
+      }
+      const d = journalData[date];
+      document.getElementById('entry-sleep').value = d.sleep || "";
+      document.getElementById('entry-water').value = d.water || "";
+      document.getElementById('entry-bowel').value = d.bowel || "";
+      document.getElementById('entry-remark').value = d.remark || "";
+    }
+
+    function addFoodItem() {
+      const date = document.getElementById('entry-date').value;
+      if (!journalData[date]) loadDateData();
+
+      const food = {
+        meal: document.getElementById('food-meal').value,
+        time: document.getElementById('food-time').value,
+        loc: document.getElementById('food-location').value,
+        name: document.getElementById('food-name').value,
+        kcal: parseFloat(document.getElementById('food-kcal').value) || 0,
+        protein: parseFloat(document.getElementById('food-protein').value) || 0
+      };
+
+      journalData[date].sleep = document.getElementById('entry-sleep').value;
+      journalData[date].water = document.getElementById('entry-water').value;
+      journalData[date].bowel = document.getElementById('entry-bowel').value;
+      journalData[date].remark = document.getElementById('entry-remark').value;
+
+      journalData[date].foods.push(food);
+      saveToStorage();
+      alert("✅ 已成功新增單項食物！");
+      document.getElementById('food-name').value = "";
+      document.getElementById('food-kcal').value = "";
+      document.getElementById('food-protein').value = "";
+    }
+
+    function addSportItem() {
+      const date = document.getElementById('entry-date').value;
+      if (!journalData[date]) loadDateData();
+
+      const sport = {
+        time: document.getElementById('sport-time').value,
+        type: document.getElementById('sport-type').value,
+        hr: document.getElementById('sport-hr').value,
+        kcal: parseFloat(document.getElementById('sport-kcal').value) || 0
+      };
+
+      journalData[date].sports.push(sport);
+      saveToStorage();
+      alert("✅ 已成功新增運動紀錄！");
+      document.getElementById('sport-type').value = "";
+      document.getElementById('sport-kcal').value = "";
+    }
+
+    // 渲染歷史日誌頁面（含單項拆解 + 每餐小計 Subtotal）
+    function renderHistoryView() {
+      const cbContainer = document.getElementById('date-checkboxes');
+      cbContainer.innerHTML = "";
+      
+      Object.keys(journalData).sort().forEach(date => {
+        cbContainer.innerHTML += `
+          <label style="font-size: 13px;"><input type="checkbox" class="print-date-cb" value="${date}" checked> ${date}</label>
+        `;
+      });
+
+      renderJournalPages();
+    }
+
+    function renderJournalPages() {
+      const renderArea = document.getElementById('journal-render-area');
+      renderArea.innerHTML = "";
+
+      const checkboxes = document.querySelectorAll('.print-date-cb:checked');
+      checkboxes.forEach(cb => {
+        const date = cb.value;
+        const data = journalData[date];
+        if (!data) return;
+
+        // Group foods by meal
+        let mealGroups = {};
+        data.foods.forEach(f => {
+          if (!mealGroups[f.meal]) mealGroups[f.meal] = [];
+          mealGroups[f.meal].push(f);
+        });
+
+        let foodRowsHtml = "";
+        let totalKcal = 0;
+        let totalProtein = 0;
+
+        for (let mealName in mealGroups) {
+          let items = mealGroups[mealName];
+          let mealSubKcal = 0;
+          let mealSubProtein = 0;
+
+          items.forEach((f, idx) => {
+            mealSubKcal += f.kcal;
+            mealSubProtein += f.protein;
+            totalKcal += f.kcal;
+            totalProtein += f.protein;
+
+            foodRowsHtml += `
+              <tr>
+                <td>${idx === 0 ? `<b>${f.meal}</b>` : ''}</td>
+                <td class="text-center">${f.time || ''}</td>
+                <td class="text-center">${f.loc || ''}</td>
+                <td>${f.name}</td>
+                <td class="text-center">${f.kcal}</td>
+                <td class="text-center">${f.protein}</td>
+              </tr>
+            `;
+          });
+
+          // Add Meal Subtotal Row
+          foodRowsHtml += `
+            <tr class="subtotal-row">
+              <td colspan="3"><b>↳ ${mealName} 小計 Subtotal</b></td>
+              <td><b>${mealName} 共 ${items.length} 項小計</b></td>
+              <td class="text-center"><b>${Math.round(mealSubKcal)} kcal</b></td>
+              <td class="text-center"><b>${Math.round(mealSubProtein * 10) / 10} g</b></td>
+            </tr>
+          `;
+        }
+
+        let sportRowsHtml = "";
+        let totalSportKcal = 0;
+        data.sports.forEach(s => {
+          totalSportKcal += s.kcal;
+          sportRowsHtml += `
+            <tr>
+              <td class="text-center">${s.time}</td>
+              <td>${s.type}</td>
+              <td class="text-center">${s.hr || '-'}</td>
+              <td class="text-center"><b>${s.kcal} kcal</b></td>
+            </tr>
+          `;
+        });
+
+        renderArea.innerHTML += `
+          <div class="card page-break">
+            <div style="display:flex; justify-content:space-between; border-bottom: 2px solid var(--primary); padding-bottom: 5px; margin-bottom: 8px;">
+              <span style="font-size: 14px; font-weight: bold; color: var(--primary);">📅 飲食日記：${date}</span>
+              <span class="badge badge-green">餐單：Kimi 減脂增肌計劃</span>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 10%;">餐節</th>
+                  <th style="width: 11%;">時間 <span class="badge badge-red">a</span></th>
+                  <th style="width: 10%;">地點 <span class="badge badge-red">b</span></th>
+                  <th style="width: 45%;">食物類別及煮法 <span class="badge badge-red">c/d</span></th>
+                  <th style="width: 12%;" class="text-center">單項熱量</th>
+                  <th style="width: 12%;" class="text-center">蛋白質(g)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${foodRowsHtml || '<tr><td colspan="6" class="text-center">今日暫無食物紀錄</td></tr>'}
+                <tr class="daily-total-row">
+                  <td colspan="3"><b>每日總攝取 Intake</b></td>
+                  <td><b>全日食物熱量與蛋白質總計</b></td>
+                  <td class="text-center"><b>${Math.round(totalKcal)} kcal</b></td>
+                  <td class="text-center"><b>${Math.round(totalProtein * 10) / 10} g</b></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div style="font-weight: bold; color: var(--primary); margin: 8px 0 3px 0;">🏃 運動與行程紀錄 <span class="badge badge-red">f</span></div>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 20%;">分鐘</th>
+                  <th style="width: 40%;">類別</th>
+                  <th style="width: 20%;">心跳率 (bpm)</th>
+                  <th style="width: 20%;">估算消耗 Outtake</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${sportRowsHtml || '<tr><td colspan="4" class="text-center">本日無額外運動紀錄</td></tr>'}
+              </tbody>
+            </table>
+
+            <div style="border: 1px solid #c3e6cb; background: #f4faf6; border-radius: 5px; padding: 6px 9px; margin-top: 8px; font-size: 11px;">
+              <b style="color: var(--primary);">備註 Remark <span class="badge badge-red">g</span>：</b><br>
+              <b>睡眠 (e)：</b>${data.sleep || '未紀錄'} &nbsp;|&nbsp; <b>飲水：</b>${data.water || '未紀錄'} &nbsp;|&nbsp; <b>排便：</b>${data.bowel || '未紀錄'}<br>
+              <b>身體狀況與備註：</b>${data.remark || '無特殊狀況'}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function printSelectedDays() {
+      renderJournalPages();
+      window.print();
+    }
+
+    // 渲染周報
+    function renderWeeklySummary() {
+      const tbody = document.getElementById('weekly-table-body');
+      tbody.innerHTML = "";
+
+      Object.keys(journalData).sort().forEach(date => {
+        const d = journalData[date];
+        let totalKcal = 0, totalProtein = 0, totalSportKcal = 0;
+        d.foods.forEach(f => { totalKcal += f.kcal; totalProtein += f.protein; });
+        d.sports.forEach(s => { totalSportKcal += s.kcal; });
+
+        tbody.innerHTML += `
+          <tr>
+            <td style="text-align:center;"><b>${date}</b></td>
+            <td style="text-align:center;">${Math.round(totalKcal)} kcal</td>
+            <td style="text-align:center;">${Math.round(totalProtein * 10) / 10} g</td>
+            <td>${d.sports.map(s => s.type).join(', ') || '日常步行'} (約 ${totalSportKcal} kcal)</td>
+            <td style="text-align:center;">${d.water || '標準'}</td>
+            <td style="text-align:center;">${d.bowel || '正常'}</td>
+            <td style="text-align:center;">${d.sleep || '正常'}</td>
+          </tr>
+        `;
+      });
+    }
+
+    // 初始化載入
+    loadDateData();
+  </script>
+</body>
+</html>
