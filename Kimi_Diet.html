@@ -84,14 +84,34 @@
     .badge-red { background: #f8d7da; color: #842029; }
     .badge-green { background: #d1e7dd; color: #0f5132; }
 
-    /* 列印專用 CSS (@media print) */
+    /* 列印專用 CSS (@media print) - 嚴格修復 */
     @media print {
-      body { background: white; font-size: 8.5pt; }
-      .navbar, .no-print { display: none !important; }
-      .container { max-width: 100%; margin: 0; padding: 0; }
-      .tab-content { display: block !important; }
-      .page-break { page-break-after: always; break-after: page; padding-top: 5px; }
-      .card { border: none; box-shadow: none; padding: 0; margin-bottom: 10px; }
+      @page {
+        size: A4 portrait;
+        margin: 8mm 10mm;
+      }
+      
+      body { background: white !important; font-size: 8.5pt; margin: 0; padding: 0; }
+      .navbar, .no-print, #daily-entry { display: none !important; } /* 隱藏輸入表單 */
+      
+      .container { max-width: 100% !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+      
+      .tab-content { display: none !important; }
+      .tab-content.active { display: block !important; }
+
+      /* 強制每卡片 1 天 1 頁 A4 */
+      .page-break {
+        page-break-after: always !important;
+        break-after: page !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        padding-top: 5px !important;
+        margin-bottom: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+      
+      .card { border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
       th { background-color: var(--primary) !important; color: white !important; }
       .subtotal-row td { background-color: #e8f5e9 !important; }
       .daily-total-row td { background-color: #fff3cd !important; }
@@ -112,8 +132,8 @@
 
   <div class="container">
 
-    <!-- ================= TAB 1: 今日輸入 / 編輯 ================= -->
-    <div id="daily-entry" class="tab-content active">
+    <!-- ================= TAB 1: 今日輸入 / 編輯 (列印時會完全隱藏 no-print) ================= -->
+    <div id="daily-entry" class="tab-content active no-print">
       <div class="card">
         <div class="card-title">📝 選擇日期與填寫基本資料</div>
         <div class="form-row">
@@ -268,7 +288,7 @@
   </div>
 
   <script>
-    // 預設數據 (單項細分 + Home 標籤 + 79kg 精算運動量)
+    // 預設數據
     let journalData = {
       "2026-08-01": {
         sleep: "1:30 AM 入睡", water: "未詳細紀錄", bowel: "未詳細紀錄", remark: "燉奶用全脂奶製作，下次計劃改用脫脂奶；太興晚餐去皮切雞表現極佳。",
@@ -450,7 +470,7 @@
       document.getElementById('sport-kcal').value = "";
     }
 
-    // 渲染歷史日誌頁面（含單項拆解 + 每餐小計 Subtotal）
+    // 渲染歷史日誌頁面（單項拆解 + 每餐小計 Subtotal）
     function renderHistoryView() {
       const cbContainer = document.getElementById('date-checkboxes');
       cbContainer.innerHTML = "";
