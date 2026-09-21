@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小三中文詞佳簿溫習系統</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --bg-color: #f0f8ff;
+            --text-color: #333;
+            --btn-bg: #fff;
+            --btn-border: #4CAF50;
+            --accent-color: #ff9800;
+            --card-bg: #ffffff;
+        }
+
+        body.theme-girl {
+            --primary-color: #e91e63;
+            --bg-color: #fce4ec;
+            --btn-border: #e91e63;
+            --accent-color: #9c27b0;
+        }
+
+        * { box-sizing: border-box; font-family: 'PingFang HK', 'Heiti TC', 'Microsoft JhengHei', sans-serif; }
+        body { margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.3s; }
+        
+        .container { max-width: 850px; margin: 0 auto; padding: 15px; text-align: center; }
+        .hidden { display: none !important; }
+
+        h1 { font-size: 24px; color: var(--primary-color); text-shadow: 1px 1px 2px rgba(0,0,0,0.1); margin-bottom: 10px;}
+        h2 { font-size: 19px; margin-bottom: 15px; color: #444; }
+        
+        .user-settings { margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap;}
+        .user-settings label { font-size: 17px; font-weight: bold; }
+        .user-settings input { font-size: 17px; padding: 6px 12px; border-radius: 12px; border: 3px solid var(--primary-color); width: 140px; text-align: center; outline: none; font-weight: bold; color: var(--text-color);}
+        
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; min-height: 45px; }
+        .home-btn { 
+            font-size: 15px; font-weight: bold; cursor: pointer; 
+            background: #fff; border: 2px solid #333; border-radius: 20px; padding: 6px 15px; 
+            box-shadow: 2px 2px 0px rgba(0,0,0,0.1); color: #333; display: inline-block;
+            transition: transform 0.1s;
+        }
+        .home-btn:active { transform: translateY(2px); box-shadow: 0 0 0 rgba(0,0,0,0); }
+
+        .settings-panel { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;}
+        .toggle-btn { 
+            padding: 8px 16px; border-radius: 20px; font-size: 15px; font-weight: bold; 
+            cursor: pointer; border: none; box-shadow: 0 3px 6px rgba(0,0,0,0.1); 
+            transition: transform 0.1s, background-color 0.2s; color: white;
+        }
+        .toggle-btn:active { transform: translateY(2px); }
+        .btn-theme-active { background-color: #9c27b0; }
+        .btn-theme-inactive { background-color: #4CAF50; }
+        .btn-audio-on { background-color: #00bcd4; }
+        .btn-audio-off { background-color: #9e9e9e; }
+
+        button:not(.home-btn):not(.toggle-btn):not(.speaker-icon):not(.unit-tab) {
+            background-color: var(--btn-bg); color: var(--text-color); border: 3px solid var(--btn-border);
+            border-radius: 15px; padding: 12px 18px; font-size: 17px; font-weight: bold;
+            margin: 6px; cursor: pointer; transition: transform 0.1s, box-shadow 0.1s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); touch-action: manipulation;
+        }
+        button:not(.home-btn):not(.toggle-btn):not(.speaker-icon):not(.unit-tab):active { transform: translateY(2px); }
+        button.btn-primary { background-color: var(--primary-color); color: white; border: none; }
+        button.btn-accent { background-color: var(--accent-color); color: white; border: none; }
+        button.btn-special { background-color: #ff9800; color: white; border: none; }
+
+        .unit-section-title { font-size: 18px; font-weight: bold; text-align: left; margin: 15px 0 8px 5px; color: var(--primary-color); border-left: 5px solid var(--primary-color); padding-left: 8px; }
+        .unit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .unit-card { 
+            background: var(--card-bg); border-radius: 15px; padding: 12px; 
+            border: 2px solid var(--primary-color); box-shadow: 0 3px 8px rgba(0,0,0,0.08); 
+            text-align: left; cursor: pointer; transition: 0.2s;
+        }
+        .unit-card:hover { transform: translateY(-3px); box-shadow: 0 5px 12px rgba(0,0,0,0.15); }
+        .unit-card-title { font-size: 15px; font-weight: bold; color: var(--primary-color); margin-bottom: 5px; }
+        .unit-card-desc { font-size: 12px; color: #666; line-height: 1.4; word-break: break-all; }
+
+        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 10px; }
+        @media (min-width: 600px) { .menu-grid { grid-template-columns: 1fr 1fr; } }
+        
+        .chapter-btn { font-size: 16px; padding: 12px; width: 100%; border-radius: 15px; background-color: var(--btn-bg); margin: 5px 0; text-align: left;}
+        .chapter-btn.selected { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
+
+        .status-bar { font-size: 18px; font-weight: bold; background: white; padding: 10px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .question-box { background: white; padding: 25px 20px; border-radius: 20px; font-size: 21px; line-height: 1.6; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: relative; min-height: 170px; display: flex; align-items: center; justify-content: center; flex-direction: column;}
+        .speaker-icon { position: absolute; top: 10px; right: 15px; font-size: 28px; cursor: pointer; background: none; border: none; box-shadow:none; padding: 0;}
+        
+        .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .text-input { font-size: 22px; padding: 10px; width: 80%; text-align: center; border: 3px solid var(--primary-color); border-radius: 15px; margin-bottom: 10px; outline: none;}
+
+        .unit-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; }
+        .unit-tab { padding: 8px 14px; border-radius: 15px; background: #eee; border: none; font-size: 14px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .unit-tab.active { background: var(--primary-color); color: white; }
+
+        .word-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 5px; }
+        @media (min-width: 500px) { .word-list { grid-template-columns: repeat(3, 1fr); } }
+        .word-card { background: white; padding: 14px; border-radius: 15px; border: 2px solid var(--primary-color); font-size: 19px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .word-card:hover { background-color: var(--primary-color); color: white; }
+
+        .leaderboard-container { margin-top: 25px; background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        .leaderboard-table th, .leaderboard-table td { padding: 8px; border-bottom: 1px solid #eee; }
+        .leaderboard-table th { background-color: var(--primary-color); color: white; }
+
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; text-align: center; max-width: 85%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
+        .wrong-anim { animation: shake 0.4s; background-color: #ffcdd2 !important; border-color: #f44336 !important; color: #d32f2f !important; }
+        .correct-anim { background-color: #c8e6c9 !important; border-color: #4CAF50 !important; color: #2e7d32 !important; }
+    </style>
+</head>
+<body class="theme-girl">
+
+<div class="container">
+    <div class="top-bar">
+        <button class="home-btn" onclick="goHome()">🏠 主目錄</button>
+        <div id="score-display" class="hidden" style="font-weight: bold; color: var(--accent-color); font-size: 18px; background: white; padding: 5px 15px; border-radius: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">🏆 分數: <span id="current-score">0</span></div>
+    </div>
+
+    <!-- 主頁 -->
+    <div id="view-home">
+        <h1>🌟 小三中文詞佳簿溫習系統 🌟</h1>
+        
+        <div class="user-settings">
+            <label>👤 學生姓名：</label>
+            <input type="text" id="player-name" value="Hailey">
+        </div>
+
+        <div class="settings-panel">
+            <button class="toggle-btn btn-theme-active" id="btn-theme" onclick="toggleTheme()">👧 女孩風格</button>
+            <button class="toggle-btn btn-audio-on" id="btn-audio" onclick="toggleAudio()">🔊 自動朗讀: ON</button>
+        </div>
+
+        <div class="unit-section-title">📚 詞佳簿課文總覽 (共 59 詞)</div>
+        <div class="unit-grid" id="home-unit-grid"></div>
+
+        <div class="unit-section-title">🎮 選擇溫習挑戰模式</div>
+        <div class="menu-grid">
+            <button class="btn-special" onclick="openLV0()">📖 LV0 詞語點讀 (預覽學習)</button>
+            <button class="btn-primary" onclick="openChapterSelect('LV1')">🗣️ LV1 詞語跟讀 (看字朗讀)</button>
+            <button class="btn-primary" onclick="openChapterSelect('LV2')">🎧 LV2 聽音選詞 (聽覺辨字)</button>
+            <button class="btn-primary" onclick="openChapterSelect('LV3')">✏️ LV3 供詞填充 (四選一)</button>
+            <button class="btn-primary" onclick="openChapterSelect('LV4')">🧩 LV4 不供詞填充 (填 1 個字)</button>
+            <button class="btn-accent" style="grid-column: 1 / -1;" onclick="openChapterSelect('LV9')">🔥 LV9 不供詞填充 (無提示挑戰)</button>
+        </div>
+
+        <div class="leaderboard-container">
+            <h3>🏆 榮譽排行榜</h3>
+            <table class="leaderboard-table">
+                <thead><tr><th>玩家</th><th>模式</th><th>範圍/單元</th><th>分數</th></tr></thead>
+                <tbody id="leaderboard-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- LV0 點讀 -->
+    <div id="view-lv0" class="hidden">
+        <h2>📖 點擊詞語聽發音</h2>
+        <div class="unit-tabs" id="lv0-tabs"></div>
+        <div class="word-list" id="lv0-word-list"></div>
+    </div>
+
+    <!-- 單元選擇 -->
+    <div id="view-chapter-select" class="hidden">
+        <h2 id="cs-title">請選擇測驗課文範圍</h2>
+        <div id="cs-buttons"></div>
+        <button class="btn-accent" style="width: 220px; margin-top: 20px;" onclick="startGame()">開始遊戲 🚀</button>
+    </div>
+
+    <!-- 遊戲挑戰 -->
+    <div id="view-game" class="hidden">
+        <div class="status-bar">進度: <span id="progress">0/10</span></div>
+        <div class="question-box">
+            <button class="speaker-icon" onclick="readQuestionManual()">📢</button>
+            <div id="question-text"></div>
+            <div id="input-area" class="hidden" style="width:100%">
+                <input type="text" id="answer-input" class="text-input" placeholder="請輸入答案" autocomplete="off">
+                <br><button class="btn-accent" onclick="checkInputAnswer()">檢查答案 ✅</button>
+            </div>
+        </div>
+        <div class="options-grid" id="options-area"></div>
+    </div>
+
+    <!-- 結算 -->
+    <div id="view-results" class="hidden">
+        <h1>🎉 完成挑戰！</h1>
+        <h2 id="res-name"></h2>
+        <div style="font-size: 55px; color: var(--accent-color); margin: 15px;" id="final-score">0分</div>
+        <button class="btn-primary" onclick="goHome()">返回主目錄</button>
+    </div>
+</div>
+
+<div id="wrong-modal" class="modal hidden">
+    <div class="modal-content">
+        <h2 style="color: #f44336; margin:0;">❌ 答錯囉！</h2>
+        <p style="font-size: 17px; margin-top: 10px;">正確答案是：</p>
+        <div id="correct-ans" style="font-size: 34px; color: var(--primary-color); font-weight: bold; margin: 10px 0;"></div>
+        <button class="btn-primary" onclick="closeModal()">重試 (親自選/填出答案)</button>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // 1. 課文單元資料
+    // ==========================================
+    const UNITS = [
+        { id: 1, title: '單元二：《爸爸和我》', desc: '親愛、浮現、空閒、痛快、洋溢、幸福、忙碌、傾談' },
+        { id: 2, title: '單元二：《媽媽的手》', desc: '親切、變化、悲哀、粗糙、皺紋、淚花、減輕、辛勞、報答' },
+        { id: 3, title: '單元四：《大榕樹》', desc: '褐色、附近、尋找、樹幹、茂密、遮擋、猛烈、眺望' },
+        { id: 4, title: '單元四：《鳥聲》', desc: '嫩綠、濃密、寂靜、高高低低、清脆、鳴叫、囑咐、逐漸' },
+        { id: 5, title: '單元五：《海邊的貝殼》', desc: '寶物、精彩、節目、銀光閃閃、海灘、收拾、貝殼、各式各樣' },
+        { id: 6, title: '單元五：《奇妙的海底》', desc: '千奇百怪、佈滿、威風凜凜、從容不迫、温順、五彩繽紛、多姿多彩、嬉戲、龐大' },
+        { id: 7, title: '單元七：《截竿進城》', desc: '城鎮、繁榮、嘗試、汗流浹背、苦惱、考慮、用途、無計可施、愁眉苦臉' }
+    ];
+
+    // ==========================================
+    // 2. 新詞語資料庫與例句
+    // ==========================================
+    const WORD_DATA = [
+        // 單元二：《爸爸和我》
+        { u: 1, w: '親愛', q: ['____的爸爸每天辛勤工作，照顧我們一家。', '我給____的媽媽寫了一張感謝卡。', '我們應該孝順____的父母。'] },
+        { u: 1, w: '浮現', q: ['看到舊照片，童年的回憶紛紛____在眼前。', '他的腦海中____出一個絕妙的好主意。', '想到快要放假，他的臉上____出燦爛的笑容。'] },
+        { u: 1, w: '空閒', q: ['爸爸在____的時間喜歡閱讀書籍。', '如果你有____，不妨來我家玩吧。', '姐姐利用____時間學習彈鋼琴。'] },
+        { u: 1, w: '痛快', q: ['炎熱的夏天喝一杯冰水，真是____！', '我們在遊樂場暢玩了一整天，玩得非常____。', '他決定把心中的不滿____地說出來。'] },
+        { u: 1, w: '洋溢', q: ['校園裡處處____著歡樂的歌聲和笑聲。', '她的臉上____著幸福的笑容。', '這首歌曲____著青春的活力。'] },
+        { u: 1, w: '幸福', q: ['能和家人圍坐在一起吃飯，是一件____的事。', '我們生活在和平的世界，感到非常____。', '祝福你們一家人過著____美滿的生活。'] },
+        { u: 1, w: '忙碌', q: ['媽媽每天都要照顧全家人的生活，非常____。', '醫生在醫院裡____地拯救病人。', '經過一整天____的工作，爸爸感到有些疲倦。'] },
+        { u: 1, w: '傾談', q: ['晚飯後，我們一家人坐在沙發上溫馨地____。', '我和好朋友在小息時互相____近況。', '遇到困難時，可以向老師或家長____。'] },
+
+        // 單元二：《媽媽的手》
+        { u: 2, w: '親切', q: ['老師用____的語氣安慰失落的同學。', '那位店員服務態度非常____。', '鄰居張太太總是對我們露出____的微笑。'] },
+        { u: 2, w: '變化', q: ['近年來，這個城市的景觀發生了很大的____。', '天氣____無常，出門記得帶雨傘。', '經歷這件事後，他的態度有了明顯的____。'] },
+        { u: 2, w: '悲哀', q: ['聽到寵物小狗去世的消息，他感到十分____。', '這是一部令人____的悲劇電影。', '請不要難過，時間會平復心中的____。'] },
+        { u: 2, w: '粗糙', q: ['農夫因為長期耕作，雙手變得有些____。', '這張木桌的表面比較____，需要打磨一下。', '這種布料摸起來很____，不太舒服。'] },
+        { u: 2, w: '皺紋', q: ['歲月在奶奶的臉上留下了深深的____。', '他一皺眉頭，額頭上就出現了____。', '這衣服放進行李箱後滿是____。'] },
+        { u: 2, w: '淚花', q: ['聽到這個感人的故事，她的眼眶泛起了____。', '激動的____在媽媽眼眶裡閃爍。', '她擦去眼角的____，重新露出笑容。'] },
+        { u: 2, w: '減輕', q: ['適當的運動可以幫助我們____學習壓力。', '吃完藥後，頭痛的症狀終於____了許多。', '大家分工合作，大大____了媽媽的家務負擔。'] },
+        { u: 2, w: '辛勞', q: ['感謝父母多年來的默默耕耘與____付出。', '建築工人冒著酷暑工作，非常____。', '經過一天的____，他一回到家就睡著了。'] },
+        { u: 2, w: '報答', q: ['我們要努力學習，長大後____父母的養育之恩。', '受人恩惠，將來一定要找機會____。', '社會各界都在想辦法____醫護人員的付出。'] },
+
+        // 單元四：《大榕樹》
+        { u: 3, w: '褐色', q: ['老樹的樹皮呈現深深的____。', '弟弟穿著一件____的秋季外套。', '這隻小狗長著一身____的毛髮。'] },
+        { u: 3, w: '附近', q: ['我家____有一座漂亮的花園公園。', '你在這____有沒有看到我的鑰匙？', '這間學校就位於車站____。'] },
+        { u: 3, w: '尋找', q: ['警員正在____失蹤小女孩的下落。', '他在書架上____一本歷史故事書。', '科學家一直在____大自然的奧秘。'] },
+        { u: 3, w: '樹幹', q: ['這棵百年的大榕樹____非常粗壯。', '小松鼠靈巧地順著____向上攀爬。', '啄木鳥正在用嘴喙敲擊____尋找害蟲。'] },
+        { u: 3, w: '茂密', q: ['公園裡的樹木枝葉____，遮擋了強烈的陽光。', '這片山林生長著____的植物。', '夏季時分，草木都生長得非常____。'] },
+        { u: 3, w: '遮擋', q: ['高大的建築物____了遠處的風景。', '媽媽舉起雨傘，為弟弟____風雨。', '厚厚的雲層____了耀眼的太陽。'] },
+        { u: 3, w: '猛烈', q: ['颱風帶來了____的風雨，大家都留在室內。', '陽光非常____，出門時記得塗太陽油。', '兩隊足球隊展開了____的競爭。'] },
+        { u: 3, w: '眺望', q: ['站在山頂上，我們可以遠數____整座城市的夜景。', '他站在海岸邊____著遠方的海平線。', '登上展望台，鳥瞰與____四周的美景。'] },
+
+        // 單元四：《鳥聲》
+        { u: 4, w: '嫩綠', q: ['春天到了，樹枝上長出了____的新芽。', '廣闊的草原上鋪滿了____的草地。', '這些剛發芽的菜葉看起來非常____新鮮。'] },
+        { u: 4, w: '濃密', q: ['她的頭髮黑亮而且非常____。', '森林深處長滿了____的樹木。', '清晨的大霧非常____，視野不太清晰。'] },
+        { u: 4, w: '寂靜', q: ['深夜的街道十分____，只能聽到風吹過的聲音。', '山谷裡一片____，空氣非常清新。', '教室裡安靜極了，連針掉在地上都能聽見，非常____。'] },
+        { u: 4, w: '高高低低', q: ['遠處的山峰____，起伏不平。', '音樂劇中傳出____的歡快樂音。', '這條山路____，走起來需要特別小心。'] },
+        { u: 4, w: '清脆', q: ['小鳥在樹枝上發出____悅耳的叫聲。', '清晨傳來____的鐘聲，喚醒了小鎮。', '風鈴在微風中發出____的響聲。'] },
+        { u: 4, w: '鳴叫', q: ['清晨，幾隻小鳥在窗外愉快地____。', '夏夜的草叢裡，蟋蟀正不停地____。', '雄雞一早便開始昂首____。'] },
+        { u: 4, w: '囑咐', q: ['出門前，媽媽叮嚀並____我路上要注意安全。', '醫生再三____病人要按時服藥和休息。', '老師____我們要認真溫習功課。'] },
+        { u: 4, w: '逐漸', q: ['隨著太陽升起，氣溫____回升了起來。', '經過不斷練習，他的英文水平____提高了。', '天空____暗了下來，夜晚即將降臨。'] },
+
+        // 單元五：《海邊的貝殼》
+        { u: 5, w: '寶物', q: ['這個精緻的盒子裡裝滿了他珍藏的____。', '海盜們一直在尋找埋藏在孤島上的____。', '知識是人類最寶貴的____。'] },
+        { u: 5, w: '精彩', q: ['昨晚的魔術表演真是____絕倫，贏得陣陣掌聲。', '這本小說情節扣人心弦，內容非常____。', '兩隊選手為大家帶來了一場____的比賽。'] },
+        { u: 5, w: '節目', q: ['電視台今晚將播出一檔有趣的綜藝____。', '校慶晚會上的表演____豐富多樣。', '你最喜歡觀看哪一個電視____？'] },
+        { u: 5, w: '銀光閃閃', q: ['月光灑在海面上，波浪變得____。', '夜空中掛著無數____的星星。', '這件新舞衣上綴滿了____的裝飾品。'] },
+        { u: 5, w: '海灘', q: ['夏天的陽光下，許多人在____上堆沙堡。', '我們在乾淨的____上散步和撿貝殼。', '這片____的金黃色沙子非常細軟。'] },
+        { u: 5, w: '收拾', q: ['做完功課後，弟弟主動____好自己的書包。', '請大家把桌面____乾淨再離開教室。', '媽媽正忙著____房間裡的衣服。'] },
+        { u: 5, w: '貝殼', q: ['我在海邊拾到了許多形狀獨特的____。', '聽說把漂亮的____放在耳邊能聽到大海的聲音。', '沙灘上散落著五顏六色的____。'] },
+        { u: 5, w: '各式各樣', q: ['文具店裡擺放著____的筆和筆記本。', '自助餐廳裡有____的美味食物供選擇。', '展覽會上陳列著____的工藝品。'] },
+
+        // 單元五：《奇妙的海底》
+        { u: 6, w: '千奇百怪', q: ['海底世界裡有著____的海洋生物。', '自然界中有許多____的奇觀令人驚歎。', '博物館裡展出了____的古老器具。'] },
+        { u: 6, w: '佈滿', q: ['夜空中____了繁星，閃閃發光。', '這張舊地圖上____了各種標記與符號。', '寒冬的窗戶上____了美麗的冰花。'] },
+        { u: 6, w: '威風凜凜', q: ['衛兵精神抖擻地站在門口，看起來____。', '大將軍騎著駿馬，樣子____。', '這隻大雄獅威嚴地巡視領地，十分____。'] },
+        { u: 6, w: '從容不迫', q: ['面對突發狀況，他依然沉著冷靜、____。', '演講者____地上台，開始了他的分享。', '他在考試時態度自信，回答得____。'] },
+        { u: 6, w: '温順', q: ['這隻小羊性格____，非常討人喜歡。', '大象雖然體型龐大，但性格其實蠻____的。', '小貓咪____地躺在主人懷裡睡覺。'] },
+        { u: 6, w: '五彩繽紛', q: ['公園的花壇裡盛開著____的花朵。', '節日的夜空放起了____的煙花。', '熱帶魚在水族箱裡展現出____的色彩。'] },
+        { u: 6, w: '多姿多彩', q: ['豐富的課外活動讓我們的校園生活____。', '大自然展現出____的生命形態。', '他過著充實而____的生活。'] },
+        { u: 6, w: '嬉戲', q: ['小魚兒在珊瑚礁之間自由自在地____。', '孩子們在公園的草地上歡快地____。', '兩隻小狗在小院裡互相追逐____。'] },
+        { u: 6, w: '龐大', q: ['藍鯨是目前世界上體型最____的動物。', '這項工程需要花費____的資金和人力。', '面前這座山丘規模非常____。'] },
+
+        // 單元七：《截竿進城》
+        { u: 7, w: '城鎮', q: ['這個歷史悠久的小____環境十分優美。', '隨著交通發展，這座山區小____變得非常熱鬧。', '許多鄉村居民紛紛遷往繁華的____生活。'] },
+        { u: 7, w: '繁榮', q: ['香港是一座國際化且經濟非常____的城市。', '希望我們的國家越來越富強、昌盛和____。', '夜市裡人來人往，展現出一片____的景象。'] },
+        { u: 7, w: '嘗試', q: ['遇到困難時不要害怕，不妨大膽____一次。', '他決定____一種全新的學習方法。', '經過多次____後，科學家終於取得了成功。'] },
+        { u: 7, w: '汗流浹背', q: ['體育課後，同學們各個都跑得____。', '農夫在烈日下辛苦耕作，早已____。', '搬完厚重的箱子後，他已經累得____。'] },
+        { u: 7, w: '苦惱', q: ['面對這道複雜的數學題，弟弟感到非常____。', '他正在為選擇哪門課程而感到____。', '不要為過去的錯誤過度____，向前看吧。'] },
+        { u: 7, w: '考慮', q: ['做決定之前，我們應該仔細____各種因素。', '請給我一些時間，讓我好好____這件事。', '老師會認真____同學提出的建議。'] },
+        { u: 7, w: '用途', q: ['這款新型智慧手機具有多種實用的____。', '竹子的____非常廣泛，可以做建築材料或工具。', '你知道這件神秘器具的正確____嗎？'] },
+        { u: 7, w: '無計可施', q: ['面對這個棘手的難題，大家一時都____。', '當汽車在半路壞掉時，司機感到焦急且____。', '對付這隻頑皮的小貓，主人真是____。'] },
+        { u: 7, w: '愁眉苦臉', q: ['看他____的樣子，一定是遇到什麼心事了。', '不要總是一副____的樣子，笑一笑吧！', '考試沒考好，他一整天都____地坐在那裡。'] }
+    ];
+
+    let currentMode = '', selectedUnitId = 0, score = 0, currentQIndex = 0;
+    let gameQueue = [];
+    let currentQFailed = false;
+    let isGirlTheme = true;
+    let isAutoAudio = true;
+    const synth = window.speechSynthesis;
+
+    function renderHomeUnits() {
+        const grid = document.getElementById('home-unit-grid');
+        grid.innerHTML = '';
+        UNITS.forEach(u => {
+            const count = WORD_DATA.filter(w => w.u === u.id).length;
+            const card = document.createElement('div');
+            card.className = 'unit-card';
+            card.onclick = () => { openLV0(u.id); };
+            card.innerHTML = `
+                <div class="unit-card-title">${u.title} (${count}字)</div>
+                <div class="unit-card-desc">${u.desc}</div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function showView(id) {
+        document.querySelectorAll('.container > div[id^="view-"]').forEach(v => v.classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
+    }
+
+    function goHome() {
+        if(synth.speaking) synth.cancel();
+        showView('view-home');
+        updateLeaderboardDisplay();
+        document.getElementById('score-display').classList.add('hidden');
+    }
+
+    function toggleTheme() {
+        isGirlTheme = !isGirlTheme;
+        const btn = document.getElementById('btn-theme');
+        if(isGirlTheme) {
+            document.body.classList.add('theme-girl');
+            btn.innerText = '👧 女孩風格';
+            btn.className = 'toggle-btn btn-theme-active';
+        } else {
+            document.body.classList.remove('theme-girl');
+            btn.innerText = '👦 男孩風格';
+            btn.className = 'toggle-btn btn-theme-inactive';
+        }
+    }
+
+    function toggleAudio() {
+        isAutoAudio = !isAutoAudio;
+        const btn = document.getElementById('btn-audio');
+        if(isAutoAudio) {
+            btn.innerText = '🔊 自動朗讀: ON';
+            btn.className = 'toggle-btn btn-audio-on';
+        } else {
+            btn.innerText = '🔇 自動朗讀: OFF';
+            btn.className = 'toggle-btn btn-audio-off';
+        }
+    }
+
+    function openLV0(unitId = 0) {
+        showView('view-lv0');
+        renderLV0Tabs(unitId);
+        loadLV0Words(unitId);
+    }
+
+    function renderLV0Tabs(activeUnitId) {
+        const tabsDiv = document.getElementById('lv0-tabs');
+        tabsDiv.innerHTML = `<button class="unit-tab ${activeUnitId === 0 ? 'active' : ''}" onclick="openLV0(0)">全部詞語 (${WORD_DATA.length})</button>`;
+        UNITS.forEach(u => {
+            tabsDiv.innerHTML += `<button class="unit-tab ${activeUnitId === u.id ? 'active' : ''}" onclick="openLV0(${u.id})">${u.title.split('：《')[1].replace('》','')}</button>`;
+        });
+    }
+
+    function loadLV0Words(unitId) {
+        const listDiv = document.getElementById('lv0-word-list');
+        listDiv.innerHTML = '';
+        let filtered = unitId === 0 ? WORD_DATA : WORD_DATA.filter(w => w.u === unitId);
+        filtered.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'word-card';
+            card.innerText = item.w;
+            card.onclick = () => speakText(item.w);
+            listDiv.appendChild(card);
+        });
+    }
+
+    function openChapterSelect(mode) {
+        currentMode = mode;
+        selectedUnitId = 0;
+        
+        const btnArea = document.getElementById('cs-buttons');
+        btnArea.innerHTML = '';
+
+        UNITS.forEach(u => {
+            btnArea.innerHTML += `<button class="chapter-btn" id="btn-u${u.id}" onclick="selectUnit(${u.id})">📌 ${u.title}</button>`;
+        });
+        btnArea.innerHTML += `<button class="chapter-btn selected" id="btn-u0" onclick="selectUnit(0)">🌟 全課文總複習 (${WORD_DATA.length}個詞語)</button>`;
+
+        showView('view-chapter-select');
+    }
+
+    function selectUnit(uId) {
+        selectedUnitId = uId;
+        document.querySelectorAll('.chapter-btn').forEach(b => b.classList.remove('selected'));
+        document.getElementById('btn-u' + uId).classList.add('selected');
+    }
+
+    function startGame() {
+        if (selectedUnitId === null || selectedUnitId === undefined) { alert('請先選擇溫習單元！'); return; }
+        
+        let rawWords = selectedUnitId === 0 ? WORD_DATA : WORD_DATA.filter(w => w.u === selectedUnitId);
+
+        gameQueue = rawWords.map(item => ({
+            w: item.w, 
+            s: item.q[Math.floor(Math.random() * item.q.length)]
+        })).sort(() => Math.random() - 0.5);
+
+        score = 0; currentQIndex = 0;
+        document.getElementById('score-display').classList.remove('hidden');
+        document.getElementById('current-score').innerText = score;
+        showView('view-game');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        if (currentQIndex >= gameQueue.length) { finishGame(); return; }
+        
+        currentQFailed = false;
+        let q = gameQueue[currentQIndex];
+        document.getElementById('progress').innerText = `${currentQIndex + 1} / ${gameQueue.length}`;
+        
+        let textDiv = document.getElementById('question-text');
+        let optArea = document.getElementById('options-area');
+        let inputArea = document.getElementById('input-area');
+        
+        optArea.innerHTML = '';
+        inputArea.classList.add('hidden');
+        textDiv.style.fontSize = "21px";
+
+        if (currentMode === 'LV1') {
+            textDiv.innerText = q.w;
+            textDiv.style.fontSize = "55px";
+            optArea.innerHTML = `<button class="btn-primary" onclick="handleCorrectAnswer()" style="grid-column: 1/-1">唸完了，下一題 ➡️</button>`;
+        } else if (currentMode === 'LV2') {
+            textDiv.innerText = "👂 聽一聽，點選正確詞語";
+            renderOptions(q.w);
+        } else if (currentMode === 'LV3') {
+            textDiv.innerText = q.s;
+            renderOptions(q.w);
+        } else if (currentMode === 'LV4') {
+            let word = q.w;
+            let blankIdx = Math.floor(Math.random() * word.length);
+            q.missingChar = word[blankIdx];
+            
+            let maskedWord = "";
+            for (let i = 0; i < word.length; i++) {
+                if (i === blankIdx) maskedWord += "（ ）";
+                else maskedWord += word[i];
+            }
+            
+            textDiv.innerText = q.s.replace('____', maskedWord);
+            inputArea.classList.remove('hidden');
+            document.getElementById('answer-input').value = '';
+            document.getElementById('answer-input').placeholder = '請輸入缺少的 1 個字';
+            document.getElementById('answer-input').focus();
+        } else if (currentMode === 'LV9') {
+            textDiv.innerText = q.s;
+            inputArea.classList.remove('hidden');
+            document.getElementById('answer-input').value = '';
+            document.getElementById('answer-input').placeholder = '請輸入完整詞語';
+            document.getElementById('answer-input').focus();
+        }
+        
+        if(isAutoAudio) {
+            readQuestionAuto();
+        }
+    }
+
+    function renderOptions(correctW) {
+        let opts = [correctW];
+        while(opts.length < Math.min(4, WORD_DATA.length)) {
+            let rand = WORD_DATA[Math.floor(Math.random()*WORD_DATA.length)].w;
+            if(!opts.includes(rand)) opts.push(rand);
+        }
+        opts.sort(() => Math.random() - 0.5).forEach(o => {
+            let b = document.createElement('button');
+            b.innerText = o;
+            b.onclick = () => {
+                if(o === correctW) {
+                    b.classList.add('correct-anim');
+                    handleCorrectAnswer();
+                } else {
+                    b.classList.add('wrong-anim');
+                    setTimeout(() => b.classList.remove('wrong-anim'), 500);
+                    currentQFailed = true;
+                    showWrong(correctW);
+                }
+            };
+            document.getElementById('options-area').appendChild(b);
+        });
+    }
+
+    function checkInputAnswer() {
+        let val = document.getElementById('answer-input').value.trim();
+        let q = gameQueue[currentQIndex];
+        let correctAns = currentMode === 'LV4' ? q.missingChar : q.w;
+        
+        if(val === correctAns) {
+            document.getElementById('answer-input').classList.add('correct-anim');
+            handleCorrectAnswer();
+        } else {
+            document.getElementById('answer-input').classList.add('wrong-anim');
+            setTimeout(() => document.getElementById('answer-input').classList.remove('wrong-anim'), 500);
+            currentQFailed = true;
+            showWrong(correctAns);
+        }
+    }
+
+    function showWrong(ans) {
+        document.getElementById('correct-ans').innerText = ans;
+        document.getElementById('wrong-modal').classList.remove('hidden');
+        if(isAutoAudio) speakText("答錯了，正確答案是：" + ans);
+    }
+
+    function closeModal() {
+        document.getElementById('wrong-modal').classList.add('hidden');
+    }
+
+    function handleCorrectAnswer() {
+        let pts = currentMode === 'LV9' ? 20 : 10;
+        let correctW = gameQueue[currentQIndex].w;
+        
+        speakText(correctW);
+
+        if (!currentQFailed && currentMode !== 'LV1') {
+            score += pts;
+            document.getElementById('current-score').innerText = score;
+        }
+
+        setTimeout(() => {
+            currentQIndex++;
+            loadQuestion();
+        }, 1200);
+    }
+
+    function readQuestionAuto() {
+        let q = gameQueue[currentQIndex];
+        let text = (currentMode === 'LV2' || currentMode === 'LV1') ? q.w : q.s.replace('____', '什麼');
+        speakText(text);
+    }
+
+    function readQuestionManual() {
+        let q = gameQueue[currentQIndex];
+        let text = (currentMode === 'LV2' || currentMode === 'LV1') ? q.w : q.s.replace('____', '什麼');
+        speakText(text);
+    }
+
+    function speakText(t) {
+        synth.cancel();
+        let u = new SpeechSynthesisUtterance(t);
+        u.lang = 'zh-HK';
+        u.rate = 0.85;
+        synth.speak(u);
+    }
+
+    function finishGame() {
+        showView('view-results');
+        let name = document.getElementById('player-name').value || 'Hailey';
+        document.getElementById('res-name').innerText = `太棒了，${name}！`;
+        document.getElementById('final-score').innerText = score + "分";
+        
+        let unitText = selectedUnitId === 0 ? '全課文' : `課文${selectedUnitId}`;
+        saveToLeaderboard(name, currentMode, unitText, score);
+    }
+
+    function saveToLeaderboard(name, mode, rangeText, score) {
+        let list = JSON.parse(localStorage.getItem('hailey_exam_rank') || '[]');
+        list.unshift({ name, mode, rangeText, score });
+        localStorage.setItem('hailey_exam_rank', JSON.stringify(list.slice(0, 10)));
+    }
+
+    function updateLeaderboardDisplay() {
+        let list = JSON.parse(localStorage.getItem('hailey_exam_rank') || '[]');
+        let html = list.map(i => `<tr><td>${i.name}</td><td>${i.mode}</td><td>${i.rangeText}</td><td>${i.score}</td></tr>`).join('');
+        document.getElementById('leaderboard-body').innerHTML = html || '<tr><td colspan="4">暫無挑戰記錄</td></tr>';
+    }
+
+    window.onload = () => {
+        renderHomeUnits();
+        updateLeaderboardDisplay();
+        document.body.classList.add('theme-girl');
+    };
+</script>
+</body>
+</html>
