@@ -4,53 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>小公主普通話朗讀館 - 《水調歌頭》</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+TC:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
     
     <style>
         body {
             font-family: 'Noto Sans TC', 'Fredoka', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #ffd1dc 0%, #e8c5ff 50%, #c4e0e5 100%);
+            background: linear-gradient(135deg, #fde8ef 0%, #e9d5ff 50%, #c4e0e5 100%);
             min-height: 100vh;
             user-select: none;
             overflow-x: hidden;
         }
 
-        /* Ruby Pinyin custom styling */
+        /* High Visibility Enlarged Ruby Pinyin Styling */
         ruby {
             ruby-position: over;
             display: inline-flex;
             flex-direction: column-reverse;
             align-items: center;
-            margin: 0 3px;
+            margin: 2px 5px;
             cursor: pointer;
             transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-            padding: 4px 6px;
-            border-radius: 12px;
+            padding: 4px 8px;
+            border-radius: 14px;
         }
         
         rt {
-            font-size: 0.52em;
-            font-weight: 600;
-            color: #d946ef;
-            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
-            line-height: 1.2;
-            margin-bottom: 2px;
-            font-family: Arial, sans-serif;
+            font-size: 1.25rem !important; /* Substantially enlarged for easy reading & printing */
+            font-weight: 800 !important;
+            color: #6b21a8 !important; /* Deep contrast purple for legibility */
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+            line-height: 1.3;
+            margin-bottom: 3px;
+            font-family: 'Fredoka', Arial, sans-serif;
+            letter-spacing: 0.5px;
         }
 
-        /* Character interaction styling */
         .char-box {
-            font-size: var(--poem-font-size, 2rem);
-            font-weight: 700;
+            font-size: var(--poem-font-size, 2.2rem);
+            font-weight: 800;
             color: #3b0764;
             display: inline-block;
             transition: transform 0.2s ease, color 0.2s ease;
         }
 
         ruby:hover {
-            background-color: rgba(255, 255, 255, 0.85);
+            background-color: rgba(255, 255, 255, 0.9);
             transform: translateY(-4px) scale(1.12);
             box-shadow: 0 8px 20px rgba(236, 72, 153, 0.25);
         }
@@ -58,32 +61,21 @@
         ruby.active-speech {
             background: linear-gradient(135deg, #fef08a, #fde047);
             border: 2px solid #eab308;
-            transform: scale(1.2);
-            box-shadow: 0 0 18px rgba(234, 179, 8, 0.7);
-            animation: pulse-glow 1s infinite alternate;
+            transform: scale(1.22);
+            box-shadow: 0 0 20px rgba(234, 179, 8, 0.8);
+            animation: pulse-glow 0.8s infinite alternate;
         }
 
         @keyframes pulse-glow {
-            0% { box-shadow: 0 0 10px #facc15, 0 0 20px #f43f5e; }
-            100% { box-shadow: 0 0 20px #facc15, 0 0 35px #ec4899; }
-        }
-
-        /* Floating background sparkles */
-        .sparkle-bg {
-            position: fixed;
-            pointer-events: none;
-            z-index: 0;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            0% { box-shadow: 0 0 10px #facc15, 0 0 18px #f43f5e; }
+            100% { box-shadow: 0 0 22px #facc15, 0 0 35px #ec4899; }
         }
 
         /* Glassmorphism containers */
         .glass-card {
-            background: rgba(255, 255, 255, 0.78);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(12px);
-            border: 2px solid rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.9);
             box-shadow: 0 12px 32px rgba(236, 72, 153, 0.15);
         }
 
@@ -98,57 +90,80 @@
             box-shadow: 0 6px 18px rgba(244, 114, 182, 0.35);
         }
 
-        .glass-btn:active {
-            transform: translateY(1px) scale(0.98);
+        .sentence-row.highlight-sentence {
+            background-color: rgba(253, 242, 248, 0.98);
+            border-color: #ec4899 !important;
+            box-shadow: 0 0 18px rgba(236, 72, 153, 0.3);
         }
 
-        /* Custom scrollbars */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #fbcfe8;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #f472b6;
-            border-radius: 10px;
-        }
-
-        /* Hide Pinyin mode */
         body.hide-pinyin rt {
             display: none !important;
         }
 
-        .sentence-row {
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
-
-        .sentence-row.highlight-sentence {
-            background-color: rgba(253, 242, 248, 0.95);
-            border-color: #ec4899 !important;
-            box-shadow: 0 0 15px rgba(236, 72, 153, 0.25);
-        }
-
-        /* Floating sparkles particle effect */
-        .magic-particle {
-            position: absolute;
+        /* Sparkle Background Canvas */
+        .sparkle-bg {
+            position: fixed;
             pointer-events: none;
-            border-radius: 50%;
-            animation: floatUp 2s ease-out forwards;
+            z-index: 0;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
 
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translate(0, 0) scale(1); }
-            100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                padding: 0 !important;
+            }
+            header, nav, .no-print, #gameArena, #rewardsGrid, .sparkle-bg, button, select {
+                display: none !important;
+            }
+            .tab-content {
+                display: block !important;
+            }
+            .glass-card {
+                background: none !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+            }
+            .print-header {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 25px;
+                border-bottom: 2px dashed #f472b6;
+                padding-bottom: 15px;
+            }
+            .sentence-row {
+                border: none !important;
+                border-bottom: 1px solid #e2e8f0 !important;
+                padding: 8px 0 !important;
+                box-shadow: none !important;
+            }
+            rt {
+                font-size: 1.35rem !important;
+                color: #4c1d95 !important;
+                font-weight: 900 !important;
+            }
+            .char-box {
+                font-size: 2.3rem !important;
+                color: #1e1b4b !important;
+            }
+        }
+
+        .print-header {
+            display: none;
         }
     </style>
 </head>
 <body class="min-h-screen text-slate-800 flex flex-col relative pb-12">
+    <!-- Background Canvas -->
     <canvas id="sparkleCanvas" class="sparkle-bg"></canvas>
 
-    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b-2 border-pink-200 px-4 py-3 shadow-md">
+    <header class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b-2 border-pink-200 px-4 py-3 shadow-md no-print">
         <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
-            <!-- App Logo -->
             <div class="flex items-center gap-3">
                 <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-pink-400 to-purple-500 flex items-center justify-center text-white text-2xl shadow-md transform hover:rotate-12 transition">
                     👑
@@ -157,7 +172,7 @@
                     <h1 class="text-xl md:text-2xl font-black bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
                         小公主普通話朗讀館
                     </h1>
-                    <p class="text-xs font-semibold text-pink-500">《水調歌頭》 • 蘇軾 (三年級評估專用)</p>
+                    <p class="text-xs font-semibold text-pink-500">《水調歌頭》 • 蘇軾 (三年級普通話朗讀評估)</p>
                 </div>
             </div>
 
@@ -173,9 +188,9 @@
                     <span id="crownCount" class="font-black text-purple-600 text-lg">0</span>
                 </div>
                 <div class="w-px h-6 bg-pink-200"></div>
-                <div class="flex items-center gap-1.5" title="稱號">
+                <div class="flex items-center gap-1.5">
                     <span id="princessTitle" class="text-xs font-bold text-pink-700 bg-pink-200 px-2 py-0.5 rounded-full">
-                        練習見習生
+                        朗讀小騎士
                     </span>
                 </div>
             </div>
@@ -183,149 +198,165 @@
     </header>
 
     <main class="max-w-5xl mx-auto w-full px-3 md:px-6 pt-4 flex-1 z-10">
-        <!-- Navigation Buttons -->
-        <nav class="flex justify-center gap-2 md:gap-4 mb-6">
-            <button onclick="switchTab('reading')" id="tabBtn-reading" class="tab-btn glass-btn px-4 md:px-6 py-2.5 rounded-2xl font-bold text-sm md:text-base text-pink-700 flex items-center gap-2 shadow-sm border-2 border-pink-400 bg-pink-100">
-                <span>🌸</span> 點讀與朗讀館
+        <!-- Navigation Tabs -->
+        <nav class="flex justify-center flex-wrap gap-2 md:gap-3 mb-6 no-print">
+            <button onclick="switchTab('reading')" id="tabBtn-reading" class="tab-btn glass-btn px-4 md:px-5 py-2.5 rounded-2xl font-bold text-xs md:text-sm text-pink-700 flex items-center gap-1.5 shadow-sm border-2 border-pink-400 bg-pink-100">
+                <span>🌸</span> 朗讀與點讀
             </button>
-            <button onclick="switchTab('games')" id="tabBtn-games" class="tab-btn glass-btn px-4 md:px-6 py-2.5 rounded-2xl font-bold text-sm md:text-base text-purple-700 flex items-center gap-2 shadow-sm border-2 border-transparent">
-                <span>🎮</span> 魔法小遊戲
+            <button onclick="switchTab('match')" id="tabBtn-match" class="tab-btn glass-btn px-4 md:px-5 py-2.5 rounded-2xl font-bold text-xs md:text-sm text-purple-700 flex items-center gap-1.5 shadow-sm border-2 border-transparent">
+                <span>💎</span> 字音配對遊戲
             </button>
-            <button onclick="switchTab('trophy')" id="tabBtn-trophy" class="tab-btn glass-btn px-4 md:px-6 py-2.5 rounded-2xl font-bold text-sm md:text-base text-indigo-700 flex items-center gap-2 shadow-sm border-2 border-transparent">
-                <span>🏰</span> 公主寶物庫
+            <button onclick="switchTab('fill')" id="tabBtn-fill" class="tab-btn glass-btn px-4 md:px-5 py-2.5 rounded-2xl font-bold text-xs md:text-sm text-indigo-700 flex items-center gap-1.5 shadow-sm border-2 border-transparent">
+                <span>✏️</span> 填空小高手
+            </button>
+            <button onclick="switchTab('assess')" id="tabBtn-assess" class="tab-btn glass-btn px-4 md:px-5 py-2.5 rounded-2xl font-bold text-xs md:text-sm text-rose-700 flex items-center gap-1.5 shadow-sm border-2 border-transparent">
+                <span>🎙️</span> 朗讀評估
+            </button>
+            <button onclick="switchTab('trophy')" id="tabBtn-trophy" class="tab-btn glass-btn px-4 md:px-5 py-2.5 rounded-2xl font-bold text-xs md:text-sm text-amber-700 flex items-center gap-1.5 shadow-sm border-2 border-transparent">
+                <span>🏰</span> 皇冠寶物庫
             </button>
         </nav>
 
-        <!-- ================= PAGE 1: READING HALL ================= -->
+        <!-- ================= TAB 1: READING & AUDIO ================= -->
         <section id="page-reading" class="tab-content space-y-6">
             
             <!-- Controls Toolbar -->
-            <div class="glass-card rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+            <div class="glass-card rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 no-print">
                 <div class="flex flex-wrap items-center gap-2 md:gap-3">
-                    <button onclick="togglePinyin()" id="pinyinToggleBtn" class="px-3.5 py-1.5 rounded-xl bg-pink-500 text-white font-semibold text-xs md:text-sm shadow-sm hover:bg-pink-600 transition flex items-center gap-1.5">
+                    <!-- Toggle Pinyin -->
+                    <button onclick="togglePinyin()" id="pinyinToggleBtn" class="px-3.5 py-2 rounded-xl bg-pink-500 text-white font-bold text-xs md:text-sm shadow-sm hover:bg-pink-600 transition flex items-center gap-1.5">
                         <i class="fa-solid fa-eye"></i> 拼音顯示：開
                     </button>
                     
-                    <div class="flex items-center bg-white/80 rounded-xl px-2 py-1 border border-pink-200">
-                        <span class="text-xs font-bold text-pink-600 mr-2">字體:</span>
-                        <button onclick="changeFontSize(-0.2)" class="px-2 py-0.5 rounded text-pink-600 hover:bg-pink-100 font-bold text-xs">-A</button>
+                    <!-- Font Size Controls -->
+                    <div class="flex items-center bg-white/90 rounded-xl px-2 py-1.5 border border-pink-200">
+                        <span class="text-xs font-bold text-pink-600 mr-1.5">字體:</span>
+                        <button onclick="changeFontSize(-0.15)" class="px-2 py-0.5 rounded text-pink-600 hover:bg-pink-100 font-bold text-xs">-A</button>
                         <button onclick="resetFontSize()" class="px-2 py-0.5 rounded text-pink-600 hover:bg-pink-100 font-bold text-xs">重置</button>
-                        <button onclick="changeFontSize(0.2)" class="px-2 py-0.5 rounded text-pink-600 hover:bg-pink-100 font-bold text-xs">+A</button>
+                        <button onclick="changeFontSize(0.15)" class="px-2 py-0.5 rounded text-pink-600 hover:bg-pink-100 font-bold text-xs">+A</button>
                     </div>
 
-                    <div class="flex items-center bg-white/80 rounded-xl px-2 py-1 border border-pink-200">
-                        <span class="text-xs font-bold text-purple-600 mr-1.5">語速:</span>
-                        <select id="speechRateSelect" class="bg-transparent text-xs font-bold text-purple-700 focus:outline-none">
+                    <!-- Speech Speed Rate Selector (0.5x added) -->
+                    <div class="flex items-center bg-white/90 rounded-xl px-2.5 py-1.5 border border-purple-200">
+                        <span class="text-xs font-bold text-purple-700 mr-1.5"><i class="fa-solid fa-gauge-high"></i> 語速:</span>
+                        <select id="speechRateSelect" class="bg-transparent text-xs font-bold text-purple-800 focus:outline-none cursor-pointer">
+                            <option value="0.5">0.5x (超慢速)</option>
                             <option value="0.8">0.8x (慢速)</option>
                             <option value="1.0" selected>1.0x (標準)</option>
+                            <option value="1.2">1.2x (快速)</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- Main Speech Controls -->
                 <div class="flex items-center gap-2">
-                    <button onclick="playFullPoem()" id="fullReadBtn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold text-sm shadow-md hover:opacity-90 transition flex items-center gap-2">
+                    <!-- Print Button -->
+                    <button onclick="triggerPrint()" class="px-3.5 py-2 rounded-xl bg-purple-600 text-white font-bold text-xs md:text-sm shadow-md hover:bg-purple-700 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-print"></i> 🖨️ 列印/打印詩詞
+                    </button>
+
+                    <!-- Play All & Stop -->
+                    <button onclick="playFullPoem()" id="fullReadBtn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold text-xs md:text-sm shadow-md hover:opacity-90 transition flex items-center gap-1.5">
                         <i class="fa-solid fa-play"></i> 全文朗讀
                     </button>
-                    <button onclick="stopSpeech()" class="px-3 py-2 rounded-xl bg-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-300 transition" title="停止播放">
+                    <button onclick="stopSpeech()" class="px-3 py-2 rounded-xl bg-slate-200 text-slate-700 font-bold text-xs md:text-sm hover:bg-slate-300 transition" title="停止">
                         <i class="fa-solid fa-square"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Princess Mascot Tip -->
-            <div class="flex items-start gap-3 bg-gradient-to-r from-pink-100/90 to-purple-100/90 border-2 border-pink-300 rounded-2xl p-4 shadow-sm relative overflow-hidden">
-                <div class="w-14 h-14 rounded-full bg-pink-200 border-2 border-white shadow flex-shrink-0 flex items-center justify-center text-3xl">
-                    👸🏻
-                </div>
-                <div class="flex-1">
-                    <div class="flex items-center justify-between">
-                        <h4 class="font-bold text-pink-700 text-sm md:text-base">愛麗絲公主的小提示：</h4>
-                        <span class="text-xs bg-pink-200 text-pink-800 px-2 py-0.5 rounded-full font-bold">小音箱</span>
-                    </div>
-                    <p id="mascotSpeech" class="text-xs md:text-sm text-slate-700 font-medium mt-1">
-                        點擊任何一個漢字可以聽「逐字點讀」；點擊句子旁邊的 <i class="fa-solid fa-volume-high text-pink-500"></i> 可以「逐句朗讀」喔！加油小公主！
-                    </p>
-                </div>
+            <!-- Print Banner Header -->
+            <div class="print-header">
+                <h1 class="text-3xl font-black text-purple-900">《水調歌頭》 蘇軾</h1>
+                <p class="text-sm text-pink-700 font-bold mt-1">小公主普通話朗讀與評估專用工作紙 (特大拼音對照本)</p>
             </div>
 
-            <!-- Poem Display Card -->
+            <!-- Poem Card Container -->
             <div class="glass-card rounded-3xl p-6 md:p-10 shadow-2xl relative border-2 border-pink-200">
-                <!-- Title Header -->
+                <!-- Poem Title Header -->
                 <div class="text-center mb-8 pb-4 border-b-2 border-dashed border-pink-200">
-                    <div class="inline-block text-center py-2 px-6 rounded-2xl bg-pink-50 border border-pink-200 shadow-sm">
+                    <div class="inline-block text-center py-2 px-6 rounded-2xl bg-pink-50/80 border border-pink-200 shadow-sm">
                         <div id="poemTitle" class="flex justify-center items-end flex-wrap gap-1">
-                            <!-- JS Populated Ruby Title -->
+                            <!-- Populated by JS -->
                         </div>
                         <div id="poemAuthor" class="flex justify-center items-end flex-wrap gap-1 mt-2 text-sm">
-                            <!-- JS Populated Ruby Author -->
+                            <!-- Populated by JS -->
                         </div>
                     </div>
                 </div>
 
-                <!-- Poem Sentences Body -->
+                <!-- Poem Body -->
                 <div id="poemBody" class="space-y-6 max-w-3xl mx-auto">
-                    <!-- Sentences generated via JS for precise sync -->
+                    <!-- Populated by JS -->
                 </div>
             </div>
         </section>
 
-        <!-- ================= PAGE 2: MINI GAMES ================= -->
-        <section id="page-games" class="tab-content hidden space-y-6">
-            <!-- Game Selector Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                <button onclick="startMiniGame(1)" id="gameTab-1" class="glass-card p-4 rounded-2xl text-center hover:border-pink-400 transition border-2 border-pink-400 bg-pink-50">
-                    <div class="text-3xl mb-1">💎</div>
-                    <h3 class="font-bold text-sm md:text-base text-pink-700">魔法寶石填空</h3>
-                    <p class="text-xs text-slate-500 mt-1">字詞填空測驗</p>
-                </button>
-                <button onclick="startMiniGame(2)" id="gameTab-2" class="glass-card p-4 rounded-2xl text-center hover:border-purple-400 transition border-2 border-transparent">
-                    <div class="text-3xl mb-1">👑</div>
-                    <h3 class="font-bold text-sm md:text-base text-purple-700">皇冠句序重組</h3>
-                    <p class="text-xs text-slate-500 mt-1">詩句重組挑戰</p>
-                </button>
-                <button onclick="startMiniGame(3)" id="gameTab-3" class="glass-card p-4 rounded-2xl text-center hover:border-indigo-400 transition border-2 border-transparent">
-                    <div class="text-3xl mb-1">🎵</div>
-                    <h3 class="font-bold text-sm md:text-base text-indigo-700">聽音尋寶遊戲</h3>
-                    <p class="text-xs text-slate-500 mt-1">普通話聽力測驗</p>
-                </button>
-                <button onclick="startMiniGame(4)" id="gameTab-4" class="glass-card p-4 rounded-2xl text-center hover:border-rose-400 transition border-2 border-transparent">
-                    <div class="text-3xl mb-1">🎙️</div>
-                    <h3 class="font-bold text-sm md:text-base text-rose-700">朗讀評估跟讀</h3>
-                    <p class="text-xs text-slate-500 mt-1">小公主發音測試</p>
-                </button>
-            </div>
-
-            <!-- Active Game Display Box -->
-            <div class="glass-card rounded-3xl p-6 md:p-8 border-2 border-purple-200 min-h-[420px] flex flex-col justify-between relative" id="gameArena">
-                <!-- Dynamic Content Rendered Here -->
+        <!-- ================= TAB 2: PINYIN MATCH GAME ================= -->
+        <section id="page-match" class="tab-content hidden space-y-6">
+            <div class="glass-card rounded-3xl p-6 md:p-8 border-2 border-purple-200">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-xl font-black text-purple-800">💎 字音配對遊戲</h2>
+                        <p class="text-xs text-slate-600 mt-1">請點擊正確的拼音與漢字配對，賺取魔法寶石！</p>
+                    </div>
+                    <span id="matchScore" class="bg-purple-100 text-purple-800 font-black px-4 py-1.5 rounded-full text-sm">
+                        得分: 0
+                    </span>
+                </div>
+                <div id="matchGameContainer" class="min-h-[320px] flex flex-col justify-center">
+                    <!-- Dynamic Match Game Rendered Here -->
+                </div>
             </div>
         </section>
 
-        <!-- ================= PAGE 3: TROPHY ROOM ================= -->
-        <section id="page-trophy" class="tab-content hidden space-y-6">
-            <div class="glass-card rounded-3xl p-6 md:p-8 border-2 border-indigo-200 text-center">
-                <h2 class="text-2xl font-black text-indigo-800 flex items-center justify-center gap-2">
-                    <span>👑</span> 小公主的夢幻寶物庫 <span>🏰</span>
-                </h2>
-                <p class="text-sm text-slate-600 mt-1">完成朗讀與遊戲挑戰，積攢魔法星星，解鎖皇家專屬寶物！</p>
+        <!-- ================= TAB 3: FILL IN BLANKS ================= -->
+        <section id="page-fill" class="tab-content hidden space-y-6">
+            <div class="glass-card rounded-3xl p-6 md:p-8 border-2 border-indigo-200">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-xl font-black text-indigo-800">✏️ 填空小高手</h2>
+                        <p class="text-xs text-slate-600 mt-1">選出詩句中缺少的正確漢字！</p>
+                    </div>
+                </div>
+                <div id="fillGameContainer" class="min-h-[320px] flex flex-col justify-center">
+                    <!-- Dynamic Fill Game Rendered Here -->
+                </div>
+            </div>
+        </section>
 
-                <!-- Reward Collection Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-8" id="rewardsGrid">
-                    <!-- Dynamic Rewards populated by JS -->
+        <!-- ================= TAB 4: READING ASSESSMENT ================= -->
+        <section id="page-assess" class="tab-content hidden space-y-6">
+            <div class="glass-card rounded-3xl p-6 md:p-8 border-2 border-rose-200 text-center">
+                <h2 class="text-xl font-black text-rose-800 mb-1">🎙️ 小公主朗讀評估測試</h2>
+                <p class="text-xs text-slate-600 mb-6">請聆聽標準示範後，按麥克風進行朗讀跟讀測驗！</p>
+                <div id="assessContainer">
+                    <!-- Assessment UI rendered via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 5: TROPHY & CROWNS ================= -->
+        <section id="page-trophy" class="tab-content hidden space-y-6">
+            <div class="glass-card rounded-3xl p-6 md:p-8 border-2 border-amber-200 text-center">
+                <h2 class="text-2xl font-black text-amber-800 flex items-center justify-center gap-2">
+                    <span>👑</span> 小公主的皇冠寶物庫 <span>🏰</span>
+                </h2>
+                <p class="text-xs text-slate-600 mt-1">積攢魔法星星，解鎖皇家夢幻寶物！</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 mt-6" id="rewardsGrid">
+                    <!-- Rewards rendered via JS -->
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- Modal Dialog for Messages -->
-    <div id="modalOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full text-center border-4 border-pink-300 shadow-2xl transform scale-95 transition-transform" id="modalBox">
+    <!-- Modal Dialog -->
+    <div id="modalOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full text-center border-4 border-pink-300 shadow-2xl">
             <div id="modalIcon" class="text-5xl mb-3">✨</div>
             <h3 id="modalTitle" class="text-xl font-black text-pink-700 mb-2">標題</h3>
-            <p id="modalMessage" class="text-sm text-slate-600 mb-6">內容訊息...</p>
+            <p id="modalMessage" class="text-xs md:text-sm text-slate-600 mb-6">訊息...</p>
             <button onclick="closeModal()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold shadow-md hover:opacity-90">
-                太棒了！
+                好棒！知道了
             </button>
         </div>
     </div>
@@ -508,88 +539,23 @@
             ]
         };
 
-        // Rewards data
         const REWARDS = [
-            { id: 'wand', name: '仙女水晶魔法棒', cost: 20, icon: '🪄', desc: '散發著夢幻微光的仙女棒', unlocked: false },
-            { id: 'crown', name: '璀璨鑽石皇冠', cost: 40, icon: '👑', desc: '高貴小公主的榮譽標誌', unlocked: false },
-            { id: 'shoes', name: '夢幻琉璃水晶鞋', cost: 60, icon: '👠', desc: '穿上它就能跳出美麗舞步', unlocked: false },
-            { id: 'castle', name: '粉紅雲端城堡', cost: 90, icon: '🏰', desc: '專屬於你的夢幻公主城堡', unlocked: false },
-            { id: 'unicorn', name: '星光飛天獨角獸', cost: 120, icon: '🦄', desc: '翱翔在銀河中的親密夥伴', unlocked: false },
-            { id: 'throne', name: '皇家金典玉座', cost: 150, icon: '🪑', desc: '象徵最傑出普通話朗讀大師', unlocked: false }
+            { id: 'wand', name: '仙女水晶魔法棒', cost: 15, icon: '🪄', desc: '散發夢幻微光', unlocked: false },
+            { id: 'crown', name: '璀璨鑽石皇冠', cost: 30, icon: '👑', desc: '高貴榮譽標誌', unlocked: false },
+            { id: 'shoes', name: '夢幻琉璃水晶鞋', cost: 50, icon: '👠', desc: '優雅舞蹈舞鞋', unlocked: false },
+            { id: 'castle', name: '粉紅雲端城堡', cost: 80, icon: '🏰', desc: '夢幻公主城堡', unlocked: false },
+            { id: 'unicorn', name: '星光飛天獨角獸', cost: 110, icon: '🦄', desc: '星空飛行夥伴', unlocked: false },
+            { id: 'throne', name: '皇家金典玉座', cost: 150, icon: '🪑', desc: '朗讀大師象徵', unlocked: false }
         ];
 
         let appState = {
-            stars: parseInt(localStorage.getItem('princess_stars') || '0'),
-            crowns: parseInt(localStorage.getItem('princess_crowns') || '0'),
+            stars: parseInt(localStorage.getItem('p3_stars') || '0'),
+            crowns: parseInt(localStorage.getItem('p3_crowns') || '0'),
             showPinyin: true,
             fontSizeScale: 1.0,
             isPlayingFull: false,
-            currentSentenceIdx: -1,
-            unlockedRewards: JSON.parse(localStorage.getItem('princess_rewards') || '[]')
+            unlockedRewards: JSON.parse(localStorage.getItem('p3_rewards') || '[]')
         };
-
-        // Web Audio API Synth Effects
-        let audioCtx = null;
-
-        function initAudioContext() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-        }
-
-        function playChimeSFX(type = 'click') {
-            try {
-                initAudioContext();
-                const now = audioCtx.currentTime;
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-
-                if (type === 'click') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(523.25, now); // C5
-                    osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.15);
-                    gain.gain.setValueAtTime(0.2, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-                    osc.start(now);
-                    osc.stop(now + 0.15);
-                } else if (type === 'success') {
-                    // Major triad
-                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
-                        const o = audioCtx.createOscillator();
-                        const g = audioCtx.createGain();
-                        o.type = 'triangle';
-                        o.frequency.value = freq;
-                        o.connect(g);
-                        g.connect(audioCtx.destination);
-                        g.gain.setValueAtTime(0.2, now + idx * 0.08);
-                        g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.3);
-                        o.start(now + idx * 0.08);
-                        o.stop(now + idx * 0.08 + 0.3);
-                    });
-                } else if (type === 'fanfare') {
-                    [440, 554.37, 659.25, 880].forEach((freq, idx) => {
-                        const o = audioCtx.createOscillator();
-                        const g = audioCtx.createGain();
-                        o.type = 'sine';
-                        o.frequency.value = freq;
-                        o.connect(g);
-                        g.connect(audioCtx.destination);
-                        g.gain.setValueAtTime(0.25, now + idx * 0.1);
-                        g.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.4);
-                        o.start(now + idx * 0.1);
-                        o.stop(now + idx * 0.1 + 0.4);
-                    });
-                }
-            } catch (e) {
-                console.log('Audio error:', e);
-            }
-        }
 
         let synth = window.speechSynthesis;
         let selectedVoice = null;
@@ -597,7 +563,6 @@
         function loadMandarinVoice() {
             if (!synth) return;
             const voices = synth.getVoices();
-            // Prioritize Mandarin Chinese voices (zh-CN, zh-TW, zh)
             selectedVoice = voices.find(v => v.lang.includes('zh-CN') || v.lang.includes('zh_CN')) ||
                             voices.find(v => v.lang.startsWith('zh')) || null;
         }
@@ -614,7 +579,7 @@
                 if (onEndCallback) onEndCallback();
                 return;
             }
-            synth.cancel(); // Stop ongoing speech
+            synth.cancel();
 
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'zh-CN';
@@ -622,7 +587,7 @@
 
             const rateSelect = document.getElementById('speechRateSelect');
             utterance.rate = rateSelect ? parseFloat(rateSelect.value) : 1.0;
-            utterance.pitch = 1.1; // Cute slightly higher pitch
+            utterance.pitch = 1.1;
 
             if (onEndCallback) {
                 utterance.onend = onEndCallback;
@@ -636,7 +601,6 @@
             if (synth) synth.cancel();
             appState.isPlayingFull = false;
             clearHighlights();
-            updateMascotSpeech('已停止朗讀。準備好隨時可以再點選哦！');
         }
 
         function renderPoem() {
@@ -644,7 +608,6 @@
             const authorContainer = document.getElementById('poemAuthor');
             const bodyContainer = document.getElementById('poemBody');
 
-            // Render Title
             titleContainer.innerHTML = POEM_DATA.title.map(item => `
                 <ruby onclick="speakWord('${item.char}')">
                     <span class="char-box">${item.char}</span>
@@ -652,19 +615,16 @@
                 </ruby>
             `).join('');
 
-            // Render Author
             authorContainer.innerHTML = '~~ ' + POEM_DATA.author.map(item => `
                 <ruby onclick="speakWord('${item.char}')">
-                    <span class="char-box" style="font-size:1.2rem;">${item.char}</span>
+                    <span class="char-box" style="font-size:1.3rem;">${item.char}</span>
                     <rt>${item.pinyin}</rt>
                 </ruby>
             `).join('');
 
-            // Render Sentences
             bodyContainer.innerHTML = POEM_DATA.sentences.map((sentence, sIdx) => {
                 const rubyWords = sentence.words.map((w, wIdx) => {
                     if (!w.pinyin) {
-                        // Punctuation
                         return `<span class="text-2xl font-bold text-pink-400 mx-0.5">${w.char}</span>`;
                     }
                     return `
@@ -676,11 +636,11 @@
                 }).join('');
 
                 return `
-                    <div id="sentence-row-${sIdx}" class="sentence-row border-2 border-pink-100 bg-white/60 p-3.5 md:p-4 rounded-2xl flex items-center justify-between gap-3 shadow-sm hover:border-pink-300 transition">
+                    <div id="sentence-row-${sIdx}" class="sentence-row border-2 border-pink-100 bg-white/70 p-3.5 md:p-4 rounded-2xl flex items-center justify-between gap-3 shadow-sm hover:border-pink-300 transition">
                         <div class="flex-1 flex flex-wrap items-center">
                             ${rubyWords}
                         </div>
-                        <button onclick="speakSentence(${sIdx})" class="w-10 h-10 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-600 flex items-center justify-center text-lg shadow-sm transition flex-shrink-0" title="朗讀此句">
+                        <button onclick="speakSentence(${sIdx})" class="no-print w-10 h-10 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-600 flex items-center justify-center text-lg shadow-sm transition flex-shrink-0" title="朗讀此句">
                             <i class="fa-solid fa-volume-high"></i>
                         </button>
                     </div>
@@ -691,34 +651,25 @@
         }
 
         function speakWord(char, sIdx = -1, wIdx = -1) {
-            playChimeSFX('click');
             clearHighlights();
-
             if (sIdx >= 0 && wIdx >= 0) {
                 const el = document.getElementById(`ruby-${sIdx}-${wIdx}`);
                 if (el) el.classList.add('active-speech');
             }
-
-            updateMascotSpeech(`正在讀字：「${char}」`);
-            speakText(char, () => {
-                clearHighlights();
-            });
+            speakText(char, () => clearHighlights());
         }
 
         function speakSentence(sIdx) {
-            playChimeSFX('click');
             clearHighlights();
-
             const sentenceObj = POEM_DATA.sentences[sIdx];
             const rowEl = document.getElementById(`sentence-row-${sIdx}`);
             if (rowEl) rowEl.classList.add('highlight-sentence');
 
-            updateMascotSpeech(`朗讀句子：「${sentenceObj.text}」`);
-            
-            // Sequential character highlight simulation
-            let wordCount = sentenceObj.words.filter(w => w.pinyin).length;
-            let currentWIdx = 0;
+            const rateSelect = document.getElementById('speechRateSelect');
+            const currentRate = rateSelect ? parseFloat(rateSelect.value) : 1.0;
+            const highlightDelay = Math.max(260, Math.round(400 / currentRate));
 
+            let currentWIdx = 0;
             const highlightInterval = setInterval(() => {
                 while (currentWIdx < sentenceObj.words.length && !sentenceObj.words[currentWIdx].pinyin) {
                     currentWIdx++;
@@ -732,17 +683,16 @@
                 } else {
                     clearInterval(highlightInterval);
                 }
-            }, 300);
+            }, highlightDelay);
 
             speakText(sentenceObj.text, () => {
                 clearInterval(highlightInterval);
                 clearHighlights();
-                addStars(1); // Reward 1 star for practicing reading
+                addStars(1);
             });
         }
 
         function playFullPoem() {
-            playChimeSFX('fanfare');
             appState.isPlayingFull = true;
             let sentenceIdx = 0;
 
@@ -750,20 +700,23 @@
                 if (!appState.isPlayingFull || sentenceIdx >= POEM_DATA.sentences.length) {
                     appState.isPlayingFull = false;
                     clearHighlights();
-                    updateMascotSpeech('全詩朗讀完成！小公主太棒了！👑');
                     addStars(5);
                     addCrowns(1);
+                    showModal('全文朗讀完成！👑', '太棒了小公主！完成一次完整《水調歌頭》朗讀！獲得 5 星星 + 1 皇冠！');
                     return;
                 }
 
+                const currentObj = POEM_DATA.sentences[sentenceIdx];
                 speakSentence(sentenceIdx);
                 sentenceIdx++;
-                // Check next sentence after approximate duration
+
+                const rateSelect = document.getElementById('speechRateSelect');
+                const currentRate = rateSelect ? parseFloat(rateSelect.value) : 1.0;
+                const estimatedDuration = Math.max(2800, Math.round((currentObj.words.length * 400 + 1300) / currentRate));
+
                 setTimeout(() => {
-                    if (appState.isPlayingFull) {
-                        playNext();
-                    }
-                }, 3800);
+                    if (appState.isPlayingFull) playNext();
+                }, estimatedDuration);
             }
 
             playNext();
@@ -783,32 +736,27 @@
             btn.innerHTML = appState.showPinyin ?
                 '<i class="fa-solid fa-eye"></i> 拼音顯示：開' :
                 '<i class="fa-solid fa-eye-slash"></i> 拼音顯示：關';
-            playChimeSFX('click');
         }
 
         function changeFontSize(delta) {
-            appState.fontSizeScale = Math.max(0.7, Math.min(1.6, appState.fontSizeScale + delta));
+            appState.fontSizeScale = Math.max(0.8, Math.min(1.5, appState.fontSizeScale + delta));
             updateFontSize();
-            playChimeSFX('click');
         }
 
         function resetFontSize() {
             appState.fontSizeScale = 1.0;
             updateFontSize();
-            playChimeSFX('click');
         }
 
         function updateFontSize() {
-            document.documentElement.style.setProperty('--poem-font-size', `${2 * appState.fontSizeScale}rem`);
+            document.documentElement.style.setProperty('--poem-font-size', `${2.2 * appState.fontSizeScale}rem`);
         }
 
-        function updateMascotSpeech(msg) {
-            const el = document.getElementById('mascotSpeech');
-            if (el) el.innerText = msg;
+        function triggerPrint() {
+            window.print();
         }
 
         function switchTab(tabKey) {
-            playChimeSFX('click');
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('border-pink-400', 'bg-pink-100');
@@ -817,377 +765,165 @@
 
             document.getElementById(`page-${tabKey}`).classList.remove('hidden');
             const activeBtn = document.getElementById(`tabBtn-${tabKey}`);
-            if (activeBtn) {
-                activeBtn.classList.add('border-pink-400', 'bg-pink-100');
-            }
+            if (activeBtn) activeBtn.classList.add('border-pink-400', 'bg-pink-100');
 
-            if (tabKey === 'games') {
-                startMiniGame(1);
-            } else if (tabKey === 'trophy') {
-                renderTrophyRoom();
-            }
+            if (tabKey === 'match') initMatchGame();
+            else if (tabKey === 'fill') initFillGame();
+            else if (tabKey === 'assess') initAssessGame();
+            else if (tabKey === 'trophy') renderTrophyRoom();
         }
 
-        let currentGameData = {};
-
-        function startMiniGame(gameNum) {
-            playChimeSFX('click');
-            // Highlight active game tab button
-            for (let i = 1; i <= 4; i++) {
-                const btn = document.getElementById(`gameTab-${i}`);
-                if (btn) {
-                    btn.classList.remove('border-pink-400', 'border-purple-400', 'border-indigo-400', 'border-rose-400', 'bg-pink-50', 'bg-purple-50', 'bg-indigo-50', 'bg-rose-50');
-                    btn.classList.add('border-transparent');
-                }
-            }
-            const activeTab = document.getElementById(`gameTab-${gameNum}`);
-            if (activeTab) {
-                activeTab.classList.add('border-pink-400', 'bg-pink-50');
-            }
-
-            const arena = document.getElementById('gameArena');
-            if (gameNum === 1) renderGame1(arena);
-            else if (gameNum === 2) renderGame2(arena);
-            else if (gameNum === 3) renderGame3(arena);
-            else if (gameNum === 4) renderGame4(arena);
-        }
-
-        // Game 1: Missing Character Gem Fill-in
-        function renderGame1(container) {
-            const questions = [
-                { text: '明月幾時有？把酒問___天。', answer: '青', options: ['青', '晴', '輕', '清'] },
-                { text: '不知天上宮闕，今夕是___年。', answer: '何', options: ['何', '河', '和', '合'] },
-                { text: '起舞弄清影，何似在___間。', answer: '人', options: ['人', '仁', '忍', '任'] },
-                { text: '但願人長久，千___共嬋娟。', answer: '里', options: ['里', '禮', '理', '離'] }
+        // Tab 2: Pinyin Match Game
+        let matchScore = 0;
+        function initMatchGame() {
+            const pairs = [
+                { char: '闕', pinyin: 'què' },
+                { char: '瓊', pinyin: 'qióng' },
+                { char: '綺', pinyin: 'qǐ' },
+                { char: '嬋', pinyin: 'chán' },
+                { char: '娟', pinyin: 'juān' },
+                { char: '勝', pinyin: 'shèng' }
             ];
 
-            let qIdx = 0;
-            let score = 0;
+            let selectedChar = null;
+            let currentPairs = [...pairs].sort(() => Math.random() - 0.5).slice(0, 4);
 
-            function showQ() {
-                const q = questions[qIdx];
-                container.innerHTML = `
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-xs font-bold bg-pink-100 text-pink-700 px-3 py-1 rounded-full">
-                                💎 魔法寶石填空 (第 ${qIdx + 1} / ${questions.length} 題)
-                            </span>
-                            <span class="text-sm font-black text-pink-600">得分: ${score}</span>
-                        </div>
-                        <div class="text-center py-8">
-                            <p class="text-2xl font-bold text-slate-800 tracking-wider">${q.text.replace('___', '<span class="inline-block w-12 h-12 border-b-4 border-pink-500 bg-pink-50 rounded-xl text-pink-600 text-center font-black leading-relaxed">?</span>')}</p>
-                        </div>
-                    </div>
+            const charList = [...currentPairs].sort(() => Math.random() - 0.5);
+            const pinyinList = [...currentPairs].sort(() => Math.random() - 0.5);
 
-                    <div class="grid grid-cols-2 gap-4 mt-6">
-                        ${q.options.map(opt => `
-                            <button onclick="checkG1('${opt}')" class="glass-btn p-4 rounded-2xl font-black text-2xl text-pink-700 border-2 border-pink-300 hover:border-pink-500 shadow-sm flex items-center justify-center gap-2">
-                                <span>💎</span> ${opt}
+            const container = document.getElementById('matchGameContainer');
+            container.innerHTML = `
+                <div class="grid grid-cols-2 gap-8 max-w-xl mx-auto w-full">
+                    <div class="space-y-3">
+                        <p class="text-xs font-bold text-purple-600 text-center mb-2">① 點擊漢字</p>
+                        ${charList.map(item => `
+                            <button onclick="selectMatchChar('${item.char}', this)" class="match-char-btn w-full p-3.5 rounded-2xl bg-white border-2 border-purple-200 text-2xl font-black text-purple-900 shadow-sm hover:border-purple-400">
+                                ${item.char}
                             </button>
                         `).join('')}
                     </div>
-                `;
-            }
+                    <div class="space-y-3">
+                        <p class="text-xs font-bold text-pink-600 text-center mb-2">② 點擊對應拼音</p>
+                        ${pinyinList.map(item => `
+                            <button onclick="selectMatchPinyin('${item.pinyin}', '${item.char}', this)" class="match-pinyin-btn w-full p-3.5 rounded-2xl bg-white border-2 border-pink-200 text-xl font-bold text-pink-600 shadow-sm hover:border-pink-400">
+                                ${item.pinyin}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
 
-            window.checkG1 = function(selected) {
-                const q = questions[qIdx];
-                if (selected === q.answer) {
-                    playChimeSFX('success');
-                    score += 10;
+            window.selectMatchChar = function(char, btn) {
+                document.querySelectorAll('.match-char-btn').forEach(b => b.classList.remove('ring-4', 'ring-purple-400', 'bg-purple-100'));
+                btn.classList.add('ring-4', 'ring-purple-400', 'bg-purple-100');
+                selectedChar = char;
+                speakText(char);
+            };
+
+            window.selectMatchPinyin = function(pinyin, targetChar, btn) {
+                if (!selectedChar) {
+                    showModal('請先選擇漢字', '請先點擊左邊的漢字，再選擇配對的拼音喔！', '💡');
+                    return;
+                }
+                if (selectedChar === targetChar) {
+                    matchScore += 10;
+                    document.getElementById('matchScore').innerText = `得分: ${matchScore}`;
                     addStars(2);
-                    showModal('回答正確！✨', `太棒了小公主！「${q.answer}」字選擇完全正確！`, '💎');
+                    showModal('配對成功！💎', `「${selectedChar}」的拼音就是「${pinyin}」！`, '✨');
+                    btn.disabled = true;
+                    btn.style.opacity = '0.3';
+                    selectedChar = null;
                 } else {
-                    playChimeSFX('click');
-                    showModal('再試一次唷！', `正確的寶石字應該是「${q.answer}」喔！加油！`, '🌸');
-                }
-
-                qIdx++;
-                if (qIdx < questions.length) {
-                    setTimeout(showQ, 1000);
-                } else {
-                    setTimeout(() => {
-                        addCrowns(1);
-                        container.innerHTML = `
-                            <div class="text-center py-10 space-y-4">
-                                <div class="text-6xl animate-bounce">👑</div>
-                                <h3 class="text-2xl font-black text-pink-700">挑戰完成！小公主獲得皇冠！</h3>
-                                <p class="text-slate-600">總得分: ${score} 分 • 獲得 1 頂皇冠</p>
-                                <button onclick="startMiniGame(1)" class="px-6 py-2.5 rounded-xl bg-pink-500 text-white font-bold shadow-md hover:bg-pink-600">
-                                    再玩一次
-                                </button>
-                            </div>
-                        `;
-                    }, 1200);
+                    showModal('再試一次', '拼音不吻合喔，再仔細看一看！', '🌸');
                 }
             };
-
-            showQ();
         }
 
-        function renderGame2(container) {
-            const targetSentences = [
-                '人有悲歡離合，',
-                '月有陰晴圓缺，',
-                '此事古難全。',
-                '但願人長久，',
-                '千里共嬋娟。'
+        // Tab 3: Fill Blanks Game
+        function initFillGame() {
+            const questions = [
+                { text: '把酒問___天。', answer: '青', options: ['青', '晴', '輕'] },
+                { text: '今夕是___年。', answer: '何', options: ['何', '河', '和'] },
+                { text: '千里共___娟。', answer: '嬋', options: ['嬋', '蟬', '纏'] }
             ];
-
-            let currentOrder = [...targetSentences].sort(() => Math.random() - 0.5);
-
-            function drawReorderUI() {
-                container.innerHTML = `
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-xs font-bold bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
-                                👑 皇冠句序重組
-                            </span>
-                            <span class="text-xs text-slate-500">點擊句子調整為正確詩句順序</span>
-                        </div>
-                        <p class="text-xs text-purple-600 font-bold mb-4 text-center">請將下列詩句排列成正確順序：</p>
-                        
-                        <div class="space-y-2.5">
-                            ${currentOrder.map((s, idx) => `
-                                <div class="flex items-center justify-between p-3 rounded-2xl border-2 border-purple-200 bg-white/80 shadow-sm">
-                                    <span class="font-bold text-slate-800 text-sm md:text-base">${idx + 1}. ${s}</span>
-                                    <div class="flex items-center gap-1">
-                                        <button onclick="moveG2(${idx}, -1)" class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 font-bold hover:bg-purple-200" ${idx === 0 ? 'disabled style="opacity:0.4;"' : ''}>▲</button>
-                                        <button onclick="moveG2(${idx}, 1)" class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 font-bold hover:bg-purple-200" ${idx === currentOrder.length - 1 ? 'disabled style="opacity:0.4;"' : ''}>▼</button>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    <div class="mt-6 text-center">
-                        <button onclick="checkG2()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-black shadow-lg hover:opacity-90">
-                            提交驗證順序 ✨
-                        </button>
-                    </div>
-                `;
-            }
-
-            window.moveG2 = function(idx, dir) {
-                playChimeSFX('click');
-                const temp = currentOrder[idx];
-                currentOrder[idx] = currentOrder[idx + dir];
-                currentOrder[idx + dir] = temp;
-                drawReorderUI();
-            };
-
-            window.checkG2 = function() {
-                let isCorrect = true;
-                for (let i = 0; i < targetSentences.length; i++) {
-                    if (currentOrder[i] !== targetSentences[i]) {
-                        isCorrect = false;
-                        break;
-                    }
-                }
-
-                if (isCorrect) {
-                    playChimeSFX('fanfare');
-                    addStars(10);
-                    addCrowns(1);
-                    showModal('完美排序！👑', '恭喜小公主完全重組《水調歌頭》後半段經典名句！獲得 10 星星 + 1 皇冠！', '🎉');
-                } else {
-                    playChimeSFX('click');
-                    showModal('順序有小錯誤喔', '再細心朗讀一下「人有悲歡離合，月有陰晴圓缺...」重新排列吧！', '💡');
-                }
-            };
-
-            drawReorderUI();
-        }
-
-        function renderGame3(container) {
-            const quizItems = [
-                { target: '宮闕', options: ['宮闕', '瓊樓', '嬋娟', '綺戶'] },
-                { target: '嬋娟', options: ['嬋娟', '清影', '無眠', '長久'] },
-                { target: '瓊樓玉宇', options: ['瓊樓玉宇', '高處不勝寒', '起舞弄清影', '把酒問青天'] },
-                { target: '乘風歸去', options: ['乘風歸去', '低綺戶', '不應有恨', '陰晴圓缺'] }
-            ];
-
             let qIdx = 0;
 
-            function showAudioQ() {
-                const item = quizItems[qIdx];
-                // Shuffle options
-                const shuffledOpts = [...item.options].sort(() => Math.random() - 0.5);
-
+            function renderQ() {
+                const q = questions[qIdx];
+                const container = document.getElementById('fillGameContainer');
                 container.innerHTML = `
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-xs font-bold bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full">
-                                🎵 聽音尋寶遊戲 (第 ${qIdx + 1} / ${quizItems.length} 題)
-                            </span>
-                        </div>
-
-                        <div class="text-center py-6">
-                            <p class="text-xs text-indigo-600 font-bold mb-3">請點擊喇叭聽普通話發音，並選出正確的詞語寶卡：</p>
-                            <button onclick="playG3Audio()" class="w-20 h-20 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white text-3xl shadow-xl hover:scale-105 transition flex items-center justify-center mx-auto">
-                                <i class="fa-solid fa-volume-high"></i>
-                            </button>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3 mt-4">
-                            ${shuffledOpts.map(opt => `
-                                <button onclick="checkG3('${opt}')" class="glass-btn p-4 rounded-2xl font-bold text-slate-800 text-base md:text-lg border-2 border-indigo-200 hover:border-indigo-500 shadow-sm">
-                                    ✨ ${opt}
+                    <div class="text-center py-6">
+                        <p class="text-2xl font-bold text-slate-800 mb-8">${q.text.replace('___', '<span class="inline-block w-12 h-12 border-b-4 border-indigo-500 bg-indigo-50 rounded-xl text-indigo-600 text-center font-black">?</span>')}</p>
+                        <div class="flex justify-center gap-4">
+                            ${q.options.map(opt => `
+                                <button onclick="checkFillAnswer('${opt}', '${q.answer}')" class="px-6 py-4 rounded-2xl bg-white border-2 border-indigo-300 font-black text-2xl text-indigo-700 hover:bg-indigo-50 shadow-md">
+                                    ${opt}
                                 </button>
                             `).join('')}
                         </div>
                     </div>
                 `;
-
-                setTimeout(playG3Audio, 500);
             }
 
-            window.playG3Audio = function() {
-                playChimeSFX('click');
-                speakText(quizItems[qIdx].target);
-            };
-
-            window.checkG3 = function(selected) {
-                const item = quizItems[qIdx];
-                if (selected === item.target) {
-                    playChimeSFX('success');
+            window.checkFillAnswer = function(selected, ans) {
+                if (selected === ans) {
                     addStars(3);
-                    showModal('聽力真敏銳！', `小公主順利聽出「${item.target}」！`, '🌟');
+                    showModal('回答正確！✏️', `填入「${ans}」字完全正確！`, '🌟');
+                    qIdx = (qIdx + 1) % questions.length;
+                    setTimeout(renderQ, 1000);
                 } else {
-                    playChimeSFX('click');
-                    showModal('再聽一次唷！', `正確的答案是「${item.target}」`, '🎧');
-                }
-
-                qIdx++;
-                if (qIdx < quizItems.length) {
-                    setTimeout(showAudioQ, 1000);
-                } else {
-                    setTimeout(() => {
-                        addCrowns(1);
-                        container.innerHTML = `
-                            <div class="text-center py-10 space-y-4">
-                                <div class="text-6xl animate-bounce">🎧</div>
-                                <h3 class="text-2xl font-black text-indigo-700">聽力寶藏全收集！</h3>
-                                <p class="text-slate-600">小公主聽力能力一棒！獲得 1 頂皇冠！</p>
-                                <button onclick="startMiniGame(3)" class="px-6 py-2.5 rounded-xl bg-indigo-500 text-white font-bold shadow-md hover:bg-indigo-600">
-                                    再玩一次
-                                </button>
-                            </div>
-                        `;
-                    }, 1200);
+                    showModal('再試一次', '字的字形不正確喔，加油！', '💡');
                 }
             };
 
-            showAudioQ();
+            renderQ();
         }
 
-        function renderGame4(container) {
-            const evalLines = [
-                { line: '明月幾時有？把酒問青天。', pinyin: 'míng yuè jǐ shí yǒu？bǎ jiǔ wèn qīng tiān。' },
-                { line: '不知天上宮闕，今夕是何年。', pinyin: 'bù zhī tiān shàng gōng què，jīn xī shì hé nián。' },
-                { line: '但願人長久，千里共嬋娟。', pinyin: 'dàn yuàn rén cháng jiǔ，qiān lǐ gòng chán juān。' }
-            ];
-
-            let lineIdx = 0;
-            let isRecording = false;
-
-            function showEvalUI() {
-                const current = evalLines[lineIdx];
-                container.innerHTML = `
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-xs font-bold bg-rose-100 text-rose-700 px-3 py-1 rounded-full">
-                                🎙️ 朗讀評估與跟讀 (第 ${lineIdx + 1} / ${evalLines.length} 關)
-                            </span>
-                        </div>
-
-                        <div class="text-center py-6 space-y-3">
-                            <p class="text-xs text-rose-500 font-bold">請先點擊示範朗讀，然後按麥克風進行跟讀評估：</p>
-                            
-                            <div class="bg-rose-50 border-2 border-rose-200 rounded-2xl p-4 inline-block max-w-lg w-full">
-                                <p class="text-xs text-pink-500 mb-1">${current.pinyin}</p>
-                                <p class="text-2xl font-black text-rose-900">${current.line}</p>
-                            </div>
-
-                            <div class="flex items-center justify-center gap-3 pt-2">
-                                <button onclick="demoReadG4()" class="px-4 py-2 rounded-xl bg-rose-100 text-rose-700 font-bold text-xs hover:bg-rose-200 flex items-center gap-1.5">
-                                    <i class="fa-solid fa-volume-high"></i> 聽示範讀音
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Simulated Voice Waveform & Record Button -->
-                        <div class="text-center space-y-4">
-                            <div id="micStatus" class="text-xs font-bold text-slate-500">
-                                點擊下方麥克風，開始錄音跟讀...
-                            </div>
-                            
-                            <button id="recordBtn" onclick="toggleRecordG4()" class="w-20 h-20 rounded-full bg-gradient-to-tr from-rose-500 to-pink-500 text-white text-3xl shadow-xl hover:scale-105 transition flex items-center justify-center mx-auto relative">
-                                <i id="micIcon" class="fa-solid fa-microphone"></i>
-                            </button>
-                        </div>
+        // Tab 4: Assessment
+        function initAssessGame() {
+            const container = document.getElementById('assessContainer');
+            container.innerHTML = `
+                <div class="max-w-md mx-auto space-y-6">
+                    <div class="p-4 bg-rose-50 border-2 border-rose-200 rounded-2xl">
+                        <p class="text-xs text-rose-500 font-bold mb-1">bǎ jiǔ wèn qīng tiān</p>
+                        <p class="text-2xl font-black text-rose-900">把酒問青天</p>
                     </div>
-                `;
-            }
 
-            window.demoReadG4 = function() {
-                playChimeSFX('click');
-                speakText(evalLines[lineIdx].line);
-            };
+                    <div class="flex justify-center gap-3">
+                        <button onclick="speakText('把酒問青天')" class="px-4 py-2 rounded-xl bg-rose-100 text-rose-700 font-bold text-xs hover:bg-rose-200">
+                            <i class="fa-solid fa-volume-high"></i> 聽示範
+                        </button>
+                    </div>
 
-            window.toggleRecordG4 = function() {
-                playChimeSFX('click');
-                const micIcon = document.getElementById('micIcon');
-                const status = document.getElementById('micStatus');
-                const btn = document.getElementById('recordBtn');
+                    <button id="micAssessBtn" onclick="runSimulatedAssess()" class="w-20 h-20 rounded-full bg-gradient-to-tr from-rose-500 to-pink-500 text-white text-3xl shadow-xl hover:scale-105 transition flex items-center justify-center mx-auto">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                    <p id="assessStatus" class="text-xs font-bold text-slate-500">點擊麥克風開始錄音跟讀測驗...</p>
+                </div>
+            `;
 
-                if (!isRecording) {
-                    isRecording = true;
-                    btn.classList.add('animate-pulse', 'ring-4', 'ring-rose-300');
-                    micIcon.className = 'fa-solid fa-stop';
-                    status.innerText = '🔴 正在錄音跟讀中... 請大聲朗讀！';
-                    
-                    // Simulate 3 seconds speech check
-                    setTimeout(() => {
-                        if (isRecording) {
-                            toggleRecordG4();
-                        }
-                    }, 3500);
-                } else {
-                    isRecording = false;
+            window.runSimulatedAssess = function() {
+                const btn = document.getElementById('micAssessBtn');
+                const status = document.getElementById('assessStatus');
+
+                btn.classList.add('animate-pulse', 'ring-4', 'ring-rose-300');
+                status.innerText = '🔴 錄音中... 請朗讀「把酒問青天」';
+
+                setTimeout(() => {
                     btn.classList.remove('animate-pulse', 'ring-4', 'ring-rose-300');
-                    micIcon.className = 'fa-solid fa-microphone';
-                    status.innerText = '✨ 錄音分析評估中...';
+                    status.innerText = '✨ 評估分析中...';
 
                     setTimeout(() => {
-                        playChimeSFX('fanfare');
                         addStars(5);
-                        showModal('朗讀評估評級：三顆皇冠 👑👑👑', '語音咬字清晰！發音極度標準！愛麗絲公主給你滿分！', '🌟');
-
-                        lineIdx++;
-                        if (lineIdx < evalLines.length) {
-                            setTimeout(showEvalUI, 1200);
-                        } else {
-                            setTimeout(() => {
-                                addCrowns(2);
-                                container.innerHTML = `
-                                    <div class="text-center py-10 space-y-4">
-                                        <div class="text-6xl animate-bounce">👑👑👑</div>
-                                        <h3 class="text-2xl font-black text-rose-700">朗讀評估獲得最高榮譽！</h3>
-                                        <p class="text-slate-600">小公主普通話發音十分流利標準！獲得 2 頂皇冠！</p>
-                                        <button onclick="startMiniGame(4)" class="px-6 py-2.5 rounded-xl bg-rose-500 text-white font-bold shadow-md hover:bg-rose-600">
-                                            重新進行朗讀測試
-                                        </button>
-                                    </div>
-                                `;
-                            }, 1200);
-                        }
+                        addCrowns(1);
+                        showModal('朗讀評估：★★★★★ 5顆星滿分！', '聲調標準！咬字非常清晰！愛麗絲公主給你頒發最佳朗讀證書！👑', '👑');
+                        status.innerText = '點擊麥克風開始錄音跟讀測驗...';
                     }, 1000);
-                }
+                }, 3000);
             };
-
-            showEvalUI();
         }
 
+        // Tab 5: Trophy Room
         function renderTrophyRoom() {
             const grid = document.getElementById('rewardsGrid');
             grid.innerHTML = REWARDS.map(r => {
@@ -1195,23 +931,23 @@
                 const canAfford = appState.stars >= r.cost;
 
                 return `
-                    <div class="glass-card rounded-2xl p-5 border-2 ${isUnlocked ? 'border-amber-300 bg-amber-50/70' : 'border-slate-200'} flex flex-col items-center text-center justify-between">
+                    <div class="glass-card rounded-2xl p-5 border-2 ${isUnlocked ? 'border-amber-300 bg-amber-50/80' : 'border-slate-200'} flex flex-col items-center text-center justify-between">
                         <div>
-                            <div class="text-5xl mb-2 ${isUnlocked ? 'animate-pulse' : 'filter grayscale opacity-60'}">
+                            <div class="text-5xl mb-2 ${isUnlocked ? '' : 'filter grayscale opacity-50'}">
                                 ${r.icon}
                             </div>
-                            <h4 class="font-bold text-slate-800 text-base">${r.name}</h4>
+                            <h4 class="font-bold text-slate-800 text-sm">${r.name}</h4>
                             <p class="text-xs text-slate-500 mt-1">${r.desc}</p>
                         </div>
 
                         <div class="mt-4 w-full">
                             ${isUnlocked ? `
-                                <span class="inline-block w-full py-1.5 rounded-xl bg-amber-200 text-amber-800 font-bold text-xs">
-                                    ✨ 已佩戴收藏
+                                <span class="inline-block w-full py-1 rounded-xl bg-amber-200 text-amber-800 font-bold text-xs">
+                                    ✨ 已擁有
                                 </span>
                             ` : `
-                                <button onclick="unlockReward('${r.id}', ${r.cost})" class="w-full py-2 rounded-xl text-xs font-bold transition shadow-sm ${canAfford ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white hover:opacity-90' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}" ${!canAfford ? 'disabled' : ''}>
-                                    解鎖需求: ⭐ ${r.cost}
+                                <button onclick="unlockReward('${r.id}', ${r.cost})" class="w-full py-1.5 rounded-xl text-xs font-bold transition shadow-sm ${canAfford ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white hover:opacity-90' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}" ${!canAfford ? 'disabled' : ''}>
+                                    解鎖: ⭐ ${r.cost}
                                 </button>
                             `}
                         </div>
@@ -1222,13 +958,12 @@
 
         function unlockReward(id, cost) {
             if (appState.stars >= cost && !appState.unlockedRewards.includes(id)) {
-                playChimeSFX('fanfare');
                 appState.stars -= cost;
                 appState.unlockedRewards.push(id);
                 saveState();
                 updateStatsUI();
                 renderTrophyRoom();
-                showModal('解鎖皇家寶物！', '恭喜小公主擁有新的專屬城堡寶物！', '✨');
+                showModal('成功解鎖寶物！✨', '恭喜獲得專屬皇家收藏品！', '🏰');
             }
         }
 
@@ -1248,18 +983,17 @@
             document.getElementById('starCount').innerText = appState.stars;
             document.getElementById('crownCount').innerText = appState.crowns;
 
-            // Title calculation
-            let title = '練習見習生';
-            if (appState.crowns >= 10) title = '皇家詩詞女王 👸🏻';
-            else if (appState.crowns >= 5) title = '優雅小公主 👑';
+            let title = '朗讀小騎士';
+            if (appState.crowns >= 8) title = '皇家詩詞女王 👸🏻';
+            else if (appState.crowns >= 4) title = '優雅小公主 👑';
             else if (appState.crowns >= 2) title = '朗讀小明星 🌟';
             document.getElementById('princessTitle').innerText = title;
         }
 
         function saveState() {
-            localStorage.setItem('princess_stars', appState.stars);
-            localStorage.setItem('princess_crowns', appState.crowns);
-            localStorage.setItem('princess_rewards', JSON.stringify(appState.unlockedRewards));
+            localStorage.setItem('p3_stars', appState.stars);
+            localStorage.setItem('p3_crowns', appState.crowns);
+            localStorage.setItem('p3_rewards', JSON.stringify(appState.unlockedRewards));
         }
 
         function showModal(title, msg, icon = '✨') {
@@ -1270,7 +1004,6 @@
         }
 
         function closeModal() {
-            playChimeSFX('click');
             document.getElementById('modalOverlay').classList.add('hidden');
         }
 
@@ -1286,22 +1019,20 @@
         resizeCanvas();
 
         class Particle {
-            constructor(x, y) {
-                this.x = x || Math.random() * canvas.width;
-                this.y = y || Math.random() * canvas.height;
-                this.size = Math.random() * 4 + 1;
-                this.speedX = (Math.random() - 0.5) * 1.5;
-                this.speedY = (Math.random() - 0.5) * 1.5;
-                this.color = `hsla(${Math.random() * 60 + 300}, 100%, 75%, ${Math.random() * 0.7 + 0.3})`;
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = (Math.random() - 0.5) * 1.2;
+                this.speedY = (Math.random() - 0.5) * 1.2;
+                this.color = `hsla(${Math.random() * 60 + 300}, 100%, 75%, ${Math.random() * 0.6 + 0.2})`;
             }
-
             update() {
                 this.x += this.speedX;
                 this.y += this.speedY;
                 if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
                 if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
             }
-
             draw() {
                 ctx.fillStyle = this.color;
                 ctx.beginPath();
@@ -1310,25 +1041,13 @@
             }
         }
 
-        for (let i = 0; i < 40; i++) {
-            particles.push(new Particle());
-        }
+        for (let i = 0; i < 35; i++) particles.push(new Particle());
 
         function animateParticles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
+            particles.forEach(p => { p.update(); p.draw(); });
             requestAnimationFrame(animateParticles);
         }
-
-        window.addEventListener('pointerdown', (e) => {
-            for (let i = 0; i < 5; i++) {
-                particles.push(new Particle(e.clientX, e.clientY));
-                if (particles.length > 60) particles.shift();
-            }
-        });
 
         window.onload = function() {
             renderPoem();
