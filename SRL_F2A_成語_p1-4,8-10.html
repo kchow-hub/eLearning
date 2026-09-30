@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SRL F2上學期UT《中二成語名言警句手冊》</title>
+    <style>
+        :root { --primary: #007aff; --bg: #f2f2f7; --card: #ffffff; --success: #34c759; --error: #ff3b30; --meaning: #e67e22; --example: #27ae60; --highlight: #ff9500; --purple: #af52de; }
+        body { margin: 0; font-family: -apple-system, sans-serif; background: var(--bg); display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+        .app { width: 100%; max-width: 500px; display: flex; flex-direction: column; }
+        .screen { flex: 1; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; overflow-y: auto; }
+        .hidden { display: none !important; }
+        .card { background: var(--card); border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.05); }
+        .btn { background: var(--primary); color: white; border: none; border-radius: 14px; padding: 16px; font-size: 18px; font-weight: 600; margin: 8px 0; cursor: pointer; width: 100%; -webkit-tap-highlight-color: transparent; }
+        .btn-exam { background: var(--highlight); }
+        .btn-purple { background: var(--purple); }
+        .btn-l0 { background: #5856d6; }
+        .btn-l4 { background: #1c1c1e; }
+        .btn-outline { background: none; color: var(--primary); border: 2px solid var(--primary); }
+        .toolbar { display: flex; justify-content: space-between; padding: 10px 20px; align-items: center; background: white; border-bottom: 1px solid #ddd; }
+        .back-link { color: var(--primary); background: none; border: none; font-size: 17px; font-weight: 600; cursor: pointer; padding: 10px 0; }
+        .list-item { background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: left; }
+        .word-row { display: flex; align-items: center; gap: 5px; margin-bottom: 8px; flex-wrap: wrap; }
+        .char-btn { border: 1.5px solid #d1d1d6; background: #fff; border-radius: 6px; padding: 4px 8px; font-size: 1.2rem; cursor: pointer; color: #003366; font-weight: bold; }
+        .char-btn:active { background: #007aff; color: #fff; }
+        .exp-text { color: var(--meaning); font-size: 1rem; font-weight: 600; margin-bottom: 5px; }
+        .ex-text { color: var(--example); font-size: 0.9rem; line-height: 1.5; }
+        .speak-btn { background: #f2f2f7; border: none; border-radius: 50%; cursor: pointer; font-size: 1.1rem; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; }
+        input { width: 100%; padding: 15px; font-size: 1.4rem; border-radius: 15px; border: 2px solid #ccc; text-align: center; box-sizing: border-box; }
+        .feedback-area { margin-top: 15px; min-height: 40px; font-weight: bold; font-size: 1.1rem; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="toolbar">
+            <span style="font-weight:700;">SRL F2上學期UT《中二成語名言警句手冊》</span>
+            <button onclick="toggleGlobalSnd()" id="snd-btn" style="border:none; background:none; font-size:22px;">🔊</button>
+        </div>
+
+        <div id="sc-cover" class="screen">
+            <div class="card" style="background: #fff9f0;">
+                <h3 style="margin:0 0 10px 0; color:#e67e22;">🔥 上學期 UT 必考範圍</h3>
+                <button class="btn btn-exam" onclick="openChapterMenu('單元一')">單元一：人情世故 (16個成語 + 5個名言)</button>
+                <button class="btn btn-exam" onclick="openChapterMenu('校本價值教育')">校本價值教育名句 (1-9 忠誠)</button>
+            </div>
+        </div>
+
+        <div id="sc-level" class="screen hidden">
+            <button class="back-link" onclick="showScreen('sc-cover')">← 返回主頁</button>
+            <div class="card"><h2 id="chapter-title" style="margin:0; color: var(--primary);"></h2></div>
+            <button class="btn btn-l0" onclick="showLevel0()">1. Level 0 (點字溫習)</button>
+            <button class="btn" onclick="startGame(1)">2. Level 1 (意思填充)</button>
+            <button class="btn btn-purple" onclick="startGame(2)">3. Level 2 (應用挑戰)</button>
+            <button class="btn btn-l4" onclick="startGame(4)">🏆 Level 4 (聽音默寫 - 無字)</button>
+        </div>
+
+        <div id="sc-l0-list" class="screen hidden">
+            <button class="back-link" onclick="showScreen('sc-level')">← 返回</button>
+            <div id="l0-content"></div>
+        </div>
+
+        <div id="sc-game" class="screen hidden">
+            <button class="back-link" onclick="confirmExit()">← 放棄練習</button>
+            <div id="game-info" style="text-align:center; color:#8e8e93; margin-bottom:10px;"></div>
+            <div id="q-card" class="card">
+                <div id="q-text" style="font-size:1.15rem; line-height:1.6; padding: 10px 0;"></div>
+                <button id="q-speak" class="btn btn-outline" style="padding:8px; font-size:0.9rem;" onclick="speakCurrentQ()">🔊 朗讀題目</button>
+            </div>
+            <div id="q-hint" style="text-align:center; letter-spacing:4px; font-size:1.2rem; font-weight:bold; margin:15px 0; background:#eee; padding:12px; border-radius:10px;"></div>
+            <input type="text" id="ans-in" placeholder="請輸入答案" autocomplete="off">
+            <div id="fb-area" class="feedback-area"></div>
+            <div id="action-area" class="hidden"><button class="btn" onclick="nextQuestion()">下一題</button></div>
+            <button id="submit-btn" class="btn" onclick="checkAnswer()">提交</button>
+        </div>
+
+        <div id="sc-res" class="screen hidden">
+            <div class="card" style="margin-top:40px;"><h1 id="res-score" style="font-size:3.5rem;"></h1><p id="res-msg"></p></div>
+            <button class="btn" onclick="showScreen('sc-cover')">完成溫習</button>
+        </div>
+    </div>
+
+<script>
+    const bank = [
+        // 中二單元一：人情世故 (16個成語)
+        { ch: "單元一", w: "猶豫不決", exp: "遲疑不決，沒法拿定主意。", l1: "比賽截止報名日期快到了，一心仍______，不知道跟幼羚還是允行一起參加合唱項目。", l2: "面對兩個同樣優秀的暑期實習計劃，他在決定時顯得______，白白錯過了報名時限。" },
+        { ch: "單元一", w: "心直口快", exp: "性情直爽，有話直說。", l1: "一心說話______，有時冒犯了別人，自己卻不知道。", l2: "他的個性非常______，雖然沒有惡意，但有時說話太過直接，難免會傷到朋友。" },
+        { ch: "單元一", w: "坐立不安", exp: "坐着也不是，站着也不是。形容人心神不寧、焦急不安，煩躁的樣子。", l1: "允行快要上台演講，他在後台______，邊踱步邊唸唸有詞，十分緊張。", l2: "等待弟弟手術結果的那兩個小時裡，爸爸在手術室外踱來踱去，顯得______。" },
+        { ch: "單元一", w: "不亢不卑", exp: "不會高傲無禮；也不低聲下氣奉承別人。形容對人的態度恰當而有分寸，切合身份。", l1: "幼羚待人處事______，不會低聲下氣討好他人，也不會看不起別人。", l2: "即便面對權威專家，他也展現出______的態度，清晰表達自己的觀點，贏得全場尊重。" },
+        { ch: "單元一", w: "沾沾自喜", exp: "形容人得意、自滿的樣子。", l1: "教練告誡隊員千萬不可因一時的佳績而______，應繼續努力，以求進步。", l2: "雖然在測驗中取得滿分，但我們絕不能______，因為接下來還有更具挑戰性的期末考。" },
+        { ch: "單元一", w: "才高八斗", exp: "斗，容量的單位。本作「八斗之才」，是讚譽曹植的文才有八斗那麼多。後人就以「才高八斗」形容人才學淵博、文才極高。", l1: "思賢______，琴棋書畫都難不倒他。", l2: "張教授學貫中西、創作豐富，在文學界享有______的美譽。" },
+        { ch: "單元一", w: "怒火中燒", exp: "憤怒的火焰在心中燃燒。形容人非常憤怒。", l1: "媽媽教我們在______時，應深呼吸，讓自己冷靜下來。", l2: "得知自己的努力結晶成果被別人惡意剽竊，他頓時______，久久無法平息。" },
+        { ch: "單元一", w: "鋒芒畢露", exp: "鋒芒，指刀劍的刃口和尖端。比喻人的銳氣、才幹。畢，全部。鋒芒畢露，比喻人的傲氣、銳氣、才幹完全顯露出來；也形容人高傲自大、喜歡表現自己的才幹。", l1: "向華聰明機智，加上年少得意，使他處處______，不懂得謙遜。", l2: "那位年輕的新員工在會議上______，雖然展現了絕佳才能，但也招致不少資深同仁的嫉妒。" },
+        { ch: "單元一", w: "目空一切", exp: "一切都不放在眼裏。形容狂妄自大、高傲自大的人。", l1: "英秀從沒有嘗過失敗的滋味，加上年少氣盛，難免會______。她的父母決定要好好教導英秀待人接物的正確態度。", l2: "事業剛有起色他就變得傲慢無禮、______，最終因忽視合作伙伴而導致公司破產。" },
+        { ch: "單元一", w: "叱咤風雲", exp: "叱咤，高聲呼喝。叱咤風雲，高聲呼喝一聲，可使風雲變色。形容威風凜凜、聲勢力量極大，足以支配局勢。", l1: "這名演員在劇中扮演______的一代名將，威風凜凜，舉手投足都充滿英雄氣概。", l2: "這位商業巨擘當年曾是______的人物，如今晚年卻選擇隱居鄉郊，回歸平淡。" },
+        { ch: "單元一", w: "趾高氣揚", exp: "走路時腳抬得高高的，神氣十足。形容人自滿驕傲，得意忘形。", l1: "允行在校際鋼琴比賽中勝出，______地上台領獎，好像自己拿了國際獎項似的。", l2: "贏得一場小比賽就如此______，這種驕傲自滿的態度終究會阻礙他取得更大的成就。" },
+        { ch: "單元一", w: "出類拔萃", exp: "語出自《孟子·公孫丑上》：「出於其類，拔乎其萃。」拔，超出。萃，本指草叢，引申指人或物的聚集。出類拔萃，形容人的才學品德超群出眾。", l1: "子謙雖然年紀輕輕，但才華橫溢，______，一定能勝任這份工作。", l2: "經過多年的苦練，她終於在眾多世界級選手中脫穎而出，成為______的舞蹈家。" },
+        { ch: "單元一", w: "妄自尊大", exp: "自高自大。", l1: "你不要______，要知道「人外有人，天外有天」，我勸你還是學會謙遜一點，否則遲早會吃虧的。", l2: "我們必須保持謙虛學習的心態，絕不能盲目自滿、______，否則終將被時代淘汰。" },
+        { ch: "單元一", w: "三思而行", exp: "反覆考慮才行動。", l1: "我們做事必須______，不能草率行事。", l2: "投資創業關乎整家人的未來，必須徹底評估風險、______，切忌衝動決定。" },
+        { ch: "單元一", w: "笑裏藏刀", exp: "形容人表面和善但內心陰險狠毒。", l1: "這名職員平日笑容可掬，卻是個______的人，所以大家都不願意親近她。", l2: "那個競爭對手表面上親切地提出合作，實際上卻暗中挖走我們的主力客戶，真是______！" },
+        { ch: "單元一", w: "胸有成竹", exp: "在下筆畫竹前，心中早已有了竹子的形象。後來人們用「胸有成竹」來比喻做事前早已有了全面的考慮和打算，有把握把事情做好。也作「成竹在胸」。", l1: "允行平日訓練有素，對於在比賽時應採取甚麼致勝策略早有打算，可謂______。", l2: "面對考官提出的各種棘手問題，她答得井井有條，顯然在考前就已對課題______。" },
+
+        // 中二單元一：名言警句 (5個)
+        { ch: "單元一", w: "君子盛德而卑,虛己以受人", exp: "語出自韓嬰《韓詩外傳·第二卷》。全句的意思是君子即使有偉大的德行也會保持謙卑，還會謙虛地接受別人的意見。", l1: "這位教授雖然是科學界的權威，但他常以「______」自勉，提醒自己要虛心接受別人的意見。", l2: "身為團隊負責人，她深刻體會到「______」的真諦，總是耐心地傾聽實習生的創意和建議。" },
+        { ch: "單元一", w: "不自伐,故有功,不自矜,故長", exp: "語出自《老子》（又名《道德經》）。伐，誇耀。矜，驕傲。全句的意思是不誇耀自己，因此能建立功績；不驕傲自負，因此能令自己有非常大的進步或成為領袖。", l1: "允行深明「______」的道理，所以他從不誇耀自己的優異成績，還虛心學習，力求進步。", l2: "歷史上成功的領袖多能體會「______」的智慧，絕不居功自傲，才能獲得團體的長期支持。" },
+        { ch: "單元一", w: "滿招損,謙受益", exp: "語出自《尚書·大禹謨》。全句的意思是自滿會招來損害、失敗；謙虛會得到好處、教益。", l1: "我們不要因一時的成功而驕傲自滿，要謹記「______」，才能繼續進步。", l2: "比賽奪冠後教練特別叮囑我們「______」，提醒大家若沉溺於榮譽而懈怠，下一場必遭敗績。" },
+        { ch: "單元一", w: "識時務者為俊傑", exp: "語出自《三國志·諸葛亮傳》。全句指能認清時代的形勢和潮流的人，才稱得上是英雄豪傑。後多用來勸導他人改變目前的立場或歸順。", l1: "你口中雖說「______」，但事實是要我與你一起做壞事，我才不會答應呢！", l2: "企業發展必須順應科技進步的趨勢，所謂「______」，拒絕數位轉型的商家注定被市場淘汰。" },
+        { ch: "單元一", w: "明槍易躲,暗箭難防", exp: "語出自小說《平妖傳》。全句指從明處來的槍容易躲避，暗中射來的箭則難以防範。比喻公開的攻擊和傷害容易對付，而暗中的、隱閉的傷害和中傷則難以提防。", l1: "所有選手都是光明磊落的，絕不會用不正當的手法來取勝，所以你根本不用擔心發生「______」的事，專心準備比賽吧。", l2: "商場上競爭激烈，公開談判容易應對，但面對背後的謠言誹謗，真是讓人感嘆「______」。" },
+
+        // 校本價值教育名句：忠誠 1-9 (2026-2027)
+        { ch: "校本價值教育", w: "風聲雨聲讀書聲,聲聲入耳;家事國事天下事,事事關心", exp: "顧憲成《題東林書院》。細聽四周的風聲、雨聲和讀書聲，把不同聲音都聽進耳裏；要關心家事、國事和天下事，把這些事情都放在心上。提醒我們在做好本分時也要關懷社會與國家。", l1: "顧憲成名句「______」提醒我們，學生除了求取知識，更要主動關心社會與國家發展。", l2: "作為青年學者，不能只窩在實驗室裡做研究，應秉持「______」的精神，將所學投入解決氣候變遷等全球議題。" },
+        { ch: "校本價值教育", w: "過則勿憚改", exp: "《論語．學而》。有過錯不要怕改正。知錯能改並在錯誤中學習，是對自己負責任的表現。", l1: "古語云「______」，當我們發現自己的決定有偏差時，應勇於承認並及時糾正。", l2: "做錯事並不可怕，重要的是抱持「______」的態度，主動承擔責任並改進自我。" },
+        { ch: "校本價值教育", w: "明日復明日,明日何其多!我生待明日,萬事成蹉跎", exp: "錢福《明日歌》。明天之後還有明天，如果一生甚麼事情都等待明天才去做，結果只會一事無成，虛度光陰。", l1: "錢福在《明日歌》中寫道「______」，告誡我們要把握當下，切勿拖延時間。", l2: "如果你總是把今天該完成的功課拖延到明天，恐怕很快就會體會到「______」的遺憾了。" },
+        { ch: "校本價值教育", w: "君子用世,隨大隨小,皆全力赴之", exp: "魏源《默觚．治篇》。君子做事積極投入，所做的事情無論是大事還是小事，都會竭盡全力，做到最好。", l1: "魏源強調「______」，無論我們在團隊中擔任什麼角色，都應全情投入完成任務。", l2: "即便只是一次小型的班級打掃，我們也應展現「______」的精神，認真把每個角落清理乾淨。" },
+        { ch: "校本價值教育", w: "君子素其位而行,不願乎其外", exp: "《中庸》。君子安分守己，按照自己的本分行事，不貪圖本分以外的名利。指明白自身角色並勇於承擔相應職責。", l1: "古人主張「______」，意思是我們應該腳踏實地做好眼前的本分工作，不盲目追求虛名。", l2: "在團隊合作中，每個人若能「______」，各司其職、互相配合，整個團隊就能發揮最大效益。" },
+        { ch: "校本價值教育", w: "律己足以服人,量寬足以得人,身先足以率人", exp: "林逋《省心錄》。嚴格要求自己能使人信服，肚量寬闊能贏得人心，身先士卒就能率領人。強調以身作則、樹立榜樣。", l1: "林逋在《省心錄》提到「______」，說明優秀的領導者必須以身作則並展現包容心。", l2: "身為班長，他深知「______」的道理，因此每次做志工服務時總是第一個到場，深得同學們信服。" },
+        { ch: "校本價值教育", w: "士不可以不弘毅,任重而道遠", exp: "《論語．泰伯》。讀書人不可以沒有寬大的志向和堅忍的毅力，因為他們的責任重大，要走的路也漫長而遙遠。", l1: "《論語》有云「______」，青年人應樹立遠大志向，不怕艱辛地為社會進步作出貢獻。", l2: "面對改善貧困與環保等全球性難題，社會學家們秉持「______」的精神，持續投入研究與救援行動。" },
+        { ch: "校本價值教育", w: "天時不如地利,地利不如人和", exp: "《孟子．公孫丑下》。佔有利的時機不如佔地理優勢，佔地理優勢又不如人心所向，上下團結。", l1: "孟子說「______」，這說明了團隊團結一致、人心所向才是取得成功的最關鍵要素。", l2: "雖然我們在設備和資源上不如對方，但只要全隊凝聚力強，古人說「______」，我們依然有機會勝出。" },
+        { ch: "校本價值教育", w: "二人同心,其利斷金;同心之言,其臭如蘭", exp: "《周易．繫辭上》。二人同心協力，其銳利的程度可以截斷堅硬的金屬；同心同德的人發表一致的意見，容易讓人接受。", l1: "《周易》中「______」這句名言，生動地詮釋了夥伴之間心手相連、團結合作的巨大力量。", l2: "只要我們這個專案小組能團結互信，「______」，就沒有解決不了的難題。" }
+    ];
+
+    let currentCh = '', activeSet = [], qIdx = 0, score = 0, level = 1, sndOn = true;
+
+    function speak(txt) { 
+        if (!window.speechSynthesis) return;
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(txt);
+        msg.lang = 'zh-HK'; msg.rate = 0.9;
+        window.speechSynthesis.speak(msg);
+    }
+
+    function toggleGlobalSnd() { sndOn = !sndOn; document.getElementById('snd-btn').innerText = sndOn ? "🔊" : "🔈"; }
+    function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+    function openChapterMenu(ch) { currentCh = ch; document.getElementById('chapter-title').innerText = ch; showScreen('sc-level'); }
+    function confirmExit() { if(confirm("確定要放棄並回到主頁？")) showScreen('sc-cover'); }
+
+    function showLevel0() {
+        const box = document.getElementById('l0-content');
+        box.innerHTML = `<h3 style="text-align:center;">${currentCh} 溫習清單</h3>`;
+        bank.filter(i => i.ch === currentCh).forEach((i, idx) => {
+            const d = document.createElement('div');
+            d.className = "list-item";
+            const charBtns = i.w.split('').map(char => `<button class="char-btn" onclick="speak('${char}')">${char}</button>`).join('');
+            d.innerHTML = `
+                <div class="word-row"><b>${idx+1}.</b> ${charBtns} <button class="speak-btn" style="margin-left:auto" onclick="speak('${i.w}')">🔊</button></div>
+                <div class="exp-text">【意思】：${i.exp}</div>
+            `;
+            box.appendChild(d);
+        });
+        showScreen('sc-l0-list');
+    }
+
+    function startGame(lv) {
+        level = lv; qIdx = 0; score = 0;
+        activeSet = bank.filter(i => i.ch === currentCh).sort(() => Math.random() - 0.5);
+        showScreen('sc-game');
+        
+        const qCard = document.getElementById('q-card');
+        const qHint = document.getElementById('q-hint');
+        if (lv === 4) {
+            qCard.style.background = "#1c1c1e";
+            document.getElementById('q-text').innerText = "🏆 聽音默寫模式 - 點擊按鈕聽音";
+            qHint.innerText = "🔇 無提示模式";
+        } else {
+            qCard.style.background = "var(--card)";
+        }
+        loadNextQ();
+    }
+
+    function loadNextQ() {
+        if(qIdx >= activeSet.length) { finishGame(); return; }
+        const q = activeSet[qIdx];
+        document.getElementById('game-info').innerText = `題目 ${qIdx + 1} / ${activeSet.length}`;
+        
+        if (level === 4) {
+            speak("請默寫：" + q.w);
+        } else {
+            const qText = (level === 2) ? q.l2 : q.l1;
+            document.getElementById('q-text').innerText = qText;
+            
+            let h = q.w.split('').map(c => (Math.random() > 0.8 || ",，。·;；!！".includes(c)) ? c : "□");
+            document.getElementById('q-hint').innerText = h.join('');
+        }
+        
+        document.getElementById('ans-in').value = "";
+        document.getElementById('fb-area').innerText = "";
+        document.getElementById('action-area').classList.add('hidden');
+        document.getElementById('submit-btn').classList.remove('hidden');
+        document.getElementById('ans-in').focus();
+    }
+
+    function speakCurrentQ() {
+        const q = activeSet[qIdx];
+        if (level === 4) { 
+            speak(q.w); 
+        } else { 
+            const qText = (level === 2) ? q.l2 : q.l1;
+            speak(qText.replace('______', q.w)); 
+        }
+    }
+
+    function checkAnswer() {
+        const u = document.getElementById('ans-in').value.trim();
+        const c = activeSet[qIdx].w;
+        const fb = document.getElementById('fb-area');
+        if(u === c) {
+            score++; fb.style.color = "var(--success)"; fb.innerText = "正確！✓";
+            speak("答對了。答案是" + c);
+            setTimeout(() => { qIdx++; loadNextQ(); }, 1200);
+        } else {
+            fb.style.color = "var(--error)"; fb.innerText = `答錯了。正確答案：${c}`;
+            speak("答錯了。正確答案是" + c);
+            document.getElementById('submit-btn').classList.add('hidden');
+            document.getElementById('action-area').classList.remove('hidden');
+        }
+    }
+
+    function nextQuestion() { qIdx++; loadNextQ(); }
+
+    function finishGame() {
+        document.getElementById('res-score').innerText = `${score} / ${activeSet.length}`;
+        document.getElementById('res-msg').innerText = score === activeSet.length ? "太強了！測考必勝！" : "再多溫習一下 Level 2 與 Level 4 吧！";
+        showScreen('sc-res');
+    }
+    
+    document.getElementById('ans-in').addEventListener('keypress', e => { if(e.key==='Enter') checkAnswer(); });
+</script>
+</body>
+</html>
