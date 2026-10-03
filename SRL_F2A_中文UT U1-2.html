@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中二中文科智庫系統 — 單元一與單元二專題測驗</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-unit1: #8e44ad;
+            --accent-unit2: #2980b9;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --correct-bg: #d4edda;
+            --correct-border: #28a745;
+            --wrong-bg: #f8d7da;
+            --wrong-border: #dc3545;
+        }
+
+        body {
+            font-family: 'PingFang HK', 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 1.5rem 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 { margin: 0; font-size: 1.8rem; }
+        header p { margin: 0.5rem 0 0 0; opacity: 0.8; font-size: 0.9rem; }
+
+        .scoreboard {
+            background: #2d3748;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            font-weight: bold;
+            box-shadow: inset 0 -2px 5px rgba(0,0,0,0.2);
+        }
+        .score-item { font-size: 1.1rem; }
+        .score-item span { color: #f1c40f; font-size: 1.3rem; margin: 0 0.2rem; }
+        
+        .progress-container {
+            width: 150px;
+            background-color: #4a5568;
+            border-radius: 10px;
+            padding: 3px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 0.5rem;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 12px;
+            background-color: #2ecc71;
+            border-radius: 8px;
+            transition: width 0.4s ease;
+        }
+
+        .user-tag {
+            background: #4a5568;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px dashed #f1c40f;
+        }
+
+        .tts-toggle-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .tts-toggle-btn.enabled { background: #2ecc71; }
+
+        .nav-tabs, .level-tabs {
+            display: flex;
+            justify-content: center;
+            background: #ecf0f1;
+            padding: 0.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .level-tabs {
+            top: 50px;
+            background: #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .tab-btn, .lvl-btn {
+            background: none;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            margin: 0 0.25rem;
+            color: #7f8c8d;
+        }
+
+        .tab-btn.active[data-target="unit1"] { background: var(--accent-unit1); color: white; }
+        .tab-btn.active[data-target="unit2"] { background: var(--accent-unit2); color: white; }
+        .lvl-btn.active { background: #34495e; color: white; }
+
+        .container { max-width: 950px; margin: 1.5rem auto; padding: 0 1rem; }
+        .tab-content, .level-content { display: none; }
+        .tab-content.active, .level-content.active { display: block; }
+
+        .chapter-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        #unit1 .chapter-card { border-top: 5px solid var(--accent-unit1); }
+        #unit2 .chapter-card { border-top: 5px solid var(--accent-unit2); }
+
+        h2 { margin-top: 0; color: var(--primary-color); border-bottom: 2px solid #eee; padding-bottom: 0.5rem; font-size: 1.4rem; }
+        
+        .section-header-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f1f2f6;
+            padding: 0.4rem 0.8rem;
+            border-left: 4px solid var(--primary-color);
+            margin-top: 1.2rem;
+            margin-bottom: 0.8rem;
+        }
+        .section-header-box h3 {
+            margin: 0;
+            font-size: 1.05rem;
+            color: #444;
+            background: none;
+            padding: 0;
+            border: none;
+        }
+
+        .quiz-section {
+            background: #fafafa;
+            border: 1px solid #eaeded;
+            padding: 1rem;
+            margin-bottom: 1.2rem;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .quiz-sentence { margin-bottom: 0.8rem; text-align: justify; font-size: 1.05rem; position: relative; }
+
+        table.quiz-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            background: #ffffff;
+        }
+        table.quiz-table th, table.quiz-table td {
+            border: 1px solid #cbd5e0;
+            padding: 8px 10px;
+            text-align: left;
+            font-size: 0.92rem;
+            vertical-align: top;
+        }
+        table.quiz-table th {
+            background-color: #e2e8f0;
+            color: #2d3748;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .idiom-box {
+            background: #f0f7ff;
+            border: 1px dashed #3498db;
+            border-radius: 6px;
+            padding: 0.8rem 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+        .idiom-box ol { margin: 0; padding-left: 1.2rem; }
+        .idiom-box li { margin-bottom: 0.3rem; }
+
+        .drop-box, .blank-input, select.quiz-select {
+            display: inline-block;
+            min-width: 50px;
+            height: 28px;
+            border-bottom: 2px solid #bdc3c7;
+            background-color: #fffde7;
+            vertical-align: middle;
+            text-align: center;
+            font-weight: bold;
+            color: #2980b9;
+            padding: 0 0.3rem;
+            margin: 2px;
+            transition: all 0.2s ease;
+        }
+
+        select.quiz-select {
+            border: 1px solid #3498db;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .blank-input {
+            border: none;
+            border-bottom: 2px solid #bdc3c7;
+            font-size: 0.95rem;
+        }
+        .blank-input:focus { outline: none; background-color: #fff; border-bottom-color: #3498db; }
+
+        .drop-box { border: 1px dashed #95a5a6; border-radius: 4px; line-height: 26px; cursor: pointer; }
+        .drop-box.over { border: 2px dashed #2c3e50; background-color: #e8f4f8; }
+
+        .word-bank {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            background: #ebf5fb;
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            margin-top: 0.3rem;
+            border: 1px dashed #3498db;
+        }
+
+        .word-bank-header {
+            width: 100%;
+            font-size: 0.8rem;
+            color: #2980b9;
+            font-weight: bold;
+            margin-bottom: 1px;
+        }
+
+        .word-tag {
+            background: #ffffff;
+            border: 1px solid #3498db;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            cursor: grab;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #2c3e50;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+        .word-tag:hover { background: #e8f4f8; border-color: #2980b9; transform: translateY(-1px); }
+        .word-tag:active { cursor: grabbing; transform: scale(0.96); }
+        .word-tag.dragged { opacity: 0.4; }
+        .word-tag.used { display: none !important; }
+
+        .state-correct { background-color: var(--correct-bg) !important; border-color: var(--correct-border) !important; color: #155724 !important; }
+        .state-wrong { background-color: var(--wrong-bg) !important; border-color: var(--wrong-border) !important; color: #721c24 !important; }
+
+        .error-hint-msg {
+            display: inline-block;
+            color: #c0392b;
+            background: #fdf2e9;
+            border: 1px solid #f5b041;
+            padding: 0 0.4rem;
+            font-size: 0.82rem;
+            border-radius: 4px;
+            margin-left: 0.3rem;
+            font-weight: bold;
+            vertical-align: middle;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-5px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .btn-reset-section {
+            background: #e67e22;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.65rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .btn-reset-section:hover { background: #d35400; }
+
+        .btn-reset-page {
+            background: #7f8c8d;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 1rem;
+            width: 100%;
+        }
+        .btn-reset-page:hover { background: #606f7b; }
+
+        .dashboard-section {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border-top: 5px solid #34495e;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        @media (max-width: 768px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+        .data-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 1rem;
+        }
+        .data-card h4 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #cbd5e0; padding-bottom: 0.3rem; }
+        
+        .leaderboard-table, .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+        .leaderboard-table th, .leaderboard-table td,
+        .history-table th, .history-table td {
+            padding: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .leaderboard-table th, .history-table th { background: #edf2f7; color: #4a5568; }
+        
+        .rank-1 { color: #f1c40f; font-weight: bold; }
+        .rank-2 { color: #95a5a6; font-weight: bold; }
+        .rank-3 { color: #d35400; font-weight: bold; }
+        
+        .history-log-container {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .btn-clear-data {
+            background: #e74c3c; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-top: 0.5rem; float: right;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>中二中文科智庫系統</h1>
+    <p>單元一 羅貫中《楊修之死》 & 單元二 也斯《在風中》雙單元合輯</p>
+</header>
+
+<!-- 計分儀表板 -->
+<div class="scoreboard">
+    <div class="score-item">挑戰者：<span id="user-name-display" class="user-tag" onclick="changeNickname()">請輸入暱稱</span></div>
+    <div class="score-item">
+        <button id="tts-toggle" class="tts-toggle-btn enabled" onclick="toggleTTS()">
+            <span id="tts-icon">🔊</span> 語音洗腦：<span id="tts-status">開啟</span>
+        </button>
+    </div>
+    <div class="score-item">累計得分：<span id="total-score">0</span> 分</div>
+    <div class="score-item">答對進度：<span id="correct-count">0</span> / <span id="total-count">0</span></div>
+    <div class="score-item">
+        完成進度：
+        <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+    </div>
+</div>
+
+<!-- 主單元分頁 -->
+<div class="nav-tabs">
+    <button class="tab-btn active" data-target="unit1">中二單元一《楊修之死》</button>
+    <button class="tab-btn" data-target="unit2">中二單元二《在風中》</button>
+</div>
+
+<!-- 難度分頁 -->
+<div class="level-tabs">
+    <button class="lvl-btn active" data-lvl="lvl1">Level 1：分段拖拉字條模式</button>
+    <button class="lvl-btn" data-lvl="lvl2">Level 2：全篇不供詞填充模式</button>
+</div>
+
+<div class="container">
+
+    <!-- ================================================================= -->
+    <!-- ==================== 中二單元一 羅貫中《楊修之死》 =============== -->
+    <!-- ================================================================= -->
+    <div id="unit1" class="tab-content active">
+        <div class="chapter-card">
+            <h2>羅貫中《楊修之死》</h2>
+
+            <!-- LEVEL 1 -->
+            <div class="level-content lvl1 active">
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>一、主旨</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+                    <div class="quiz-sentence">
+                        本文記敘 <div class="drop-box" data-ans="楊修被殺的經過和因由" style="min-width:180px;"></div>，反映楊修 <div class="drop-box" data-ans="恃才放曠" style="min-width:90px;"></div> 和曹操 <div class="drop-box" data-ans="陰險奸忌" style="min-width:90px;"></div> 的性格，並帶出 <div class="drop-box" data-ans="恃才放曠的害處" style="min-width:130px;"></div>。
+                    </div>
+                    <div class="word-bank" data-words="楊修被殺的經過和因由,恃才放曠,陰險奸忌,恃才放曠的害處"></div>
+                </div>
+
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>二、段落層次大意</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+                    <table class="quiz-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 20%;">部分</th>
+                                <th style="width: 25%;">段落</th>
+                                <th style="width: 55%;">內容大意</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><b>一：雞肋事件</b></td>
+                                <td>第 <div class="drop-box" data-ans="1" style="min-width:30px;"></div> 至 <div class="drop-box" data-ans="3" style="min-width:30px;"></div> 段</td>
+                                <td>記敘楊修在「雞肋事件」中被曹操以 <div class="drop-box" data-ans="造言亂軍心" style="min-width:110px;"></div> 的罪名處死，交代楊修之死的近因。</td>
+                            </tr>
+                            <tr>
+                                <td><b>二：六件事</b></td>
+                                <td>第 <div class="drop-box" data-ans="4" style="min-width:30px;"></div> 段至 <div class="drop-box" data-ans="9" style="min-width:30px;"></div> 段</td>
+                                <td>記敘 <div class="drop-box" data-ans="楊修與曹操之間的六件往事" style="min-width:210px;"></div>，交代 <div class="drop-box" data-ans="楊修之死的遠因" style="min-width:140px;"></div>。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="word-bank" data-words="1,3,造言亂軍心,4,9,楊修與曹操之間的六件往事,楊修之死的遠因"></div>
+                </div>
+
+                <!-- 三、內容分析* (全面表單/表格模式，每個事件獨立選詞庫) -->
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>三、內容分析*</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+
+                    <table class="quiz-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 12%;">類別</th>
+                                <th style="width: 12%;">事件</th>
+                                <th style="width: 38%;">起因和經過</th>
+                                <th style="width: 20%;">結果</th>
+                                <th style="width: 18%;">詳略安排</th>
+                            </tr>
+                        </thead>
+
+                        <!-- 事件一（近因） -->
+                        <tbody class="quiz-subgroup">
+                            <tr>
+                                <td><b>事件（近因）</b></td>
+                                <td><b>事件一</b></td>
+                                <td>楊修從暗號「<div class="drop-box" data-ans="雞肋" style="min-width:50px;"></div>」推測 <div class="drop-box" data-ans="曹操將退兵" style="min-width:100px;"></div>。於是 <div class="drop-box" data-ans="吩咐士兵收拾行裝" style="min-width:130px;"></div>。</td>
+                                <td>楊修被判 <div class="drop-box" data-ans="惑亂軍心之罪處死" style="min-width:130px;"></div>。</td>
+                                <td>發生時間：<div class="drop-box" data-ans="現在" style="min-width:50px;"></div><br>篇幅較 <div class="drop-box" data-ans="長" style="min-width:35px;"></div>，屬於 <div class="drop-box" data-ans="詳寫" style="min-width:50px;"></div>。</td>
+                            </tr>
+                            <tr>
+                                <td colspan="5" style="background:#fcfcfc; padding:4px 8px;">
+                                    <div class="word-bank" data-words="雞肋,曹操將退兵,吩咐士兵收拾行裝,惑亂軍心之罪處死,現在,長,詳寫" data-header="💡 【事件一（近因）】可選詞條庫："></div>
+                                </td>
+                            </tr>
+                        </tbody>
+
+                        <!-- 過渡句 -->
+                        <tbody class="quiz-subgroup">
+                            <tr>
+                                <td colspan="2"><b>過渡句</b></td>
+                                <td colspan="3">「<div class="drop-box" data-ans="原來楊修為人，恃才放曠，數犯曹操之忌" style="min-width:290px;"></div>」（摘錄原文）</td>
+                            </tr>
+                            <tr>
+                                <td colspan="5" style="background:#fcfcfc; padding:4px 8px;">
+                                    <div class="word-bank" data-words="原來楊修為人，恃才放曠，數犯曹操之忌" data-header="💡 【過渡句】可選詞條庫："></div>
+                                </td>
+                            </tr>
+                        </tbody>
+
+                        <!-- 事件二至七（遠因） -->
+                        <tbody class="quiz-subgroup">
+                            <!-- 事件二 -->
+                            <tr>
+                                <td rowspan="12"><b>事件（遠因）</b></td>
+                                <td><b>事件二</b></td>
+                                <td>楊修猜出曹操在門上寫「<div class="drop-box" data-ans="活" style="min-width:40px;"></div>」字是嫌 <div class="drop-box" data-ans="園門太闊" style="min-width:80px;"></div>。</td>
+                                <td>招致曹操的 <div class="drop-box" data-ans="妒忌" style="min-width:50px;"></div>。</td>
+                                <td rowspan="12" style="vertical-align:middle; background:#fafafa;">
+                                    <b>遠因整體詳略安排：</b><br>
+                                    發生時間：<div class="drop-box" data-ans="過去" style="min-width:50px;"></div><br>
+                                    篇幅較 <div class="drop-box" data-ans="短" style="min-width:35px;"></div>，屬於 <div class="drop-box" data-ans="略寫" style="min-width:50px;"></div>。
+                                    <div style="margin-top:8px;">
+                                        <div class="word-bank" data-words="過去,短,略寫" data-header="💡 【遠因整體詳略】可選詞條庫："></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="background:#fcfcfc; padding:4px 8px;">
+                                    <div class="word-bank" data-words="活,園門太闊,妒忌" data-header="💡 【事件二】可選詞條庫："></div>
+                                </td>
+                            </tr>
+
+                            <!-- 事件三 -->
+                            <tr>
+                                <td><b>事件三</b></td>
+                                <td>楊修猜中「一合酥」是指「<div class="drop-box" data-ans="一人一口酥" style="min-width:90px;"></div>」，並把酥餅 <div class="drop-box" data-ans="與眾人分來吃" style="min-width:110px;"></div>。</td>
+                                <td>招致曹操的 <div class="drop-box" data-ans="厭惡" style="min-width:50px;"></div>。</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="background:#fcfcfc; padding:4px 8px;">
+                                    <div class="word-bank" data-words="一人一口酥,與眾人分來吃,厭惡" data-header="💡 【事件三】可選詞條庫："></div>
+                                </td>
+                            </tr>
+
+                            <!-- 事件四 -->
+                            <tr>
+                                <td><b>事件四</b></td>
+                                <td>楊修當眾 <div class="drop-box" data-ans="揭穿曹操假裝會在夢中殺人" style="min-width:190px;"></div>。</td>
+                                <td>令曹操更感 <div class="drop-box" data-ans="厭惡" style="min-width:50px;"></div>。</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="background:#fcfcfc; padding:4px 8px;">
+                                    <div class="word-bank" data-words="揭穿曹操假裝會在夢中殺人,厭惡" data-header="💡 【事件四】可選詞條庫："></div>
+                                </td>
+                            </tr>
+
+                            <!-- 事件五 -->
+                            <tr>
+                                <td><b>事件五</b></td>
+                                <td>楊修密告曹丕與吳質會談 <div class="drop-box" data-ans="世子繼位" style="min-width:80px;"></div> 的事，反被 <div class="drop-box" data-ans="吳質暗算" style="min-width:80px;"></div>。</td>
+                                <td>背上 <div class="drop-box" data-ans="誣害曹丕" style="min-width:80px;"></div> 之嫌，令曹操更感 <div class="drop-box" data-ans="厭惡" style="min-width:50px;"></div>。</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="background:#fcfcfc; padding:4px 8px;">
+                                    <div class="word-bank" data-words="世子繼位,吳質暗算,誣害曹丕,厭惡" data-header="💡 【事件五】可選詞條庫："></div>
+                                </td>
+                            </tr>
+
+                            <!-- 事件六 -->
+                            <tr>
+                                <td><b>事件六</b></td>
+                                <td>楊修教曹植出 <div class="drop-box" data-ans="鄴城門" style="min-width:70px;"></div> 的方法。</td>
+                                <td>令曹操十分 <div class="drop-box" data-ans="憤怒" style="min-width:50px;"></div>。</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="background:#fcfcfc; padding:4px 8px;">
+                                    <div class="word-bank" data-words="鄴城門,憤怒" data-header="💡 【事件六】可選詞條庫："></div>
+                                </td>
+                            </tr>
+
+                            <!-- 事件七 -->
+                            <tr>
+                                <td><b>事件七</b></td>
+                                <td>楊修為曹植作「<div class="drop-box" data-ans="答教" style="min-width:50px;"></div>」，用以應對 <div class="drop-box" data-ans="曹操的考問" style="min-width:90px;"></div>。</td>
+                                <td>令曹操大怒並萌生 <div class="drop-box" data-ans="殺意" style="min-width:50px;"></div>。</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="background:#fcfcfc; padding:4px 8px;">
+                                    <div class="word-bank" data-words="答教,曹操的考問,殺意" data-header="💡 【事件七】可選詞條庫："></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 四、寫作手法* -->
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>四、寫作手法*</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+
+                    <div class="quiz-subgroup">
+                        <div class="quiz-sentence">
+                            <strong>1. 試從第 4 段中找出表示記敘事件時間轉變的過渡句，並說明這過渡句的作用：</strong><br>
+                            在第 4 段中「① <div class="drop-box" data-ans="原來楊修為人，恃才放曠，數犯曹操之忌" style="min-width:320px;"></div>」（摘錄原文作答）一句是本文的過渡句。<br>
+                            這個句子表示前後文的過渡，上承 ② <div class="drop-box" data-ans="記述楊修被曹操處死的經過和結果" style="min-width:240px;"></div>，下啟過去 ③ <div class="drop-box" data-ans="楊修與曹操之間發生的往事" style="min-width:210px;"></div>，具體交代楊修之死的因由，使文章轉折 ④ <div class="drop-box" data-ans="自然" style="min-width:60px;"></div>，段落過渡流暢。
+                        </div>
+                        <div class="word-bank" data-words="原來楊修為人，恃才放曠，數犯曹操之忌,記述楊修被曹操處死的經過和結果,楊修與曹操之間發生的往事,自然" data-header="💡 【問題 1 過渡句】可選詞條庫："></div>
+                    </div>
+
+                    <div class="quiz-subgroup" style="margin-top:1.2rem;">
+                        <div class="quiz-sentence">
+                            <strong>2. 根據本文的記敘詳略安排，回答以下問題：</strong><br>
+                            <strong>(1) 試按各事件的篇幅長短，判斷它們是屬於詳寫還是略寫：</strong>
+                            <table class="quiz-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 20%;">事件名稱</th>
+                                        <th style="width: 80%;">詳略判斷</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>A 雞肋事件</td>
+                                        <td><select class="quiz-select" data-ans="① 詳寫"><option value="">--請選擇--</option><option value="① 詳寫">① 詳寫</option><option value="② 略寫">② 略寫</option></select></td>
+                                    </tr>
+                                    <tr>
+                                        <td>B 闊門事件、C 一合酥事件、D 夢中殺人事件、E 吳質事件、F 城門事件、G 答教事件</td>
+                                        <td><select class="quiz-select" data-ans="② 略寫"><option value="">--請選擇--</option><option value="① 詳寫">① 詳寫</option><option value="② 略寫">② 略寫</option></select></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="quiz-sentence" style="margin-top:0.8rem;">
+                            <strong>(2) 承上題，為什麼作者要這樣安排？</strong><br>
+                            詳寫的事件 ① <select class="quiz-select" data-ans="直接"><option value="">--請選擇--</option><option value="直接">① 直接</option><option value="間接">② 間接</option></select> 指出導致楊修被殺的原因，能充分反映楊修 ② <div class="drop-box" data-ans="恃才放曠" style="min-width:90px;"></div> 的性格帶來的結果，故須詳細交代事情的發展。<br>
+                            略寫的事件則用來補充說明楊修的 ③ <div class="drop-box" data-ans="性格特點" style="min-width:90px;"></div> 和他數次 ④ <div class="drop-box" data-ans="觸犯曹操" style="min-width:90px;"></div>，交代楊修和曹操之間的矛盾由來已久，故可以略寫。
+                        </div>
+                        <div class="word-bank" data-words="恃才放曠,性格特點,觸犯曹操" data-header="💡 【問題 2 詳略原因】可選詞條庫："></div>
+                    </div>
+                </div>
+
+                <!-- 五、【字詞和成語學習】 -->
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>五、【字詞和成語學習】</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+
+                    <div class="quiz-sentence"><strong>一、字詞辨析</strong></div>
+                    <div class="quiz-sentence">
+                        (1) 以下哪個成語中的「當」字讀音，與「於是再築牆圍，改造停當，又請操觀之」（第 4 段）的「當」字相同？<br>
+                        A 當頭棒喝 &nbsp;&nbsp;&nbsp;&nbsp; B 直截了當 &nbsp;&nbsp;&nbsp;&nbsp; C 旗鼓相當<br>
+                        答案：<select class="quiz-select" data-ans="B"><option value="">--請選擇--</option><option value="A">A</option><option value="B">B (直截了當)</option><option value="C">C</option></select>
+                    </div>
+
+                    <div class="quiz-sentence" style="margin-top:0.8rem;">
+                        (2) 以下哪句中的「乃」字意思，與「君乃在夢中耳」（第 6 段）中的「乃」字相同？<br>
+                        A 陳太丘與友期行，期日中，過中不至，太丘捨去，去後乃至。（劉義慶《陳太丘與友期行》）<br>
+                        B 因恐有人知覺，乃用大籠藏吳質於中，只說是絹疋在內，載入府中。（羅貫中《楊修之死》）<br>
+                        C 乃取一葫蘆置於地，以錢覆其口，徐以杓酌油瀝之，自錢孔入，而錢不濕。（歐陽修《賣油翁》）<br>
+                        答案：<select class="quiz-select" data-ans="B"><option value="">--請選擇--</option><option value="A">A</option><option value="B">B (因恐有人知覺，乃用大籠藏吳質於中)</option><option value="C">C</option></select>
+                    </div>
+
+                    <div class="quiz-sentence" style="margin-top:1.2rem;"><strong>二、成語學習（認識以下有關待人處事的成語及其意思）</strong></div>
+                    <div class="idiom-box">
+                        <div style="font-weight:bold; color:#2c3e50; margin-bottom:0.4rem;">待人處事成語庫：</div>
+                        <ol>
+                            <li><b>猶豫不決：</b>遲疑不決，沒法拿定主意。</li>
+                            <li><b>鋒芒畢露：</b>比喻人的傲氣、才幹完全顯露出來，也形容人高傲自大、喜歡表現自己的才幹。</li>
+                            <li><b>目空一切：</b>一切都不放在眼裏。形容狂妄自大、高傲自大的人。</li>
+                            <li><b>三思而行：</b>反覆考慮才行動。</li>
+                            <li><b>胸有成竹：</b>比喻做事事前早已有全面的考慮和打算，有把握把事情做好。</li>
+                        </ol>
+                    </div>
+
+                    <div class="quiz-sentence"><strong>從上表中選出適當的字詞，填在橫線上，使之成為完整的句子：</strong></div>
+                    <div class="quiz-sentence">(1) 她早已作好了充足的準備，因此現在才能在問答比賽中 <div class="drop-box" data-ans="胸有成竹" style="min-width:100px;"></div> 地作出應對。</div>
+                    <div class="quiz-sentence">(2) 不論要處理甚麼事情，我們都要思量清楚事情的後果，<div class="drop-box" data-ans="三思而行" style="min-width:100px;"></div>，才能作出最恰當的決定。</div>
+                    <div class="quiz-sentence">(3) 做事時如果過於賣弄本領，<div class="drop-box" data-ans="鋒芒畢露" style="min-width:100px;"></div>，容易給別人留下負面印象。</div>
+                    <div class="quiz-sentence">(4) 正所謂「當機立斷，免受其亂」，我們做事時不應 <div class="drop-box" data-ans="猶豫不決" style="min-width:100px;"></div>，白白浪費時間。</div>
+                    <div class="quiz-sentence">(5) 他恃才傲物、<div class="drop-box" data-ans="目空一切" style="min-width:100px;"></div> 的處事態度，令不少同學對他頗有微詞。</div>
+                    <div class="word-bank" data-words="胸有成竹,三思而行,鋒芒畢露,猶豫不決,目空一切" data-header="💡 【成語應用】可選詞條庫："></div>
+                </div>
+
+                <button class="btn-reset-page" onclick="resetSection(this)">🧹 重置全頁（單元一 L1）</button>
+            </div>
+
+            <!-- LEVEL 2 -->
+            <div class="level-content lvl2">
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>一、主旨</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+                    <div class="quiz-sentence">
+                        本文記敘 <input type="text" class="blank-input" data-ans="楊修被殺的經過和因由" style="width:180px;">，反映楊修 <input type="text" class="blank-input" data-ans="恃才放曠" style="width:90px;"> 和曹操 <input type="text" class="blank-input" data-ans="陰險奸忌" style="width:90px;"> 的性格，並帶出 <input type="text" class="blank-input" data-ans="恃才放曠的害處" style="width:130px;">。
+                    </div>
+                </div>
+
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>二、段落層次大意</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+                    <table class="quiz-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 20%;">部分</th>
+                                <th style="width: 25%;">段落</th>
+                                <th style="width: 55%;">內容大意</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><b>一：雞肋事件</b></td>
+                                <td>第 <input type="text" class="blank-input" data-ans="1" style="width:30px;"> 至 <input type="text" class="blank-input" data-ans="3" style="width:30px;"> 段</td>
+                                <td>記敘楊修在「雞肋事件」中被曹操以 <input type="text" class="blank-input" data-ans="造言亂軍心" style="width:110px;"> 的罪名處死，交代楊修之死的近因。</td>
+                            </tr>
+                            <tr>
+                                <td><b>二：六件事</b></td>
+                                <td>第 <input type="text" class="blank-input" data-ans="4" style="width:30px;"> 段至 <input type="text" class="blank-input" data-ans="9" style="width:30px;"> 段</td>
+                                <td>記敘 <input type="text" class="blank-input" data-ans="楊修與曹操之間的六件往事" style="width:210px;">，交代 <input type="text" class="blank-input" data-ans="楊修之死的遠因" style="width:140px;">。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 三、內容分析* (Level 2 - 表格/表單模式) -->
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>三、內容分析*</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+
+                    <table class="quiz-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 12%;">類別</th>
+                                <th style="width: 12%;">事件</th>
+                                <th style="width: 38%;">起因和經過</th>
+                                <th style="width: 20%;">結果</th>
+                                <th style="width: 18%;">詳略安排</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 事件一（近因） -->
+                            <tr>
+                                <td><b>事件（近因）</b></td>
+                                <td><b>事件一</b></td>
+                                <td>楊修從暗號「<input type="text" class="blank-input" data-ans="雞肋" style="width:50px;">」推測 <input type="text" class="blank-input" data-ans="曹操將退兵" style="width:100px;">。於是 <input type="text" class="blank-input" data-ans="吩咐士兵收拾行裝" style="width:140px;">。</td>
+                                <td>楊修被判 <input type="text" class="blank-input" data-ans="惑亂軍心之罪處死" style="width:130px;">。</td>
+                                <td>發生時間：<input type="text" class="blank-input" data-ans="現在" style="width:50px;"><br>篇幅較 <input type="text" class="blank-input" data-ans="長" style="width:35px;">，屬於 <input type="text" class="blank-input" data-ans="詳寫" style="width:50px;">。</td>
+                            </tr>
+
+                            <!-- 過渡句 -->
+                            <tr>
+                                <td colspan="2"><b>過渡句</b></td>
+                                <td colspan="3">「<input type="text" class="blank-input" data-ans="原來楊修為人，恃才放曠，數犯曹操之忌" style="width:300px;">」（摘錄原文）</td>
+                            </tr>
+
+                            <!-- 事件二至七（遠因） -->
+                            <tr>
+                                <td rowspan="6"><b>事件（遠因）</b></td>
+                                <td><b>事件二</b></td>
+                                <td>楊修猜出曹操在門上寫「<input type="text" class="blank-input" data-ans="活" style="width:40px;">」字是嫌 <input type="text" class="blank-input" data-ans="園門太闊" style="width:80px;">。</td>
+                                <td>招致曹操的 <input type="text" class="blank-input" data-ans="妒忌" style="width:50px;">。</td>
+                                <td rowspan="6" style="vertical-align:middle; background:#fafafa;">
+                                    <b>遠因整體詳略安排：</b><br>
+                                    發生時間：<input type="text" class="blank-input" data-ans="過去" style="width:50px;"><br>
+                                    篇幅較 <input type="text" class="blank-input" data-ans="短" style="width:35px;">，屬於 <input type="text" class="blank-input" data-ans="略寫" style="width:50px;">。
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><b>事件三</b></td>
+                                <td>楊修猜中「一合酥」是指「<input type="text" class="blank-input" data-ans="一人一口酥" style="width:90px;">」，並把酥餅 <input type="text" class="blank-input" data-ans="與眾人分來吃" style="width:110px;">。</td>
+                                <td>招致曹操的 <input type="text" class="blank-input" data-ans="厭惡" style="width:50px;">。</td>
+                            </tr>
+                            <tr>
+                                <td><b>事件四</b></td>
+                                <td>楊修當眾 <input type="text" class="blank-input" data-ans="揭穿曹操假裝會在夢中殺人" style="width:190px;">。</td>
+                                <td>令曹操更感 <input type="text" class="blank-input" data-ans="厭惡" style="width:50px;">。</td>
+                            </tr>
+                            <tr>
+                                <td><b>事件五</b></td>
+                                <td>楊修密告曹丕與吳質會談 <input type="text" class="blank-input" data-ans="世子繼位" style="width:80px;"> 的事，反被 <input type="text" class="blank-input" data-ans="吳質暗算" style="width:80px;">。</td>
+                                <td>背上 <input type="text" class="blank-input" data-ans="誣害曹丕" style="width:80px;"> 之嫌，令曹操更感 <input type="text" class="blank-input" data-ans="厭惡" style="width:50px;">。</td>
+                            </tr>
+                            <tr>
+                                <td><b>事件六</b></td>
+                                <td>楊修教曹植出 <input type="text" class="blank-input" data-ans="鄴城門" style="width:70px;"> 的方法。</td>
+                                <td>令曹操十分 <input type="text" class="blank-input" data-ans="憤怒" style="width:50px;">。</td>
+                            </tr>
+                            <tr>
+                                <td><b>事件七</b></td>
+                                <td>楊修為曹植作「<input type="text" class="blank-input" data-ans="答教" style="width:50px;">」，用以應對 <input type="text" class="blank-input" data-ans="曹操的考問" style="width:90px;">。</td>
+                                <td>令曹操大怒並萌生 <input type="text" class="blank-input" data-ans="殺意" style="width:50px;">。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 四、寫作手法* (L2) -->
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>四、寫作手法*</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+
+                    <div class="quiz-sentence">
+                        <strong>1. 過渡句填空：</strong><br>
+                        在第 4 段中「① <input type="text" class="blank-input" data-ans="原來楊修為人，恃才放曠，數犯曹操之忌" style="width:310px;">」（摘錄原文作答）一句是本文的過渡句。<br>
+                        這個句子上承 ② <input type="text" class="blank-input" data-ans="記述楊修被曹操處死的經過和結果" style="width:250px;">，下啟過去 ③ <input type="text" class="blank-input" data-ans="楊修與曹操之間發生的往事" style="width:210px;">，使文章轉折 ④ <input type="text" class="blank-input" data-ans="自然" style="width:60px;">。
+                    </div>
+
+                    <div class="quiz-sentence" style="margin-top:1.2rem;">
+                        <strong>2. 詳略安排原因填空：</strong><br>
+                        詳寫的事件直接指出導致楊修被殺的原因，能充分反映楊修 <input type="text" class="blank-input" data-ans="恃才放曠" style="width:100px;"> 的性格帶來的結果；略寫的事件則用來補充說明楊修的 <input type="text" class="blank-input" data-ans="性格特點" style="width:100px;"> 和他數次 <input type="text" class="blank-input" data-ans="觸犯曹操" style="width:100px;">。
+                    </div>
+                </div>
+
+                <!-- 五、【字詞和成語學習】 (L2) -->
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>五、【字詞和成語學習】</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+
+                    <div class="quiz-sentence"><strong>一、字詞填充辨析</strong></div>
+                    <div class="quiz-sentence">
+                        (1) 「於是再築牆圍，改造停當，又請操觀之」中的「當」字，與成語「直截了<input type="text" class="blank-input" data-ans="當" style="width:40px;">」讀音相同。
+                    </div>
+                    <div class="quiz-sentence" style="margin-top:0.6rem;">
+                        (2) 「君乃在夢中耳」中的「乃」字，與「因恐有人知覺，<input type="text" class="blank-input" data-ans="乃" style="width:40px;">用大籠藏吳質於中」中的「乃」字意思相同。
+                    </div>
+
+                    <div class="quiz-sentence" style="margin-top:1.2rem;"><strong>二、成語填空</strong></div>
+                    <div class="quiz-sentence">(1) 她早已作好了充足的準備，因此現在才能在問答比賽中 <input type="text" class="blank-input" data-ans="胸有成竹" style="width:100px;"> 地作出應對。</div>
+                    <div class="quiz-sentence">(2) 不論要處理甚麼事情，我們都要思量清楚事情的後果，<input type="text" class="blank-input" data-ans="三思而行" style="width:100px;">，才能作出最恰當的決定。</div>
+                    <div class="quiz-sentence">(3) 做事時如果過於賣弄本領，<input type="text" class="blank-input" data-ans="鋒芒畢露" style="width:100px;">，容易給別人留下負面印象。</div>
+                    <div class="quiz-sentence">(4) 正所謂「當機立斷，免受其亂」，我們做事時不應 <input type="text" class="blank-input" data-ans="猶豫不決" style="width:100px;">，白白浪費時間。</div>
+                    <div class="quiz-sentence">(5) 他恃才傲物、<input type="text" class="blank-input" data-ans="目空一切" style="width:100px;"> 的處事態度，令不少同學對他頗有微詞。</div>
+                </div>
+
+                <button class="btn-reset-page" onclick="resetSection(this)">🧹 重置全頁（單元一 L2）</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================================================================= -->
+    <!-- ==================== 中二單元二 也斯《在風中》 ===================== -->
+    <!-- ================================================================= -->
+    <div id="unit2" class="tab-content">
+        <div class="chapter-card">
+            <h2>也斯《在風中》</h2>
+
+            <!-- LEVEL 1 -->
+            <div class="level-content lvl1 active">
+                
+                <!-- 一、主旨 -->
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>一、主旨</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+                    <div class="quiz-sentence">
+                        作者通過描述與朋友在 <div class="drop-box" data-ans="一次颱風襲港下" style="min-width:140px;"></div> 的所見所聞，刻畫 <div class="drop-box" data-ans="颱風的威力|威力|強大|威力／強大" style="min-width:110px;"></div>。
+                    </div>
+                    <div class="word-bank" data-words="一次颱風襲港下,颱風的威力"></div>
+                </div>
+
+                <!-- 二、段落層次 -->
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>二、段落層次</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+                    <p style="margin-bottom:0.5rem;">本文共 14 段，按作者經歷分為四個部分：</p>
+                    
+                    <table class="quiz-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%;">部分</th>
+                                <th style="width: 25%;">段落數字</th>
+                                <th style="width: 65%;">內容大意</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 第一部分 -->
+                            <tr class="quiz-subgroup">
+                                <td><b>一</b></td>
+                                <td>① 第 <div class="drop-box" data-ans="1"></div> 至 <div class="drop-box" data-ans="2"></div> 段</td>
+                                <td>
+                                    ⑤ 寫作者和朋友從 <div class="drop-box" data-ans="居所樓下" style="min-width:85px;"></div> 出發，感受到颱風的 <div class="drop-box" data-ans="強勁" style="min-width:65px;"></div>。
+                                    <div class="word-bank" data-words="1,2,居所樓下,強勁" data-header="💡 第一部分 可選詞條庫："></div>
+                                </td>
+                            </tr>
+                            <!-- 第二部分 -->
+                            <tr class="quiz-subgroup">
+                                <td><b>二</b></td>
+                                <td>② 第 <div class="drop-box" data-ans="3"></div> 至 <div class="drop-box" data-ans="8"></div> 段</td>
+                                <td>
+                                    ⑥ 描寫作者和朋友躲避 <div class="drop-box" data-ans="風雨" style="min-width:65px;"></div>，以及在 <div class="drop-box" data-ans="橫街" style="min-width:65px;"></div>、海濱和 <div class="drop-box" data-ans="馬路" style="min-width:65px;"></div> 的見聞，反映風力的 <div class="drop-box" data-ans="強大" style="min-width:65px;"></div> 和街上的 <div class="drop-box" data-ans="雜亂" style="min-width:65px;"></div> 情景。
+                                    <div class="word-bank" data-words="3,8,風雨,橫街,馬路,強大,雜亂" data-header="💡 第二部分 可選詞條庫："></div>
+                                </td>
+                            </tr>
+                            <!-- 第三部分 -->
+                            <tr class="quiz-subgroup">
+                                <td><b>三</b></td>
+                                <td>③ 第 <div class="drop-box" data-ans="9"></div> 至 <div class="drop-box" data-ans="11"></div> 段</td>
+                                <td>
+                                    ⑦ 描寫作者和朋友在 <div class="drop-box" data-ans="公園" style="min-width:65px;"></div> 和 <div class="drop-box" data-ans="碼頭" style="min-width:65px;"></div> 所見的颱風景象，顯示了颱風的 <div class="drop-box" data-ans="威力／強大|威力|強大" style="min-width:90px;"></div> 和 <div class="drop-box" data-ans="破壞力" style="min-width:75px;"></div>。
+                                    <div class="word-bank" data-words="9,11,公園,碼頭,威力／強大,破壞力" data-header="💡 第三部分 可選詞條庫："></div>
+                                </td>
+                            </tr>
+                            <!-- 第四部分 -->
+                            <tr class="quiz-subgroup">
+                                <td><b>四</b></td>
+                                <td>④ 第 <div class="drop-box" data-ans="12"></div> 至 <div class="drop-box" data-ans="14"></div> 段</td>
+                                <td>
+                                    ⑧ <div class="drop-box" data-ans="描寫颱風後的市面情況，指出人們生活逐漸恢復正常" style="min-width:280px;"></div>。
+                                    <div class="word-bank" data-words="12,14,描寫颱風後的市面情況，指出人們生活逐漸恢復正常" data-header="💡 第四部分 可選詞條庫："></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 三、內容分析（風中見聞與景物） -->
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>三、內容分析（風中見聞與景物）</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+                    
+                    <div class="quiz-subgroup">
+                        <p style="font-weight:bold; color:#2c3e50; margin-bottom: 0.3rem;">【第一組：樓下、鐵絲網與橫街】</p>
+                        <table class="quiz-table">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 25%;"><b>作者居所樓下</b><br>(第 1 至 3 段)</td>
+                                    <td style="width: 75%;">街上沒有 <div class="drop-box" data-ans="行人"></div>，只有 <div class="drop-box" data-ans="風"></div> 迎面撲打，雨點刺人。</td>
+                                </tr>
+                                <tr>
+                                    <td><b>鐵絲網旁</b><br>(第 4 段)</td>
+                                    <td>作者和朋友與風正面相對，有人被吹得 <div class="drop-box" data-ans="腳步踉蹌" style="min-width:90px;"></div>，人們要轉進 <div class="drop-box" data-ans="大廈的鐵閘" style="min-width:100px;"></div> 內暫避。</td>
+                                </tr>
+                                <tr>
+                                    <td><b>橫街</b><br>(第 6 段)</td>
+                                    <td>滿地都是 <div class="drop-box" data-ans="垃圾"></div>，頭上有 <div class="drop-box" data-ans="岌岌可危" style="min-width:90px;"></div> 的招牌，上面還掉下 <div class="drop-box" data-ans="碎磚和玻璃片" style="min-width:110px;"></div>。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="word-bank" data-words="行人,風,腳步踉蹌,大廈的鐵閘,垃圾,岌岌可危,碎磚和玻璃片"></div>
+                    </div>
+
+                    <div class="quiz-subgroup" style="margin-top:1rem;">
+                        <p style="font-weight:bold; color:#2c3e50; margin-bottom: 0.3rem;">【第二組：大廈後面、馬路與公園】</p>
+                        <table class="quiz-table">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 25%;"><b>大廈後面</b><br>(第 6 段)</td>
+                                    <td style="width: 75%;">露出海洋，海洋旁邊有 <div class="drop-box" data-ans="鐵欄"></div>，風呼呼地颳過 <div class="drop-box" data-ans="空地"></div>。</td>
+                                </tr>
+                                <tr>
+                                    <td><b>馬路</b><br>(第 8 段)</td>
+                                    <td>招牌在風中 <div class="drop-box" data-ans="晃動"></div>，有些被吹毀，有些 <div class="drop-box" data-ans="半吊在空中擺動" style="min-width:130px;"></div>，地上散滿 <div class="drop-box" data-ans="白色膠片" style="min-width:90px;"></div>。</td>
+                                </tr>
+                                <tr>
+                                    <td><b>公園</b><br>(第 9 段)</td>
+                                    <td>樹葉落到街道上，有的 <div class="drop-box" data-ans="鮮嫩青綠、濕漉漉的" style="min-width:150px;"></div>，有的連枝帶葉被風吹斷，也有樹葉 <div class="drop-box" data-ans="在樹上搖動掙扎" style="min-width:130px;"></div>。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="word-bank" data-words="鐵欄,空地,晃動,半吊在空中擺動,白色膠片,鮮嫩青綠、濕漉漉的,在樹上搖動掙扎"></div>
+                    </div>
+
+                    <div class="quiz-subgroup" style="margin-top:1rem;">
+                        <p style="font-weight:bold; color:#2c3e50; margin-bottom: 0.3rem;">【第三組：碼頭與大街】</p>
+                        <table class="quiz-table">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 25%;"><b>碼頭</b><br>(第 10 至 12 段)</td>
+                                    <td style="width: 75%;">碼頭關閉，公共汽車 <div class="drop-box" data-ans="停開"></div>。海浪洶湧滾動，鐵欄網上綁着 <div class="drop-box" data-ans="空的竹簍和籬子" style="min-width:130px;"></div>。附近一株樹 <div class="drop-box" data-ans="被風吹斷" style="min-width:90px;"></div>，樹葉 <div class="drop-box" data-ans="垂到地面" style="min-width:90px;"></div>。</td>
+                                </tr>
+                                <tr>
+                                    <td><b>大街</b><br>(第 13 至 14 段)</td>
+                                    <td>紙屑飄飛，地上有 <div class="drop-box" data-ans="橫卧的垃圾筒" style="min-width:110px;"></div> 和 <div class="drop-box" data-ans="破碎的招牌" style="min-width:100px;"></div>。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="word-bank" data-words="停開,空的竹簍和籬子,被風吹斷,垂到地面,橫卧的垃圾筒,破碎的招牌"></div>
+                    </div>
+                </div>
+
+                <!-- 四、寫作手法（每個手法獨立詞詞庫） -->
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>四、寫作手法（描寫順序與描寫方法）</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+
+                    <p style="font-weight:bold; color:#2c3e50; margin-bottom:8px;">【描寫順序】</p>
+                    <table class="quiz-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">手法種類</th>
+                                <th style="width: 40%;">手法定義</th>
+                                <th style="width: 45%;">課文運用說明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 步移法 -->
+                            <tr class="quiz-subgroup">
+                                <td><b>步移法</b></td>
+                                <td>隨着作者 <div class="drop-box" data-ans="行走的路線" style="min-width:90px;"></div> 依次描寫景物，讓讀者有如跟隨 <div class="drop-box" data-ans="作者的步伐" style="min-width:90px;"></div>，一同親臨當中的環境。</td>
+                                <td>根據步行路線，由 <div class="drop-box" data-ans="作者居所樓下至大街" style="min-width:130px;"></div>，依次描寫景象。
+                                    <div class="word-bank" data-words="行走的路線,作者的步伐,作者居所樓下至大街" data-header="💡 【步移法】可選詞條庫："></div>
+                                </td>
+                            </tr>
+                            <!-- 定點描寫 -->
+                            <tr class="quiz-subgroup">
+                                <td><b>定點描寫</b></td>
+                                <td>在一個 <div class="drop-box" data-ans="固定" style="min-width:50px;"></div> 的觀察點，按 <div class="drop-box" data-ans="視線" style="min-width:50px;"></div> 的轉移，如由近至 <div class="drop-box" data-ans="遠" style="min-width:40px;"></div>、由高至低、由左至 <div class="drop-box" data-ans="右" style="min-width:40px;"></div> 等，將景物順序描寫出來。</td>
+                                <td>以 <div class="drop-box" data-ans="碼頭的鐵欄" style="min-width:90px;"></div> 為觀察點，把海洋和近岸景物由 <div class="drop-box" data-ans="遠" style="min-width:40px;"></div> 到 <div class="drop-box" data-ans="近" style="min-width:40px;"></div> 描寫出來。
+                                    <div class="word-bank" data-words="固定,視線,遠,右,碼頭的鐵欄,遠,近" data-header="💡 【定點描寫】可選詞條庫："></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p style="font-weight:bold; color:#2c3e50; margin-top:20px; margin-bottom:8px;">【描寫方法】</p>
+                    <table class="quiz-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">手法種類</th>
+                                <th style="width: 40%;">手法定義</th>
+                                <th style="width: 45%;">課文運用說明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 直接描寫 -->
+                            <tr class="quiz-subgroup">
+                                <td><b>直接描寫</b></td>
+                                <td>又稱 <div class="drop-box" data-ans="正面描寫" style="min-width:70px;"></div>，指直接描繪事物或景物的 <div class="drop-box" data-ans="形態和特徵" style="min-width:90px;"></div>。</td>
+                                <td>直接寫出颱風的 <div class="drop-box" data-ans="風勢、聲音" style="min-width:90px;"></div> 和動態，又表示颱風像要 <div class="drop-box" data-ans="把人吹下海去" style="min-width:110px;"></div>。<br>颱風特徵：來勢 <div class="drop-box" data-ans="洶湧" style="min-width:50px;"></div>。
+                                    <div class="word-bank" data-words="正面描寫,形態和特徵,風勢、聲音,把人吹下海去,洶湧" data-header="💡 【直接描寫】可選詞條庫："></div>
+                                </td>
+                            </tr>
+                            <!-- 間接描寫 -->
+                            <tr class="quiz-subgroup">
+                                <td><b>間接描寫</b></td>
+                                <td>又稱 <div class="drop-box" data-ans="側面描寫" style="min-width:70px;"></div>，指通過描繪 <div class="drop-box" data-ans="其他事物" style="min-width:70px;"></div>，間接地把描寫對象烘托出，使描寫對象更突出。</td>
+                                <td>描寫「<div class="drop-box" data-ans="瓦煲" style="min-width:50px;"></div>」和雨傘在風中的情形，行人在 <div class="drop-box" data-ans="街道前進" style="min-width:80px;"></div> 的艱難，<div class="drop-box" data-ans="招牌和樹木" style="min-width:90px;"></div> 被吹毀。
+                                    <div class="word-bank" data-words="側面描寫,其他事物,瓦煲,街道前進,招牌和樹木" data-header="💡 【間接描寫】可選詞條庫："></div>
+                                </td>
+                            </tr>
+                            <!-- 比喻描寫 -->
+                            <tr class="quiz-subgroup">
+                                <td><b>比喻描寫</b></td>
+                                <td>根據景物與事物之間的 <div class="drop-box" data-ans="相似之處" style="min-width:80px;"></div>，發揮 <div class="drop-box" data-ans="聯想" style="min-width:50px;"></div>，使景物描畫得更具體。</td>
+                                <td>把雨比喻為 <div class="drop-box" data-ans="針刺" style="min-width:50px;"></div>，拍打在人的臉上和耳朵，令人疼痛。
+                                    <div class="word-bank" data-words="相似之處,聯想,針刺" data-header="💡 【比喻描寫】可選詞條庫："></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 五、字詞與成語 -->
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>五、字詞與成語學習</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+                    <div class="quiz-sentence"><strong>1. 字詞運用：試選擇適當的字詞填空。</strong></div>
+                    <div class="quiz-sentence">(1) 洪水 <select class="quiz-select" data-ans="洶湧"><option value="">--請選擇--</option><option value="洶湧">① 洶湧</option><option value="晃動">② 晃動</option></select> 而至，轉眼間便淹沒了整座木橋。</div>
+                    <div class="quiz-sentence">(2) 不少路人被突如其來的大雨沾濕，全身 <select class="quiz-select" data-ans="濕漉漉"><option value="">--請選擇--</option><option value="濕漉漉">① 濕漉漉</option><option value="岌岌可危">② 岌岌可危</option></select> 的。</div>
+                    <div class="quiz-sentence">(3) 她跌倒受傷，只好拄着拐杖，<select class="quiz-select" data-ans="腳步踉蹌"><option value="">--請選擇--</option><option value="腳步踉蹌">① 腳步踉蹌</option><option value="翻騰不息">② 翻騰不息</option></select> 地到診所求醫。</div>
+                    <div class="quiz-sentence">(4) 地震發生時，大地 <select class="quiz-select" data-ans="晃動"><option value="">--請選擇--</option><option value="晃動">① 晃動</option><option value="措手不及">② 措手不及</option></select>，不少建築物都左搖右擺。</div>
+                    <div class="quiz-sentence">(5) 這座山近日多次發生山泥傾瀉，附近居民的處境可謂 <select class="quiz-select" data-ans="岌岌可危"><option value="">--請選擇--</option><option value="岌岌可危">① 岌岌可危</option><option value="洶湧">② 洶湧</option></select>。</div>
+                    <div class="quiz-sentence">(6) 他被眼前的湖光山色吸引，不禁 <select class="quiz-select" data-ans="獃"><option value="">--請選擇--</option><option value="獃">① 獃</option><option value="晃">② 晃</option></select> 在這兒拍照。</div>
+                    <div class="quiz-sentence">(7) 剛才還是晴空萬里，現在卻下起傾盆大雨，讓我 <select class="quiz-select" data-ans="措手不及"><option value="">--請選擇--</option><option value="措手不及">① 措手不及</option><option value="腳步踉蹌">② 腳步踉蹌</option></select>。</div>
+                    <div class="quiz-sentence">(8) 看着一個個餃子浮起，隨着沸水 <select class="quiz-select" data-ans="翻騰不息"><option value="">--請選擇--</option><option value="翻騰不息">① 翻騰不息</option><option value="濕漉漉">② 濕漉漉</option></select>，真是叫人食指大動。</div>
+
+                    <div class="quiz-sentence" style="margin-top:1.2rem;"><strong>2. 成語辨析與應用：選擇最適當的成語。</strong></div>
+                    <div class="quiz-sentence">(1) 他禁不起一連串的 <select class="quiz-select" data-ans="風吹雨打"><option value="">--請選擇--</option><option value="乘風破浪">① 乘風破浪</option><option value="風吹雨打">② 風吹雨打</option></select>，從此一蹶不振。</div>
+                    <div class="quiz-sentence">(2) 一心不畏困難，一路 <select class="quiz-select" data-ans="乘風破浪"><option value="">--請選擇--</option><option value="乘風破浪">① 乘風破浪</option><option value="步步為營">② 步步為營</option></select>，最終取得成功。</div>
+                    <div class="quiz-sentence">(3) 這次任務非常艱鉅，我們必須 <select class="quiz-select" data-ans="步步為營"><option value="">--請選擇--</option><option value="步步為營">① 步步為營</option><option value="驚心動魄">② 驚心動魄</option></select>，才能避免失敗。</div>
+                    <div class="quiz-sentence">(4) 人的一生總會遭受挫折，總不可能永遠 <select class="quiz-select" data-ans="風平浪靜"><option value="">--請選擇--</option><option value="風吹雨打">① 風吹雨打</option><option value="風平浪靜">② 風平浪靜</option></select>。</div>
+                    <div class="quiz-sentence">(5) 探險家一路披荊斬棘，經過 <select class="quiz-select" data-ans="驚心動魄"><option value="">--請選擇--</option><option value="安然無恙">① 安然無恙</option><option value="驚心動魄">② 驚心動魄</option></select> 的旅途後，<select class="quiz-select" data-ans="安然無恙"><option value="">--請選擇--</option><option value="安然無恙">① 安然無恙</option><option value="驚心動魄">② 驚心動魄</option></select> 地回來了，大家總算放下心來。</div>
+                </div>
+
+                <button class="btn-reset-page" onclick="resetSection(this)">🧹 重置全頁（單元二 L1）</button>
+            </div>
+
+            <!-- LEVEL 2 -->
+            <div class="level-content lvl2">
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>一、主旨</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+                    <div class="quiz-sentence">作者通過描述與朋友在 <input type="text" class="blank-input" data-ans="一次颱風襲港下" style="width:140px;"> 的所見所聞，刻畫 <input type="text" class="blank-input" data-ans="颱風的威力|威力|強大" style="width:120px;">。</div>
+                </div>
+
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>二、段落層次</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+                    <table class="quiz-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 12%;">部分</th>
+                                <th style="width: 23%;">段落</th>
+                                <th style="width: 65%;">內容大意</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><b>一</b></td>
+                                <td>① 第 <input type="text" class="blank-input" data-ans="1" style="width:30px;"> 至 <input type="text" class="blank-input" data-ans="2" style="width:30px;"> 段</td>
+                                <td>⑤ 寫作者和朋友從 <input type="text" class="blank-input" data-ans="居所樓下" style="width:90px;"> 出發，感受到颱風的 <input type="text" class="blank-input" data-ans="強勁" style="width:70px;">。</td>
+                            </tr>
+                            <tr>
+                                <td><b>二</b></td>
+                                <td>② 第 <input type="text" class="blank-input" data-ans="3" style="width:30px;"> 至 <input type="text" class="blank-input" data-ans="8" style="width:30px;"> 段</td>
+                                <td>⑥ 描寫作者和朋友躲避 <input type="text" class="blank-input" data-ans="風雨" style="width:70px;">，以及在 <input type="text" class="blank-input" data-ans="橫街" style="width:70px;">、海濱和 <input type="text" class="blank-input" data-ans="馬路" style="width:70px;"> 的見聞，反映風力的 <input type="text" class="blank-input" data-ans="強大" style="width:70px;"> 和街上的 <input type="text" class="blank-input" data-ans="雜亂" style="width:70px;"> 情景。</td>
+                            </tr>
+                            <tr>
+                                <td><b>三</b></td>
+                                <td>③ 第 <input type="text" class="blank-input" data-ans="9" style="width:30px;"> 至 <input type="text" class="blank-input" data-ans="11" style="width:30px;"> 段</td>
+                                <td>⑦ 描寫作者和朋友在 <input type="text" class="blank-input" data-ans="公園" style="width:70px;"> 和 <input type="text" class="blank-input" data-ans="碼頭" style="width:70px;"> 所見的颱風景象，顯示了颱風的 <input type="text" class="blank-input" data-ans="威力／強大|威力|強大" style="width:110px;"> 和 <input type="text" class="blank-input" data-ans="破壞力" style="width:80px;">。</td>
+                            </tr>
+                            <tr>
+                                <td><b>四</b></td>
+                                <td>④ 第 <input type="text" class="blank-input" data-ans="12" style="width:30px;"> 至 <input type="text" class="blank-input" data-ans="14" style="width:30px;"> 段</td>
+                                <td>⑧ <input type="text" class="blank-input" data-ans="描寫颱風後的市面情況，指出人們生活逐漸恢復正常" style="width:330px;">。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>三、內容分析（風中見聞與景物）</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+                    <table class="quiz-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">地點／段落</th>
+                                <th style="width: 75%;">颱風下的景物與人物表現</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><b>作者居所樓下</b><br>(第 1 至 3 段)</td>
+                                <td>街上沒有 <input type="text" class="blank-input" data-ans="行人" style="width:60px;">，只有 <input type="text" class="blank-input" data-ans="風" style="width:40px;"> 迎面撲打，雨點刺人。</td>
+                            </tr>
+                            <tr>
+                                <td><b>鐵絲網旁</b><br>(第 4 段)</td>
+                                <td>作者和朋友與風正面相對，有人被吹得 <input type="text" class="blank-input" data-ans="腳步踉蹌" style="width:90px;">，人們要轉進 <input type="text" class="blank-input" data-ans="大廈的鐵閘" style="width:100px;"> 內暫避。</td>
+                            </tr>
+                            <tr>
+                                <td><b>橫街</b><br>(第 6 段)</td>
+                                <td>滿地都是 <input type="text" class="blank-input" data-ans="垃圾" style="width:60px;">，頭上有 <input type="text" class="blank-input" data-ans="岌岌可危" style="width:90px;"> 的招牌，上面還掉下 <input type="text" class="blank-input" data-ans="碎磚和玻璃片" style="width:110px;">。</td>
+                            </tr>
+                            <tr>
+                                <td><b>大廈後面</b><br>(第 6 段)</td>
+                                <td>露出海洋，海洋旁邊有 <input type="text" class="blank-input" data-ans="鐵欄" style="width:60px;">，風呼呼地颳過 <input type="text" class="blank-input" data-ans="空地" style="width:60px;">。</td>
+                            </tr>
+                            <tr>
+                                <td><b>馬路</b><br>(第 8 段)</td>
+                                <td>招牌在風中 <input type="text" class="blank-input" data-ans="晃動" style="width:60px;">，有些被吹毀，有些 <input type="text" class="blank-input" data-ans="半吊在空中擺動" style="width:130px;">，地上散滿 <input type="text" class="blank-input" data-ans="白色膠片" style="width:90px;">。</td>
+                            </tr>
+                            <tr>
+                                <td><b>公園</b><br>(第 9 段)</td>
+                                <td>樹葉落到街道上，有的 <input type="text" class="blank-input" data-ans="鮮嫩青綠、濕漉漉的" style="width:150px;">，有的連枝帶葉被風吹斷，也有樹葉 <input type="text" class="blank-input" data-ans="在樹上搖動掙扎" style="width:130px;">。</td>
+                            </tr>
+                            <tr>
+                                <td><b>碼頭</b><br>(第 10 至 12 段)</td>
+                                <td>碼頭關閉，公共汽車 <input type="text" class="blank-input" data-ans="停開" style="width:60px;">。海浪洶湧滾動，鐵欄網上綁着 <input type="text" class="blank-input" data-ans="空的竹簍和籬子" style="width:130px;">。附近一株樹 <input type="text" class="blank-input" data-ans="被風吹斷" style="width:90px;">，樹葉 <input type="text" class="blank-input" data-ans="垂到地面" style="width:90px;">。</td>
+                            </tr>
+                            <tr>
+                                <td><b>大街</b><br>(第 13 至 14 段)</td>
+                                <td>紙屑飄飛，地上有 <input type="text" class="blank-input" data-ans="橫卧的垃圾筒" style="width:110px;"> 和 <input type="text" class="blank-input" data-ans="破碎的招牌" style="width:100px;">。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>四、寫作手法（描寫順序與描寫方法）</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+                    <table class="quiz-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">描寫類別</th>
+                                <th style="width: 15%;">手法種類</th>
+                                <th style="width: 35%;">手法定義</th>
+                                <th style="width: 35%;">課文運用說明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td rowspan="2"><b>描寫順序</b></td>
+                                <td><b>步移法</b></td>
+                                <td>隨着作者 <input type="text" class="blank-input" data-ans="行走的路線" style="width:100px;"> 依次描寫景物，讓讀者有如跟隨 <input type="text" class="blank-input" data-ans="作者的步伐" style="width:100px;">。</td>
+                                <td>根據步行路線，由 <input type="text" class="blank-input" data-ans="作者居所樓下至大街" style="width:150px;"> 描寫。</td>
+                            </tr>
+                            <tr>
+                                <td><b>定點描寫</b></td>
+                                <td>在一個 <input type="text" class="blank-input" data-ans="固定" style="width:60px;"> 的觀察點，按 <input type="text" class="blank-input" data-ans="視線" style="width:60px;"> 的轉移，如由近至 <input type="text" class="blank-input" data-ans="遠" style="width:40px;">、由左至 <input type="text" class="blank-input" data-ans="右" style="width:40px;"> 等。</td>
+                                <td>以 <input type="text" class="blank-input" data-ans="碼頭的鐵欄" style="width:100px;"> 為觀察點，把景物由 <input type="text" class="blank-input" data-ans="遠" style="width:40px;"> 到 <input type="text" class="blank-input" data-ans="近" style="width:40px;"> 描寫出來。</td>
+                            </tr>
+                            <tr>
+                                <td rowspan="3"><b>描寫方法</b></td>
+                                <td><b>直接描寫</b></td>
+                                <td>又稱 <input type="text" class="blank-input" data-ans="正面描寫" style="width:80px;">，指直接描繪事物或景物的 <input type="text" class="blank-input" data-ans="形態和特徵" style="width:100px;">。</td>
+                                <td>寫出颱風的 <input type="text" class="blank-input" data-ans="風勢、聲音" style="width:100px;">，表示颱風像要 <input type="text" class="blank-input" data-ans="把人吹下海去" style="width:120px;">。<br>特徵：來勢 <input type="text" class="blank-input" data-ans="洶湧" style="width:60px;">。</td>
+                            </tr>
+                            <tr>
+                                <td><b>間接描寫</b></td>
+                                <td>又稱 <input type="text" class="blank-input" data-ans="側面描寫" style="width:80px;">，指通過描繪 <input type="text" class="blank-input" data-ans="其他事物" style="width:80px;">，間接烘托描寫對象。</td>
+                                <td>描寫「<input type="text" class="blank-input" data-ans="瓦煲" style="width:60px;">」和雨傘情形，行人在 <input type="text" class="blank-input" data-ans="街道前進" style="width:90px;"> 的艱難，<input type="text" class="blank-input" data-ans="招牌和樹木" style="width:100px;"> 被吹毀。</td>
+                            </tr>
+                            <tr>
+                                <td><b>比喻描寫</b></td>
+                                <td>根據景物與事物之間的 <input type="text" class="blank-input" data-ans="相似之處" style="width:90px;">，發揮 <input type="text" class="blank-input" data-ans="聯想" style="width:60px;"> 描寫景物。</td>
+                                <td>把雨比喻為 <input type="text" class="blank-input" data-ans="針刺" style="width:60px;">，拍打在臉上和耳朵。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="quiz-section">
+                    <div class="section-header-box">
+                        <h3>五、字詞與成語學習</h3>
+                        <button class="btn-reset-section" onclick="resetSingleSection(this)">🔄 重置本組</button>
+                    </div>
+                    <div class="quiz-sentence"><strong>1. 字詞填充：請填入適當字詞。</strong></div>
+                    <div class="quiz-sentence">(1) 洪水 <input type="text" class="blank-input" data-ans="洶湧" style="width:70px;"> 而至，轉眼間便淹沒了整座木橋。</div>
+                    <div class="quiz-sentence">(2) 不少路人被突如其來的大雨沾濕，全身 <input type="text" class="blank-input" data-ans="濕漉漉" style="width:80px;"> 的。</div>
+                    <div class="quiz-sentence">(3) 她跌倒受傷，只好拄着拐杖，<input type="text" class="blank-input" data-ans="腳步踉蹌" style="width:90px;"> 地到診所求醫。</div>
+                    <div class="quiz-sentence">(4) 地震發生時，大地 <input type="text" class="blank-input" data-ans="晃動" style="width:70px;">，不少建築物都左搖右擺。</div>
+                    <div class="quiz-sentence">(5) 這座山近日多次發生山泥傾瀉，附近居民的處境可謂 <input type="text" class="blank-input" data-ans="岌岌可危" style="width:90px;">。</div>
+                    <div class="quiz-sentence">(6) 他被眼前的湖光山色吸引，不禁 <input type="text" class="blank-input" data-ans="獃" style="width:40px;"> 在這兒拍照。</div>
+                    <div class="quiz-sentence">(7) 剛才還是晴空萬里，現在卻下起傾盆大雨，讓我 <input type="text" class="blank-input" data-ans="措手不及" style="width:90px;">。</div>
+                    <div class="quiz-sentence">(8) 看着一個個餃子浮起，隨着沸水 <input type="text" class="blank-input" data-ans="翻騰不息" style="width:90px;">，真是叫人食指大動。</div>
+
+                    <div class="quiz-sentence" style="margin-top:1.2rem;"><strong>2. 成語填空：請填入正確成語。</strong></div>
+                    <div class="quiz-sentence">(1) 他禁不起一連串的 <input type="text" class="blank-input" data-ans="風吹雨打" style="width:90px;">，從此一蹶不振。</div>
+                    <div class="quiz-sentence">(2) 一心不畏困難，一路 <input type="text" class="blank-input" data-ans="乘風破浪" style="width:90px;">，最終取得成功。</div>
+                    <div class="quiz-sentence">(3) 這次任務非常艱鉅，我們必須 <input type="text" class="blank-input" data-ans="步步為營" style="width:90px;">，才能避免失敗。</div>
+                    <div class="quiz-sentence">(4) 人的一生總會遭受挫折，總不可能永遠 <input type="text" class="blank-input" data-ans="風平浪靜" style="width:90px;">。</div>
+                    <div class="quiz-sentence">(5) 探險家一路披荊斬棘，經過 <input type="text" class="blank-input" data-ans="驚心動魄" style="width:90px;"> 的旅途後，<input type="text" class="blank-input" data-ans="安然無恙" style="width:90px;"> 地回來了，大家總算放下心來。</div>
+                </div>
+
+                <button class="btn-reset-page" onclick="resetSection(this)">🧹 重置全頁（單元二 L2）</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- ================== 數據儀表板與排行榜 =================== -->
+    <!-- ================================================================= -->
+    <div class="dashboard-section">
+        <h2>📊 數據榮譽中心（跨單元溫習紀錄）</h2>
+        <div class="dashboard-grid">
+            
+            <div class="data-card">
+                <h4>🏆 當前課文與難度 — 頂尖排行榜 Top 3</h4>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%">名次</th>
+                            <th style="width: 45%">挑戰者</th>
+                            <th style="width: 20%">最高分數</th>
+                            <th style="width: 20%">答對率</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-tbody"></tbody>
+                </table>
+            </div>
+
+            <div class="data-card">
+                <button class="btn-clear-data" onclick="clearAllData()">⚠️ 清除所有紀錄</button>
+                <h4>🕒 您的學習足跡 (History Logs)</h4>
+                <div class="history-log-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%">時間</th>
+                                <th style="width: 40%">單元課文/級別</th>
+                                <th style="width: 15%">得分</th>
+                                <th style="width: 20%">完成度</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let userScore = 0;
+    let currentNickname = localStorage.getItem('zh_f2_quiz_nickname') || '中二學霸';
+    let scoredElements = new Set(); 
+    let assistedElements = new Set();
+    
+    let ttsEnabled = localStorage.getItem('zh_f2_quiz_tts') !== 'disabled';
+    let rankingData = JSON.parse(localStorage.getItem('zh_f2_quiz_rankings')) || {};
+    let historyLogs = JSON.parse(localStorage.getItem('zh_f2_quiz_history')) || [];
+
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.tab-content');
+    const lvlBtns = document.querySelectorAll('.lvl-btn');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.target).classList.add('active');
+            window.speechSynthesis.cancel();
+            updateDashboard();
+        });
+    });
+
+    lvlBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            lvlBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const targetLvl = btn.dataset.lvl;
+            
+            document.querySelectorAll('.level-content').forEach(lc => {
+                lc.classList.remove('active');
+                if(lc.classList.contains(targetLvl)) lc.classList.add('active');
+            });
+            window.speechSynthesis.cancel();
+            updateDashboard();
+        });
+    });
+
+    function initTTSUi() {
+        const btn = document.getElementById('tts-toggle');
+        const status = document.getElementById('tts-status');
+        const icon = document.getElementById('tts-icon');
+        
+        if (ttsEnabled) {
+            btn.classList.add('enabled');
+            status.innerText = '開啟';
+            icon.innerText = '🔊';
+        } else {
+            btn.classList.remove('enabled');
+            status.innerText = '關閉';
+            icon.innerText = '🔇';
+            window.speechSynthesis.cancel();
+        }
+    }
+
+    function toggleTTS() {
+        ttsEnabled = !ttsEnabled;
+        localStorage.setItem('zh_f2_quiz_tts', ttsEnabled ? 'enabled' : 'disabled');
+        initTTSUi();
+    }
+
+    function speakSentenceOfElement(element) {
+        if (!ttsEnabled) return;
+
+        const sentenceContainer = element.closest('.quiz-sentence, td');
+        if (!sentenceContainer) return;
+
+        let singleWord = "";
+        if (element.tagName === "INPUT") {
+            singleWord = element.value.trim();
+        } else if (element.tagName === "SELECT") {
+            const selectedOpt = element.options[element.selectedIndex];
+            singleWord = selectedOpt ? selectedOpt.text.replace(/^[①②③④⑤⑥⑦⑧⑨⑩\d\s\.\-]+/g, '').trim() : element.value;
+        } else {
+            singleWord = element.innerText.trim();
+        }
+
+        if (!singleWord) return;
+
+        const allInteractive = sentenceContainer.querySelectorAll('.drop-box, .blank-input, .quiz-select');
+        const allCorrect = Array.from(allInteractive).length > 0 && Array.from(allInteractive).every(el => el.classList.contains('state-correct'));
+
+        window.speechSynthesis.cancel();
+
+        const getVoice = () => {
+            const voices = window.speechSynthesis.getVoices();
+            return voices.find(v => v.lang.includes('HK') || v.lang.includes('zh-HK')) ||
+                   voices.find(v => v.lang.includes('CN') || v.lang.includes('zh') || v.lang.includes('zh-CN'));
+        };
+
+        const createUtterance = (text) => {
+            const utt = new SpeechSynthesisUtterance(text);
+            const voice = getVoice();
+            if (voice) utt.voice = voice;
+            utt.rate = 0.95; 
+            utt.pitch = 1.0;
+            return utt;
+        };
+
+        window.speechSynthesis.speak(createUtterance(singleWord));
+
+        if (allCorrect) {
+            let rawText = sentenceContainer.innerText;
+            rawText = rawText.replace(/❌\s*正確：[^\n]+/g, '');
+            rawText = rawText.replace(/[\n\r]/g, ' ').trim();
+            window.speechSynthesis.speak(createUtterance(rawText));
+        }
+    }
+
+    if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = () => {};
+    }
+
+    function changeNickname() {
+        const name = prompt("請輸入您的溫習暱稱（用於排行榜）：", currentNickname);
+        if(name && name.trim() !== "") {
+            currentNickname = name.trim();
+            localStorage.setItem('zh_f2_quiz_nickname', currentNickname);
+            document.getElementById('user-name-display').innerText = currentNickname;
+            updateDashboard();
+        }
+    }
+
+    function getCurrentScopeKey() {
+        const activeTab = document.querySelector('.tab-btn.active').dataset.target;
+        const activeLvl = document.querySelector('.lvl-btn.active').dataset.lvl;
+        return `${activeTab}_${activeLvl}`;
+    }
+
+    function saveAndLogRecord(isFinishedEvent = false) {
+        const activeTab = document.querySelector('.tab-btn.active');
+        const activeLvl = document.querySelector('.lvl-btn.active');
+        const activeContent = document.querySelector('.tab-content.active .level-content.active');
+        
+        if (!activeContent) return;
+
+        const dropBoxes = activeContent.querySelectorAll('.drop-box').length;
+        const blankInputs = activeContent.querySelectorAll('.blank-input').length;
+        const selects = activeContent.querySelectorAll('.quiz-select').length;
+        const totalBlanks = dropBoxes + blankInputs + selects;
+        const correctBlanks = activeContent.querySelectorAll('.state-correct').length;
+        
+        if (correctBlanks === 0) return; 
+
+        const rateStr = `${Math.round((correctBlanks / totalBlanks) * 100)}%`;
+        const scopeKey = getCurrentScopeKey();
+        const modeDesc = `${activeTab.innerText} (${activeLvl.innerText.split('：')[0]})`;
+
+        const now = new Date();
+        const timeStr = `${now.getMonth()+1}/${now.getDate()} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+        
+        if(isFinishedEvent) {
+            historyLogs.unshift({ time: timeStr, mode: modeDesc, score: userScore, rate: "100% (通關)" });
+        } else {
+            historyLogs.unshift({ time: timeStr, mode: modeDesc, score: userScore, rate: rateStr });
+        }
+        if(historyLogs.length > 30) historyLogs.pop(); 
+        localStorage.setItem('zh_f2_quiz_history', JSON.stringify(historyLogs));
+
+        if(!rankingData[scopeKey]) rankingData[scopeKey] = [];
+        
+        const userExistIdx = rankingData[scopeKey].findIndex(r => r.name === currentNickname);
+        if(userExistIdx > -1) {
+            if(userScore > rankingData[scopeKey][userExistIdx].score) {
+                rankingData[scopeKey][userExistIdx] = { name: currentNickname, score: userScore, rate: rateStr };
+            }
+        } else {
+            rankingData[scopeKey].push({ name: currentNickname, score: userScore, rate: rateStr });
+        }
+
+        rankingData[scopeKey].sort((a,b) => b.score - a.score);
+        if(rankingData[scopeKey].length > 3) rankingData[scopeKey].pop(); 
+        
+        localStorage.setItem('zh_f2_quiz_rankings', JSON.stringify(rankingData));
+        renderDashboardTables();
+    }
+
+    function renderDashboardTables() {
+        const scopeKey = getCurrentScopeKey();
+        const tbodyRank = document.getElementById('leaderboard-tbody');
+        tbodyRank.innerHTML = '';
+
+        const currentRanks = rankingData[scopeKey] || [];
+        for(let i=0; i<3; i++) {
+            const tr = document.createElement('tr');
+            const medal = i === 0 ? '🥇' : (i === 1 ? '🥈' : '🥉');
+            if(currentRanks[i]) {
+                tr.innerHTML = `<td class="rank-${i+1}">${medal}</td><td>${currentRanks[i].name}</td><td><b>${currentRanks[i].score}</b></td><td>${currentRanks[i].rate}</td>`;
+            } else {
+                tr.innerHTML = `<td style="color:#bdc3c7">${medal}</td><td style="color:#bdc3c7">虛位以待</td><td style="color:#bdc3c7">-</td><td style="color:#bdc3c7">-</td>`;
+            }
+            tbodyRank.appendChild(tr);
+        }
+
+        const tbodyHist = document.getElementById('history-tbody');
+        tbodyHist.innerHTML = '';
+        historyLogs.forEach(log => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${log.time}</td><td>${log.mode}</td><td><span style="color:#27ae60">${log.score}</span></td><td>${log.rate}</td>`;
+            tbodyHist.appendChild(tr);
+        });
+    }
+
+    function clearAllData() {
+        if(confirm("確定要清除本機上的排行榜與學習歷史足跡嗎？")) {
+            localStorage.removeItem('zh_f2_quiz_rankings');
+            localStorage.removeItem('zh_f2_quiz_history');
+            rankingData = {};
+            historyLogs = [];
+            renderDashboardTables();
+        }
+    }
+
+    function updateDashboard() {
+        const activeTab = document.querySelector('.tab-btn.active');
+        const activeLvl = document.querySelector('.lvl-btn.active');
+        const activeContent = document.querySelector('.tab-content.active .level-content.active');
+        
+        if (!activeTab || !activeLvl || !activeContent) return;
+
+        document.getElementById('user-name-display').innerText = currentNickname;
+        document.getElementById('total-score').innerText = userScore;
+
+        const dropBoxes = activeContent.querySelectorAll('.drop-box');
+        const blankInputs = activeContent.querySelectorAll('.blank-input');
+        const selects = activeContent.querySelectorAll('.quiz-select');
+        const totalBlanks = dropBoxes.length + blankInputs.length + selects.length;
+        document.getElementById('total-count').innerText = totalBlanks;
+
+        const correctBlanks = activeContent.querySelectorAll('.state-correct').length;
+        document.getElementById('correct-count').innerText = correctBlanks;
+
+        const progressPercent = totalBlanks > 0 ? (correctBlanks / totalBlanks) * 100 : 0;
+        document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+        renderDashboardTables();
+
+        if (correctBlanks === totalBlanks && totalBlanks > 0) {
+            const finishedFlag = `done_${currentNickname}_${getCurrentScopeKey()}_${userScore}`;
+            if(window.lastFinishedFlag === finishedFlag) return;
+            window.lastFinishedFlag = finishedFlag;
+
+            saveAndLogRecord(true); 
+            setTimeout(() => {
+                alert(`🎉🎉🎉 完美通關！！\n恭喜 ${currentNickname} 成功制霸 ${activeTab.innerText} (${activeLvl.innerText.split('：')[0]})！\n最終榮譽積分：${userScore} 分！`);
+            }, 400);
+        }
+    }
+
+    function initSingleWordBank(bank) {
+        bank.innerHTML = '';
+        const headerText = bank.getAttribute('data-header') || '💡 可選詞條庫：';
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'word-bank-header';
+        headerDiv.innerText = headerText;
+        bank.appendChild(headerDiv);
+
+        const wordsAttr = bank.getAttribute('data-words');
+        if (!wordsAttr) return;
+        
+        const wordsArr = wordsAttr.split(',').sort(() => Math.random() - 0.5);
+        wordsArr.forEach(word => {
+            const tag = document.createElement('div');
+            tag.className = 'word-tag';
+            tag.draggable = true;
+            tag.innerText = word;
+            
+            tag.addEventListener('dragstart', (e) => {
+                draggedElement = tag;
+                tag.classList.add('dragged');
+                e.dataTransfer.setData('text/plain', word);
+            });
+            
+            tag.addEventListener('dragend', () => {
+                tag.classList.remove('dragged');
+            });
+            
+            bank.appendChild(tag);
+        });
+    }
+
+    // 精準定位選詞條庫所對應的填空框集合
+    function getDropBoxesForBank(bank) {
+        const td = bank.closest('td');
+        if (td) {
+            const tdBoxes = td.querySelectorAll('.drop-box');
+            if (tdBoxes.length > 0) return tdBoxes;
+        }
+
+        const tr = bank.closest('tr');
+        if (tr && tr.previousElementSibling) {
+            const prevBoxes = tr.previousElementSibling.querySelectorAll('.drop-box');
+            if (prevBoxes.length > 0) return prevBoxes;
+        }
+
+        const subgroup = bank.closest('.quiz-subgroup');
+        if (subgroup) {
+            const subBanks = subgroup.querySelectorAll('.word-bank');
+            if (subBanks.length === 1) {
+                return subgroup.querySelectorAll('.drop-box');
+            }
+        }
+
+        const section = bank.closest('.quiz-section');
+        return section ? section.querySelectorAll('.drop-box') : [];
+    }
+
+    function updateWordBankVisibility(scopeContainer) {
+        if (!scopeContainer) return;
+
+        scopeContainer.querySelectorAll('.word-bank').forEach(bank => {
+            const targetBoxes = getDropBoxesForBank(bank);
+
+            const usedWords = [];
+            targetBoxes.forEach(box => {
+                const val = box.innerText.trim();
+                if (val) usedWords.push(val);
+            });
+
+            const usedCounts = {};
+            usedWords.forEach(w => usedCounts[w] = (usedCounts[w] || 0) + 1);
+
+            const currentCounts = {};
+            bank.querySelectorAll('.word-tag').forEach(tag => {
+                const text = tag.innerText.trim();
+                currentCounts[text] = (currentCounts[text] || 0) + 1;
+                
+                if (usedCounts[text] && usedCounts[text] >= currentCounts[text]) {
+                    tag.classList.add('used');
+                } else {
+                    tag.classList.remove('used');
+                }
+            });
+        });
+    }
+
+    let draggedElement = null;
+
+    function initDragAndDrop() {
+        document.querySelectorAll('.word-bank').forEach(bank => {
+            initSingleWordBank(bank);
+        });
+
+        document.querySelectorAll('.drop-box').forEach((box, index) => {
+            if(!box.id) box.id = `dropbox-${box.getAttribute('data-ans').substring(0,2)}-${index}`;
+
+            box.addEventListener('dragover', (e) => { e.preventDefault(); box.classList.add('over'); });
+            box.addEventListener('dragleave', () => { box.classList.remove('over'); });
+            
+            box.addEventListener('drop', (e) => {
+                e.preventDefault();
+                box.classList.remove('over');
+                const droppedText = e.dataTransfer.getData('text/plain');
+                box.innerText = droppedText;
+                checkSingleElement(box, droppedText);
+            });
+
+            box.addEventListener('click', () => {
+                if (draggedElement) {
+                    const clickText = draggedElement.innerText;
+                    box.innerText = clickText;
+                    checkSingleElement(box, clickText);
+                    draggedElement = null;
+                } else if(box.innerText !== "") {
+                    if(scoredElements.has(box.id)) {
+                        userScore -= 10;
+                        scoredElements.delete(box.id);
+                    }
+                    box.innerText = "";
+                    box.className = "drop-box";
+                    window.speechSynthesis.cancel();
+                    updateSingleBoxReset(box);
+                }
+            });
+        });
+    }
+
+    function updateSingleBoxReset(box) {
+        const quizSection = box.closest('.quiz-section');
+        updateWordBankVisibility(quizSection);
+        updateDashboard();
+    }
+
+    function initInputsAndSelects() {
+        document.querySelectorAll('.blank-input').forEach((input, index) => {
+            if(!input.id) input.id = `input-${input.getAttribute('data-ans').substring(0,2)}-${index}`;
+
+            input.addEventListener('change', () => {
+                checkSingleElement(input, input.value.trim());
+            });
+            input.addEventListener('keyup', (e) => {
+                if(e.key === 'Enter') checkSingleElement(input, input.value.trim());
+            });
+        });
+
+        document.querySelectorAll('.quiz-select').forEach((select, index) => {
+            if(!select.id) select.id = `select-${select.getAttribute('data-ans').substring(0,2)}-${index}`;
+
+            select.addEventListener('change', () => {
+                checkSingleElement(select, select.value);
+            });
+        });
+    }
+
+    function checkSingleElement(element, value) {
+        const isInput = (element.tagName === "INPUT");
+        const isSelect = (element.tagName === "SELECT");
+        const elementId = element.id;
+        const quizSection = element.closest('.quiz-section');
+        
+        if (!value) {
+            element.className = isInput ? "blank-input" : (isSelect ? "quiz-select" : "drop-box");
+            removeErrorMsg(element);
+            if(scoredElements.has(elementId)) {
+                userScore -= isInput ? (assistedElements.has(elementId) ? 5 : 20) : 10;
+                scoredElements.delete(elementId);
+                assistedElements.delete(elementId);
+            }
+            updateWordBankVisibility(quizSection);
+            updateDashboard();
+            return;
+        }
+        
+        const targetAnsStr = element.getAttribute('data-ans');
+        const rawAnswers = targetAnsStr.split('|').map(a => a.trim());
+        const validAnswers = [];
+        rawAnswers.forEach(ans => {
+            validAnswers.push(ans);
+            if (ans.includes('／')) validAnswers.push(ans.replace(/／/g, '/'));
+            if (ans.includes('/')) validAnswers.push(ans.replace(/\//g, '／'));
+        });
+
+        const isCorrect = validAnswers.includes(value.trim());
+        const baseClass = isInput ? "blank-input" : (isSelect ? "quiz-select" : "drop-box");
+
+        if (isCorrect) {
+            element.className = `${baseClass} state-correct`;
+            element.title = "完全正確！";
+            removeErrorMsg(element); 
+
+            if (!scoredElements.has(elementId)) {
+                if (isInput) {
+                    if (assistedElements.has(elementId)) {
+                        userScore += 5; 
+                    } else {
+                        userScore += 20; 
+                    }
+                } else {
+                    userScore += 10; 
+                }
+                scoredElements.add(elementId);
+            }
+            
+            speakSentenceOfElement(element);
+
+        } else {
+            element.className = `${baseClass} state-wrong`;
+            element.title = "答案不對，再試試！";
+            
+            if(scoredElements.has(elementId)) {
+                userScore -= isInput ? (assistedElements.has(elementId) ? 5 : 20) : 10;
+                scoredElements.delete(elementId);
+            }
+
+            if (isInput) {
+                showErrorMsg(element, targetAnsStr.replace(/\|/g, ' 或 '));
+                assistedElements.add(elementId); 
+            }
+        }
+
+        updateWordBankVisibility(quizSection);
+        updateDashboard();
+    }
+
+    function showErrorMsg(inputElement, correctText) {
+        removeErrorMsg(inputElement); 
+        const msgSpan = document.createElement('span');
+        msgSpan.className = 'error-hint-msg';
+        msgSpan.innerText = `❌ 正確：${correctText}`;
+        inputElement.parentNode.insertBefore(msgSpan, inputElement.nextSibling);
+    }
+
+    function removeErrorMsg(inputElement) {
+        const nextEl = inputElement.nextSibling;
+        if (nextEl && nextEl.className === 'error-hint-msg') {
+            nextEl.remove();
+        }
+    }
+
+    function resetSingleSection(btn) {
+        const section = btn.closest('.quiz-section');
+        if (!section) return;
+
+        window.speechSynthesis.cancel();
+
+        section.querySelectorAll('.drop-box, .blank-input, .quiz-select').forEach(el => {
+            if(scoredElements.has(el.id)) {
+                const isInput = (el.tagName === "INPUT");
+                userScore -= isInput ? (assistedElements.has(el.id) ? 5 : 20) : 10;
+                scoredElements.delete(el.id);
+                assistedElements.delete(el.id);
+            }
+        });
+
+        section.querySelectorAll('.drop-box').forEach(b => { b.innerText = ""; b.className = "drop-box"; b.title=""; });
+        section.querySelectorAll('.blank-input').forEach(i => { i.value = ""; i.className = "blank-input"; i.title=""; removeErrorMsg(i); });
+        section.querySelectorAll('.quiz-select').forEach(s => { s.value = ""; s.className = "quiz-select"; s.title=""; });
+
+        section.querySelectorAll('.word-bank').forEach(bank => {
+            initSingleWordBank(bank);
+        });
+
+        updateWordBankVisibility(section);
+        updateDashboard();
+    }
+
+    function resetSection(btn) {
+        const parent = btn.parentElement;
+        
+        saveAndLogRecord(false);
+        window.speechSynthesis.cancel();
+
+        parent.querySelectorAll('.drop-box, .blank-input, .quiz-select').forEach(el => {
+            if(scoredElements.has(el.id)) {
+                const isInput = (el.tagName === "INPUT");
+                userScore -= isInput ? (assistedElements.has(el.id) ? 5 : 20) : 10;
+                scoredElements.delete(el.id);
+                assistedElements.delete(el.id);
+            }
+        });
+
+        parent.querySelectorAll('.drop-box').forEach(b => { b.innerText = ""; b.className = "drop-box"; b.title=""; });
+        parent.querySelectorAll('.blank-input').forEach(i => { i.value = ""; i.className = "blank-input"; i.title=""; removeErrorMsg(i); });
+        parent.querySelectorAll('.quiz-select').forEach(s => { s.value = ""; s.className = "quiz-select"; s.title=""; });
+        
+        parent.querySelectorAll('.word-bank').forEach(bank => {
+            initSingleWordBank(bank);
+        });
+        
+        parent.querySelectorAll('.quiz-section').forEach(qs => updateWordBankVisibility(qs));
+        updateDashboard();
+    }
+
+    window.onload = () => {
+        if(!localStorage.getItem('zh_f2_quiz_nickname')) {
+            const name = prompt("歡迎使用中二中文科智庫系統！請輸入您的暱稱：", "中二學霸");
+            if(name && name.trim() !== "") currentNickname = name.trim();
+            localStorage.setItem('zh_f2_quiz_nickname', currentNickname);
+        }
+
+        initTTSUi();
+        initDragAndDrop();
+        initInputsAndSelects();
+        updateDashboard();
+        
+        document.addEventListener('click', (e) => {
+            if(e.target.classList.contains('word-tag')) {
+                document.querySelectorAll('.word-tag').forEach(t => t.style.borderColor = "#3498db");
+                draggedElement = e.target;
+                e.target.style.borderColor = "#e67e22";
+            }
+        });
+    };
+</script>
+
+</body>
+</html>
