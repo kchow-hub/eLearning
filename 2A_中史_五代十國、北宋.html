@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🌸 中二中史溫習卡 (iPad優化版) 🌸</title>
+    <style>
+        :root {
+            --primary-color: #ff85a1;
+            --secondary-color: #fbb1bd;
+            --accent-color: #70d6ff;
+            --bg-color: #fff0f5;
+            --card-bg: #ffffff;
+            --text-color: #5c4d61;
+            --correct-color: #70e4be;
+            --incorrect-color: #ff9999;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#ffccd5 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+        }
+
+        .quiz-container {
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(255, 133, 161, 0.2);
+            padding: 25px 20px;
+            width: 100%;
+            max-width: 650px;
+            border: 3px solid #ffccd5;
+            position: relative;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.5em;
+            margin: 0 0 10px 0;
+            text-shadow: 1px 1px 2px #ffe6ea;
+        }
+
+        .progress-bar-container {
+            background-color: #ffe6ea;
+            border-radius: 12px;
+            height: 12px;
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #ff85a1, #fbb1bd);
+            height: 100%;
+            width: 2%;
+            transition: width 0.3s ease;
+            border-radius: 12px;
+        }
+
+        .card {
+            background-color: #fff9fa;
+            border: 2px dashed #ffb3c1;
+            border-radius: 18px;
+            padding: 25px 15px;
+            margin-bottom: 20px;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .question-num {
+            font-size: 0.9em;
+            color: #ff758f;
+            font-weight: bold;
+            margin-bottom: 12px;
+            background: #ffe6ea;
+            padding: 4px 14px;
+            border-radius: 15px;
+            display: inline-block;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #4a3e4d;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        /* 針對 iPad 優化的輸入框：防止 iOS 自動放大畫面 */
+        input[type="text"] {
+            border: none;
+            border-bottom: 3px dashed var(--primary-color);
+            background-color: #ffffff;
+            padding: 6px 10px;
+            font-size: 18px; /* 必須 >= 16px 防止 iOS 觸發自動 Zoom-in */
+            width: 160px;
+            text-align: center;
+            outline: none;
+            color: #ff477e;
+            font-weight: bold;
+            border-radius: 8px 8px 0 0;
+            font-family: inherit;
+            -webkit-appearance: none;
+        }
+
+        input[type="text"]:focus {
+            background-color: #fff0f3;
+            border-bottom-style: solid;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ff85a1, #ff94b8);
+            color: white;
+            border: none;
+            padding: 14px 35px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 133, 161, 0.4);
+            transition: transform 0.1s ease;
+            font-family: inherit;
+            font-weight: bold;
+            touch-action: manipulation;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(92, 77, 97, 0.4);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 24px;
+            padding: 25px;
+            max-width: 480px;
+            width: 90%;
+            border: 3px solid;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+
+        .modal.correct-modal { border-color: var(--correct-color); }
+        .modal.incorrect-modal { border-color: var(--incorrect-color); }
+
+        .modal-title {
+            font-size: 1.4em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .modal-ans-info {
+            font-size: 1.05em;
+            margin: 12px 0;
+            padding: 10px;
+            border-radius: 12px;
+            background: #fff0f3;
+        }
+
+        .modal-explain {
+            font-size: 0.95em;
+            color: #665264;
+            line-height: 1.6;
+            text-align: left;
+            background: #fdf8fa;
+            padding: 12px 15px;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .score-board { display: none; }
+        .score-board h2 { color: var(--primary-color); font-size: 1.8em; }
+        .score-badge { font-size: 2.8em; color: #ff477e; margin: 15px 0; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <div class="header" id="quizHeader">
+            <h1>🌸 中史溫習卡 (iPad專用版) 🌸</h1>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+
+        <!-- 使用 form 結構以完全支援 iPad 虛擬鍵盤與外接鍵盤的 Enter / Go 提交 -->
+        <form id="quizForm" onsubmit="handleFormSubmit(event)">
+            <div id="cardArea">
+                <div class="question-num" id="qNum">Question 1 / 50</div>
+                <div class="card">
+                    <div class="question-text" id="qText"></div>
+                </div>
+                <button type="submit" class="btn">送出答案 ✨</button>
+            </div>
+        </form>
+
+        <div class="score-board" id="scoreBoard">
+            <h2>🎉 練習完成！ 🎉</h2>
+            <div>你的最終得分是：</div>
+            <div class="score-badge" id="finalScore">0 / 50</div>
+            <p id="scoreComment"></p>
+            <button class="btn" onclick="location.reload()">再試一次 🔄</button>
+        </div>
+    </div>
+
+    <!-- 即時對答案彈窗 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modalBox">
+            <div class="modal-title" id="modalTitle"></div>
+            <div class="modal-ans-info" id="modalAnsInfo"></div>
+            <div class="modal-explain" id="modalExplain"></div>
+            <button class="btn" type="button" onclick="nextQuestion()">下一題 ➔</button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            // 圖像與兵制專題（結合作業範本）
+            { q: "北宋兵種中，體格壯健、戰鬥力強，負責警衛京師的士兵屬於____。", a: "禁軍", e: "禁軍是北宋最精銳的中央部隊，駐紮京師，戰鬥力強。[cite: 35]" },
+            { q: "北宋兵種中，體格瘦弱、戰鬥力低，負責守衛地方的士兵屬於____。", a: "廂軍", e: "廂軍為地方部隊，多由老弱殘兵組成，主要負責地方治安及雜役，戰鬥力低。[cite: 35]" },
+            { q: "北宋將精兵收歸中央警衛京師，地方僅留老弱士兵守衛，此職責區分屬於____國策。", a: "強幹弱枝", e: "「強幹弱枝」旨在集中精兵於中央，削弱地方軍事力量。[cite: 35]" },
+            { q: "北宋實行強幹弱枝，使中央軍力增強、地方軍力轉弱，目的是防止軍人____。", a: "篡奪頻仍", e: "宋初汲取五代教訓，大幅削弱地方軍力以防止將領擁兵發動兵變篡位。[cite: 35]" },
+            { q: "負責警衛汴京等京師重要要塞的全國精銳部隊稱為____。", a: "禁軍", e: "禁軍由中央直接統領，是宋代軍隊的核心實力。[cite: 35]" },
+            { q: "駐紮在地方各州、戰力被刻意削弱以防叛亂的士兵稱為____。", a: "廂軍", e: "廂軍戰力低落，無法對中央構成軍事威脅。[cite: 35]" },
+
+            // 五代十國政治特色
+            { q: "五代時期政局混亂，地方武將隨意廢立君主，政治上呈現____的極端現象。", a: "武人專政", e: "五代由節度使掌權，重武輕文，法治蕩然無存。[cite: 26, 34]" },
+            { q: "五代五十年間歷經五朝十三君，朝代頻繁更替，反映出當時____的特色。", a: "篡奪頻仍", e: "將領動輒發動兵變廢帝自立，導致政權極不穩定。[cite: 27, 34]" },
+            { q: "後晉石敬瑭割讓燕雲十六州後，北方門戶大開，使中原地區長期承受巨大的____。", a: "契丹威脅", e: "契丹（遼國）佔據燕雲十六州後，可隨時南下侵擾中原。[cite: 27, 34]" },
+            { q: "五代武將多缺乏治國能力，靠兵權控制朝政，形成____的惡劣政局。", a: "武人專政", e: "武官專橫暴虐，社會動盪不安。[cite: 26, 34]" },
+            { q: "後唐、後漢、後周皆由下屬兵變篡位而建立，充分體現了五代時期____的特徵。", a: "篡奪頻仍", e: "軍人擁兵自重，隨時可推翻朝廷。[cite: 27, 34]" },
+            { q: "北宋建立後，北方強敵遼國不斷南侵，成為宋朝初期最嚴重的____。", a: "契丹威脅", e: "契丹實力強盛，是北宋外患的主要來源。[cite: 27, 34]" },
+
+            // 宋初建立與京師
+            { q: "後周殿前都點檢____在陳橋驛發動兵變，建立宋朝。", a: "趙匡胤", e: "趙匡胤即宋太祖，建立了長達三百年的宋朝。[cite: 28, 34]" },
+            { q: "公元 960 年，趙匡胤率軍北上抵達____時，獲部下黃袍加身擁立為帝。", a: "陳橋驛", e: "陳橋驛位於京師附近，是宋朝開國兵變的地點。[cite: 28, 34]" },
+            { q: "宋太祖登基後，建都於交通發達、商業繁榮的____。", a: "汴京", e: "汴京（今河南開封）為北宋都城。[cite: 28, 34]" },
+            { q: "結束五代十國分裂局面的關鍵開國君主是____。", a: "趙匡胤", e: "宋太祖先後消滅南方各國，統一了中原及南方大部分地區。[cite: 28, 34]" },
+            { q: "史稱黃袍加身、不血刃而完成政權更替的兵變發生於____。", a: "陳橋驛", e: "陳橋兵變是中國歷史上著名的政變事件。[cite: 28, 34]" },
+            { q: "北宋中央政府、皇宮以及精銳禁軍總部皆設於都城____。", a: "汴京", e: "汴京是北宋政治與軍事指揮中心。[cite: 28, 34]" },
+
+            // 宋初國策與官制
+            { q: "宋初為防範兵變重演，實行削弱地方、集中大權於中央的____政策。", a: "強幹弱枝", e: "將地方財權、軍權及政權收歸中央。[cite: 29, 34]" },
+            { q: "宋朝實行極力提升文官地位、嚴格抑制武將權力的____國策。", a: "重文輕武", e: "宋代由文官主持軍政，武將受到嚴密監視。[cite: 29, 34]" },
+            { q: "宋代在中央設立樞密院，由____掌管全國軍政，以分削宰相的軍權。", a: "樞密使", e: "樞密使與宰相分權，使宰相無法專擅大權。[cite: 30, 34]" },
+            { q: "宋代中央設置____專門統轄全國財政，分奪宰相的財權。", a: "三司使", e: "三司使直轄財政，稱為「計相」。[cite: 30, 34]" },
+            { q: "宋朝廢除地方藩鎮實權，由中央派遣文官出任地方長官，稱為____。", a: "知州", e: "知州取代了五代的節度使，管理地方行政。[cite: 30, 34]" },
+            { q: "為防止地方長官獨攬大權，中央特設副官____以作牽制與監督。", a: "通判", e: "通判有權監督知州，公文需經通判聯署方能生效。[cite: 30, 34]" },
+            { q: "地方財賦除保留日常開支外，其餘盡數運送中央，這屬於____的具體措施。", a: "強幹弱枝", e: "削弱地方財力，使其無力養兵抗拒中央。[cite: 29, 34]" },
+            { q: "宋代大力發展科舉、起用文人統兵，充份貫徹了____的執政理念。", a: "重文輕武", e: "提高文人社會地位，營造良好的文治風氣。[cite: 29, 34]" },
+            { q: "掌管全國軍事調配但無直接握兵權的中央高官是____。", a: "樞密使", e: "兵符在樞密使，發兵權與統兵權分離。[cite: 30, 34]" },
+            { q: "掌管戶部、鹽鐵、度支等財政大權的官職是____。", a: "三司使", e: "專管國家收支與財賦。[cite: 30, 34]" },
+            { q: "地方大小公事必須由____與通判共同簽署始能下達實施。", a: "知州", e: "知州作為長官，權力受到副官監督。[cite: 30, 34]" },
+            { q: "有權直接向皇帝密報知州違法行為的地方監督官是____。", a: "通判", e: "通判是皇帝插在地方的一雙眼睛。[cite: 30, 34]" },
+
+            // 北宋變法與黨爭
+            { q: "宋仁宗時，范仲淹主持了旨在整頓吏治、澄清朝政的____。", a: "慶曆變法", e: "慶曆變法是北宋改革的先聲。[cite: 31, 34]" },
+            { q: "范仲淹向宋仁宗呈上《十事疏》，展開了短暫的____。", a: "慶曆變法", e: "因遭守舊派強烈反對，變法僅推行一年多即告失敗。[cite: 31, 34]" },
+            { q: "宋神宗起用王安石推行大規模的富國強兵改革，史稱____。", a: "熙豐變法", e: "因發生於神宗熙寧、元豐年間，故稱「熙豐變法」。[cite: 31, 34]" },
+            { q: "王安石頒布青苗法、保甲法等新法，此全面性改革稱為____。", a: "熙豐變法", e: "熙豐變法涵蓋財政與軍事兩大範疇。[cite: 31, 34]" },
+            { q: "舊黨代表人物____極力反對王安石新法，認為新法擾民損民。", a: "司馬光", e: "司馬光為著名歷史學家，也是舊黨的核心領袖。[cite: 32, 33, 34]" },
+            { q: "哲宗即位後舊黨掌權，由大臣____主持朝政並全面廢除新法。", a: "司馬光", e: "司馬光廢除新法，史稱「元祐更化」。[cite: 33, 34]" },
+            { q: "新法推行後，朝臣分成支持與反對兩大陣營，演變成長期的____。", a: "新舊黨爭", e: "新黨與舊黨輪流掌權，互相打壓。[cite: 33, 34]" },
+            { q: "新舊黨爭歷時數十年，朝臣互相攻擊，導致政治極度腐敗，稱為____。", a: "新舊黨爭", e: "黨爭損耗國家內力，加速北宋滅亡。[cite: 33, 34]" },
+            { q: "宋徽宗時，蔡京將司馬光等舊黨大臣的名字刻於____，進行政治迫害。", a: "奸黨人碑", e: "將反對派誣陷為奸黨並刻石立碑，永遠禁止其子弟入仕。[cite: 33, 34]" },
+            { q: "蔡京豎立____打壓異己，使朝中忠良盡去，政風敗壞至極。", a: "奸黨人碑", e: "奸黨人碑是北宋黨爭達到惡化頂峰的象徵。[cite: 33, 34]" },
+
+            // 綜合鞏固與課本概念理解
+            { q: "范仲淹希望透過____改善吏治，但最終受到既得利益者阻撓而失敗。", a: "慶曆變法", e: "改革官員升遷制度觸怒了大批守舊官僚。[cite: 31, 34]" },
+            { q: "王安石發動的____雖然增加了國家財政收入，卻引發朝臣嚴重分歧。", a: "熙豐變法", e: "新法執行過程中出現流弊，導致朝臣分成兩派。[cite: 31, 32, 34]" },
+            { q: "編撰《資治通鑑》的名臣____，在政治上是堅決反對王安石新法的舊黨領袖。", a: "司馬光", e: "司馬光主張循序漸進，反對激進改革。[cite: 32, 33, 34]" },
+            { q: "北宋後期朝臣陷入盲目的意氣與私利之爭，此現象稱為____。", a: "新舊黨爭", e: "黨爭由政策分歧轉變為個人恩怨打壓。[cite: 33, 34]" },
+            { q: "徽宗時期朝廷立____，將舊黨成員劃為奸黨，嚴厲懲處。", a: "奸黨人碑", e: "打擊面極廣，嚴重傷害朝政人才。[cite: 33, 34]" },
+            { q: "宋太祖把各地精兵調集京師組成____，有效穩固了中央統治。", a: "禁軍", e: "京師兵力強大，地方無力反抗。[cite: 30, 35]" },
+            { q: "地方保留的兵員稱為____，因戰力低下，無力發動兵變。", a: "廂軍", e: "地方軍隊主要負責維持治安與建造工程。[cite: 30, 35]" },
+            { q: "宋初國策____雖然維護了政局穩定，但也造成了北宋「積弱」的後果。", a: "重文輕武", e: "武將受制過甚，軍隊戰鬥力普遍下降。[cite: 29, 34]" },
+            { q: "宋代集中兵權與財權於中央，實行____，從根本上解決了藩鎮割據問題。", a: "強幹弱枝", e: "成功維持了宋朝內部的長期安定。[cite: 29, 34]" },
+            { q: "宋代由文官擔任的____，負責管理一州的行政與民政事務。", a: "知州", e: "地方長官改由文官擔任，奠定文治基礎。[cite: 30, 34]" },
+            { q: "與知州相互牽制、防止地方長官濫用職權的地方副官是____。", a: "通判", e: "分化地方長官的權力。[cite: 30, 34]" },
+            { q: "宋太祖於____兵變登基，奠定了北宋三百年的基業。", a: "陳橋驛", e: "黃袍加身建立宋朝。[cite: 28, 34]" },
+            { q: "作為北宋政治與文化中心的都城是____。", a: "汴京", e: "繁華的汴京是北宋的首都。[cite: 28, 34]" },
+            { q: "宋太祖____透過平定南方割據政權，逐步實現了局部的統一。", a: "趙匡胤", e: "採納「先南後北」的統一策略。[cite: 28, 34]" }
+        ];
+
+        let currentQIndex = 0;
+        let score = 0;
+
+        function loadQuestion() {
+            const currentQ = quizData[currentQIndex];
+            document.getElementById('qNum').textContent = `Question ${currentQIndex + 1} / ${quizData.length}`;
+            
+            const questionHtml = currentQ.q.replace("____", `<input type="text" id="userAnswer" placeholder="請輸入生字" autocomplete="off" autocorrect="off" autocapitalize="off">`);
+            document.getElementById('qText').innerHTML = questionHtml;
+
+            const progress = ((currentQIndex + 1) / quizData.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault(); // 阻止表單重設，相容 iPad 提交
+            submitAnswer();
+        }
+
+        function submitAnswer() {
+            const input = document.getElementById('userAnswer');
+            if(!input) return;
+
+            const userAns = input.value.trim();
+            const currentQ = quizData[currentQIndex];
+            
+            const modalOverlay = document.getElementById('modalOverlay');
+            const modalBox = document.getElementById('modalBox');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalAnsInfo = document.getElementById('modalAnsInfo');
+            const modalExplain = document.getElementById('modalExplain');
+
+            if (userAns === currentQ.a) {
+                score++;
+                modalBox.className = "modal correct-modal";
+                modalTitle.innerHTML = "✨ 答對了！太棒了！ 🌸";
+                modalTitle.style.color = "#27ae60";
+                modalAnsInfo.innerHTML = `正確答案：<strong>${currentQ.a}</strong>`;
+                modalExplain.innerHTML = `<strong>💡 溫習小筆記：</strong><br>${currentQ.e}`;
+            } else {
+                modalBox.className = "modal incorrect-modal";
+                modalTitle.innerHTML = "💔 差一點點，再接再厲！";
+                modalTitle.style.color = "#e74c3c";
+                modalAnsInfo.innerHTML = `你的答案：<span style="text-decoration:line-through;">${userAns || '未填寫'}</span><br>正確答案是：<strong style="color:#ff477e;">${currentQ.a}</strong>`;
+                modalExplain.innerHTML = `<strong>📖 課本概念解說：</strong><br>${currentQ.e}`;
+            }
+
+            modalOverlay.classList.add('active');
+            input.blur(); // 關閉 iPad 虛擬鍵盤
+        }
+
+        function nextQuestion() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            currentQIndex++;
+
+            if (currentQIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                showFinalScore();
+            }
+        }
+
+        function showFinalScore() {
+            document.getElementById('quizHeader').style.display = 'none';
+            document.getElementById('quizForm').style.display = 'none';
+            const scoreBoard = document.getElementById('scoreBoard');
+            scoreBoard.style.display = 'block';
+
+            document.getElementById('finalScore').textContent = `${score} / ${quizData.length}`;
+
+            const comment = document.getElementById('scoreComment');
+            if (score === quizData.length) {
+                comment.innerHTML = "🌟 滿分完美！17 個生字及工作紙重點完全掌握，太厲害了！";
+            } else if (score >= 40) {
+                comment.innerHTML = "💖 表現非常好！把答錯的題解多看兩遍就完全融會貫通囉！";
+            } else {
+                comment.innerHTML = "🎀 不要灰心，對照生字表與作業多溫習幾次，下次一定更棒！";
+            }
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>

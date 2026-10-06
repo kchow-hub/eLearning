@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S2 Science 7.1 & 7.2 34生字 50題填充挑戰</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .game-container {
+            background-color: #1e293b;
+            border-radius: 16px;
+            padding: 30px;
+            width: 100%;
+            max-width: 720px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 2px solid #334155;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #38bdf8;
+        }
+        .stats {
+            font-size: 16px;
+            color: #4ade80;
+        }
+        .category-tag {
+            display: inline-block;
+            background-color: #334155;
+            color: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .question-box {
+            font-size: 18px;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            color: #f1f5f9;
+        }
+        .input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .answer-input {
+            flex: 1;
+            padding: 14px 18px;
+            border-radius: 8px;
+            border: 2px solid #475569;
+            background-color: #0f172a;
+            color: #ffffff;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .answer-input:focus {
+            border-color: #38bdf8;
+        }
+        .submit-btn {
+            background-color: #38bdf8;
+            color: #0f172a;
+            border: none;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .submit-btn:hover {
+            background-color: #7dd3fc;
+        }
+        .explanation {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #0f172a;
+            border-left: 4px solid #38bdf8;
+            border-radius: 4px;
+            display: none;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        .explanation.correct-exp {
+            border-left-color: #4ade80;
+        }
+        .explanation.wrong-exp {
+            border-left-color: #f87171;
+        }
+        .next-btn, .restart-btn {
+            margin-top: 20px;
+            background-color: #4ade80;
+            color: #0f172a;
+            border: none;
+            padding: 14px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            display: none;
+        }
+        .next-btn:hover, .restart-btn:hover {
+            background-color: #86efac;
+        }
+        .result-screen {
+            text-align: center;
+            display: none;
+        }
+        .result-screen h2 {
+            color: #38bdf8;
+            font-size: 28px;
+        }
+        .result-screen p {
+            font-size: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <!-- 遊戲主畫面 -->
+    <div id="quiz-screen">
+        <div class="header">
+            <div class="title">Science 34生字 50題關卡</div>
+            <div class="stats">進度: <span id="current-q">1</span>/50 | 得分: <span id="score">0</span></div>
+        </div>
+
+        <div class="category-tag" id="category-tag">Section 7.1</div>
+        <div class="question-box" id="question-text">載入中...</div>
+
+        <div class="input-container">
+            <input type="text" id="user-input" class="answer-input" placeholder="請在此輸入英文答案..." autocomplete="off" onkeypress="handleKeyPress(event)">
+            <button class="submit-btn" id="submit-btn" onclick="checkAnswer()">提交</button>
+        </div>
+
+        <div class="explanation" id="explanation"></div>
+
+        <button class="next-btn" id="next-btn" onclick="nextQuestion()">下一題 ➔</button>
+    </div>
+
+    <!-- 結算畫面 -->
+    <div class="result-screen" id="result-screen">
+        <h2>🎉 50 題挑戰完成！</h2>
+        <p>你的最終得分：<span id="final-score">0</span> / 50</p>
+        <p id="feedback-text"></p>
+        <button class="restart-btn" style="display:block;" onclick="restartGame()">重新挑戰 🔄</button>
+    </div>
+</div>
+
+<script>
+const quizData = [
+    // Section 7.1 (Q1 - Q22)
+    { category: "Section 7.1: Gases in the Air", question: "1. Air is a ____________ of different gases.", answers: ["mixture"], exp: "正解：mixture（混合物）。" },
+    { category: "Section 7.1: Gases in the Air", question: "2. The gas that makes up about 78% of air is ____________.", answers: ["nitrogen"], exp: "正解：nitrogen（氮氣）。" },
+    { category: "Section 7.1: Gases in the Air", question: "3. Plants release ____________ gas during photosynthesis.", answers: ["oxygen"], exp: "正解：oxygen（氧氣）。" },
+    { category: "Section 7.1: Gases in the Air", question: "4. Carbon dioxide turns clear ____________ ____________ milky.", answers: ["lime water"], exp: "正解：lime water（石灰水）。" },
+    { category: "Section 7.1: Gases in the Air", question: "5. Oxygen gas ____________ a glowing splint.", answers: ["relights"], exp: "正解：relights（使...復燃）。" },
+    { category: "Section 7.1: Gases in the Air", question: "6. Argon, helium, and neon belong to the group of ____________ gases.", answers: ["noble"], exp: "正解：noble（noble gases 稀有氣體）。" },
+    { category: "Section 7.1: Gases in the Air", question: "7. Noble gases are chemically ____________, so they do not react easily.", answers: ["unreactive"], exp: "正解：unreactive（不活潑的 / 無反應的）。" },
+    { category: "Section 7.1: Gases in the Air", question: "8. We can use a ____________ ____________ indicator to test carbon dioxide levels.", answers: ["hydrogencarbonate"], exp: "正解：hydrogencarbonate（碳酸氫鹽指示劑）。" },
+    { category: "Section 7.1: Gases in the Air", question: "9. A ____________ splint is used to test for flammable gases like hydrogen.", answers: ["burning"], exp: "正解：burning（burning splint 燃燒中的木條）。" },
+    { category: "Section 7.1: Gases in the Air", question: "10. Oxygen causes a ____________ splint to relight.", answers: ["glowing"], exp: "正解：glowing（glowing splint 帶火星的木條）。" },
+    { category: "Section 7.1: Gases in the Air", question: "11. Water turns dry blue ____________ ____________ paper to pink.", answers: ["cobalt chloride", "cobalt chloride paper"], exp: "正解：cobalt chloride paper（氯化鈷試紙）。" },
+    { category: "Section 7.1: Gases in the Air", question: "12. A vessel used to keep substances dry in experiments is a ____________.", answers: ["desiccator"], exp: "正解：desiccator（乾燥器）。" },
+    { category: "Section 7.1: Gases in the Air", question: "13. Gases without any smell are described as ____________.", answers: ["odourless", "odorless"], exp: "正解：odourless（無氣味的）。" },
+    { category: "Section 7.1: Gases in the Air", question: "14. A very light gas used in party balloons is ____________.", answers: ["helium"], exp: "正解：helium（氦氣）。" },
+    { category: "Section 7.1: Gases in the Air", question: "15. A noble gas that glows reddish-orange in advertising signs is ____________.", answers: ["neon"], exp: "正解：neon（氖氣）。" },
+    { category: "Section 7.1: Gases in the Air", question: "16. Exhaled air contains a higher concentration of ____________ ____________.", answers: ["carbon dioxide"], exp: "正解：carbon dioxide（二氧化碳）。" },
+    { category: "Section 7.1: Gases in the Air", question: "17. Pure oxygen gas ____________ a glowing splint quickly.", answers: ["relights"], exp: "正解：relights（使...復燃）。" },
+    { category: "Section 7.1: Gases in the Air", question: "18. Nitrogen and oxygen are combined physically, forming a ____________.", answers: ["mixture"], exp: "正解：mixture（混合物）。" },
+    { category: "Section 7.1: Gases in the Air", question: "19. Helium and neon are both ____________ gases.", answers: ["noble"], exp: "正解：noble（稀有氣體）。" },
+    { category: "Section 7.2: Photosynthesis", question: "20. To remove carbon dioxide from air, we pass it through ____________ lime.", answers: ["soda"], exp: "正解：soda（soda lime 鹼石灰）。" },
+    { category: "Section 7.1: Gases in the Air", question: "21. Pure nitrogen gas is an ____________ gas with no smell.", answers: ["odourless", "odorless"], exp: "正解：odourless（無味的）。" },
+    { category: "Section 7.1: Gases in the Air", question: "22. Carbon dioxide turns ____________ ____________ cloudy.", answers: ["lime water"], exp: "正解：lime water（石灰水）。" },
+
+    // Section 7.2 (Q23 - Q50)
+    { category: "Section 7.2: Photosynthesis", question: "23. Green plants make food through the process of ____________.", answers: ["photosynthesis"], exp: "正解：photosynthesis（光合作用）。" },
+    { category: "Section 7.2: Photosynthesis", question: "24. Light energy is absorbed by green leaves containing ____________.", answers: ["chlorophyll"], exp: "正解：chlorophyll（葉綠素）。" },
+    { category: "Section 7.2: Photosynthesis", question: "25. The primary sugar made during photosynthesis is ____________.", answers: ["glucose"], exp: "正解：glucose（葡萄糖）。" },
+    { category: "Section 7.2: Photosynthesis", question: "26. Photosynthesis converts light energy into ____________ energy.", answers: ["chemical"], exp: "正解：chemical（化學能）。" },
+    { category: "Section 7.2: Photosynthesis", question: "27. Excess glucose is converted and stored in leaves as ____________.", answers: ["starch"], exp: "正解：starch（澱粉）。" },
+    { category: "Section 7.2: Photosynthesis", question: "28. Starch and glucose both belong to the nutrient group called ____________.", answers: ["carbohydrate", "carbohydrates"], exp: "正解：carbohydrate（碳水化合物）。" },
+    { category: "Section 7.2: Photosynthesis", question: "29. To supply carbon dioxide to aquatic plants, add ____________ hydrogencarbonate.", answers: ["sodium"], exp: "正解：sodium（sodium hydrogencarbonate 碳酸氫鈉）。" },
+    { category: "Section 7.2: Photosynthesis", question: "30. A ____________ set up is used for comparison in experiments.", answers: ["control", "control set up"], exp: "正解：control set up（對照實驗裝置）。" },
+    { category: "Section 7.2: Photosynthesis", question: "31. Absorbing carbon dioxide in photosynthesis experiments requires ____________ lime.", answers: ["soda"], exp: "正解：soda lime（鹼石灰）。" },
+    { category: "Section 7.2: Photosynthesis", question: "32. The chemical solution used to test for starch is ____________ solution.", answers: ["iodine"], exp: "正解：iodine（碘液）。" },
+    { category: "Section 7.2: Photosynthesis", question: "33. In the starch test, a leaf is boiled in ____________ to dissolve chlorophyll.", answers: ["alcohol"], exp: "正解：alcohol（酒精）。" },
+    { category: "Section 7.2: Photosynthesis", question: "34. Leaving a plant in darkness for 48 hours is called ____________.", answers: ["destarching"], exp: "正解：destarching（脫澱粉處理）。" },
+    { category: "Section 7.2: Photosynthesis", question: "35. A leaf with both green and white/yellow areas is a ____________ leaf.", answers: ["variegated"], exp: "正解：variegated（斑葉/斑駁的）。" },
+    { category: "Section 7.2: Food Chain & Energy", question: "36. Energy is ____________ from plants to herbivores when eaten.", answers: ["transferred"], exp: "正解：transferred（轉移 / 傳遞）。" },
+    { category: "Section 7.2: Food Chain & Energy", question: "37. A single sequence of feeding relationships is a food ____________.", answers: ["chain"], exp: "正解：food chain（食物鏈）。" },
+    { category: "Section 7.2: Food Chain & Energy", question: "38. Multiple interconnected food chains form a food ____________.", answers: ["web"], exp: "正解：food web（食物網）。" },
+    { category: "Section 7.2: Food Chain & Energy", question: "39. Organisms that produce their own food are ____________.", answers: ["producers", "producer"], exp: "正解：producers（生產者）。" },
+    { category: "Section 7.2: Food Chain & Energy", question: "40. Organisms that eat other organisms are called ____________.", answers: ["consumers", "consumer"], exp: "正解：consumers（消費者）。" },
+    { category: "Section 7.2: Photosynthesis", question: "41. Green leaves contain ____________ to capture light.", answers: ["chlorophyll"], exp: "正解：chlorophyll（葉綠素）。" },
+    { category: "Section 7.2: Photosynthesis", question: "42. Iodine solution turns blue-black in the presence of ____________.", answers: ["starch"], exp: "正解：starch（澱粉）。" },
+    { category: "Section 7.2: Photosynthesis", question: "43. During photosynthesis, light energy is transformed into ____________ energy.", answers: ["chemical"], exp: "正解：chemical（化學能）。" },
+    { category: "Section 7.2: Photosynthesis", question: "44. Glucose is a type of simple ____________.", answers: ["carbohydrate"], exp: "正解：carbohydrate（碳水化合物）。" },
+    { category: "Section 7.2: Photosynthesis", question: "45. Hot ____________ is used to remove green pigment from leaves.", answers: ["alcohol"], exp: "正解：alcohol（酒精）。" },
+    { category: "Section 7.2: Photosynthesis", question: "46. Before an experiment, plants undergo ____________ to remove stored starch.", answers: ["destarching"], exp: "正解：destarching（脫澱粉處理）。" },
+    { category: "Section 7.2: Food Chain & Energy", question: "49. Chemical energy in food is ____________ through the food chain.", answers: ["transferred"], exp: "正解：transferred（傳遞）。" },
+    { category: "Section 7.2: Food Chain & Energy", question: "47. A complex network of feeding relationships is a food ____________.", answers: ["web"], exp: "正解：food web（食物網）。" },
+    { category: "Section 7.2: Food Chain & Energy", question: "48. Plants are the primary ____________ in most ecosystems.", answers: ["producers", "producer"], exp: "正解：producers（生產者）。" },
+    { category: "Section 7.2: Food Chain & Energy", question: "50. Animals cannot perform photosynthesis, so they are ____________.", answers: ["consumers", "consumer"], exp: "正解：consumers（消費者）。" }
+];
+
+let currentQuestion = 0;
+let score = 0;
+let answered = false;
+
+function loadQuestion() {
+    answered = false;
+    const currentQuiz = quizData[currentQuestion];
+    
+    document.getElementById('current-q').textContent = currentQuestion + 1;
+    document.getElementById('category-tag').textContent = currentQuiz.category;
+    document.getElementById('question-text').textContent = currentQuiz.question;
+    
+    const input = document.getElementById('user-input');
+    input.value = '';
+    input.disabled = false;
+    input.focus();
+    
+    document.getElementById('submit-btn').disabled = false;
+    document.getElementById('explanation').style.display = 'none';
+    document.getElementById('next-btn').style.display = 'none';
+}
+
+function checkAnswer() {
+    if (answered) return;
+    
+    const input = document.getElementById('user-input');
+    const userAns = input.value.trim().toLowerCase();
+    
+    if (userAns === '') return;
+    
+    answered = true;
+    input.disabled = true;
+    document.getElementById('submit-btn').disabled = true;
+    
+    const currentQuiz = quizData[currentQuestion];
+    const isCorrect = currentQuiz.answers.some(ans => ans.toLowerCase() === userAns);
+    
+    const expBox = document.getElementById('explanation');
+    
+    if (isCorrect) {
+        score += 1;
+        document.getElementById('score').textContent = score;
+        expBox.className = "explanation correct-exp";
+        expBox.innerHTML = "✅ <strong>答對了！</strong><br>" + currentQuiz.exp;
+    } else {
+        expBox.className = "explanation wrong-exp";
+        expBox.innerHTML = "❌ <strong>答錯囉！</strong><br>" + currentQuiz.exp;
+    }
+    
+    expBox.style.display = 'block';
+    document.getElementById('next-btn').style.display = 'block';
+}
+
+function handleKeyPress(e) {
+    if (e.key === 'Enter') {
+        if (!answered) {
+            checkAnswer();
+        } else {
+            nextQuestion();
+        }
+    }
+}
+
+function nextQuestion() {
+    currentQuestion++;
+    if (currentQuestion < quizData.length) {
+        loadQuestion();
+    } else {
+        showResults();
+    }
+}
+
+function showResults() {
+    document.getElementById('quiz-screen').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'block';
+    document.getElementById('final-score').textContent = score;
+    
+    const feedback = document.getElementById('feedback-text');
+    if (score === 50) {
+        feedback.textContent = "🏆 完美！50 題全部正確！34 個生字拼寫與科學概念全都難不倒你！";
+    } else if (score >= 40) {
+        feedback.textContent = "👍 表現非常出色！大部分生字都精準掌握了！";
+    } else if (score >= 30) {
+        feedback.textContent = "📚 表現不錯！把有錯漏的幾個生字多練習幾次，就能拿滿分了！";
+    } else {
+        feedback.textContent = "💪 建議再對照 34 個重點生字表多記幾遍，加油！";
+    }
+}
+
+function restartGame() {
+    currentQuestion = 0;
+    score = 0;
+    document.getElementById('score').textContent = score;
+    document.getElementById('result-screen').style.display = 'none';
+    document.getElementById('quiz-screen').style.display = 'block';
+    loadQuestion();
+}
+
+// 初始化遊戲
+loadQuestion();
+</script>
+
+</body>
+</html>
