@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🌸 F.2 English Glossary 溫習系統 🌸</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #ff758c;
+            --primary-hover: #ff5277;
+            --bg-color: #fff0f3;
+            --card-bg: #ffffff;
+            --text-color: #4a4a4a;
+            --accent-color: #ff9a9e;
+            --badge-bg: #ffe3e8;
+            --border-color: #ffccd5;
+            --shadow: 0 8px 20px rgba(255, 117, 140, 0.15);
+            --font-family: 'Nunito', 'M PLUS Rounded 1c', 'PingFang HK', 'Microsoft JhengHei', sans-serif;
+        }
+
+        body.theme-matcha {
+            --primary-color: #70a13d;
+            --primary-hover: #5a852e;
+            --bg-color: #f4f8f0;
+            --card-bg: #ffffff;
+            --text-color: #334228;
+            --accent-color: #8bc34a;
+            --badge-bg: #e8f5e9;
+            --border-color: #c8e6c9;
+            --shadow: 0 8px 20px rgba(112, 161, 61, 0.15);
+        }
+
+        * { box-sizing: border-box; font-family: var(--font-family); }
+        body { margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-color); transition: all 0.3s ease; }
+        
+        .container { max-width: 880px; margin: 0 auto; padding: 20px 15px; text-align: center; }
+        .hidden { display: none !important; }
+
+        h1 { font-size: 26px; color: var(--primary-color); margin-bottom: 8px; font-weight: 800; letter-spacing: 0.5px; }
+        h2 { font-size: 20px; margin-bottom: 15px; color: #555; font-weight: 700; }
+        
+        .user-settings { margin-bottom: 20px; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap;}
+        .user-settings label { font-size: 16px; font-weight: 700; }
+        .user-settings input { 
+            font-size: 16px; padding: 8px 16px; border-radius: 20px; border: 2px solid var(--primary-color); 
+            width: 150px; text-align: center; outline: none; font-weight: 700; color: var(--text-color);
+            background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; min-height: 45px; }
+        .home-btn { 
+            font-size: 15px; font-weight: 700; cursor: pointer; 
+            background: #fff; border: 2px solid var(--primary-color); border-radius: 20px; padding: 6px 18px; 
+            box-shadow: var(--shadow); color: var(--primary-color); transition: all 0.2s;
+        }
+        .home-btn:hover { background: var(--primary-color); color: white; }
+
+        .settings-panel { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;}
+        .toggle-btn { 
+            padding: 8px 18px; border-radius: 20px; font-size: 14px; font-weight: 700; 
+            cursor: pointer; border: none; box-shadow: var(--shadow); transition: all 0.2s; color: white;
+        }
+        .btn-theme-sakura { background: linear-gradient(135deg, #ff758c, #ff7eb3); }
+        .btn-theme-matcha { background: linear-gradient(135deg, #a8e063, #56ab2f); }
+        .btn-audio-on { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .btn-audio-off { background: #b0bec5; }
+
+        button:not(.home-btn):not(.toggle-btn):not(.speaker-icon):not(.unit-tab) {
+            background-color: var(--card-bg); color: var(--text-color); border: 2px solid var(--border-color);
+            border-radius: 18px; padding: 14px 20px; font-size: 16px; font-weight: 700;
+            margin: 6px; cursor: pointer; transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04); touch-action: manipulation;
+        }
+        button:not(.home-btn):not(.toggle-btn):not(.speaker-icon):not(.unit-tab):hover {
+            border-color: var(--primary-color); transform: translateY(-2px); box-shadow: var(--shadow);
+        }
+        button.btn-primary { background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color: white; border: none; }
+        button.btn-accent { background: linear-gradient(135deg, #ff9a9e, #fecfef); color: #555; border: none; }
+        button.btn-special { background: linear-gradient(135deg, #a1c4fd, #c2e9fb); color: #444; border: none; }
+
+        .unit-section-title { font-size: 18px; font-weight: 800; text-align: left; margin: 20px 0 10px 5px; color: var(--primary-color); border-left: 5px solid var(--primary-color); padding-left: 10px; }
+        .unit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .unit-card { 
+            background: var(--card-bg); border-radius: 18px; padding: 15px; 
+            border: 2px solid var(--border-color); box-shadow: var(--shadow); 
+            text-align: left; cursor: pointer; transition: all 0.2s ease;
+        }
+        .unit-card:hover { transform: translateY(-3px); border-color: var(--primary-color); }
+        .unit-card-title { font-size: 15px; font-weight: 800; color: var(--primary-color); margin-bottom: 6px; }
+        .unit-card-desc { font-size: 13px; color: #777; line-height: 1.4; }
+
+        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
+        @media (min-width: 600px) { .menu-grid { grid-template-columns: 1fr 1fr; } }
+        
+        .chapter-btn { font-size: 16px; padding: 14px; width: 100%; border-radius: 18px; background-color: var(--card-bg); margin: 6px 0; text-align: left;}
+        .chapter-btn.selected { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+
+        .status-bar { font-size: 17px; font-weight: 700; background: white; padding: 12px; border-radius: 15px; margin-bottom: 15px; box-shadow: var(--shadow); }
+        .question-box { background: white; padding: 30px 20px; border-radius: 24px; font-size: 20px; line-height: 1.6; margin-bottom: 20px; box-shadow: var(--shadow); position: relative; min-height: 180px; display: flex; align-items: center; justify-content: center; flex-direction: column;}
+        .speaker-icon { position: absolute; top: 12px; right: 15px; font-size: 26px; cursor: pointer; background: none; border: none; box-shadow:none; padding: 0;}
+        
+        .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        @media (max-width: 500px) { .options-grid { grid-template-columns: 1fr; } }
+        
+        .text-input { font-size: 20px; padding: 12px; width: 85%; text-align: center; border: 3px solid var(--primary-color); border-radius: 18px; margin-bottom: 15px; outline: none; font-weight: 700;}
+
+        .unit-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; }
+        .unit-tab { padding: 8px 16px; border-radius: 20px; background: #fff; border: 2px solid var(--border-color); font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; color: #666;}
+        .unit-tab.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+
+        .word-list { display: grid; grid-template-columns: repeat(1, 1fr); gap: 12px; padding: 5px; }
+        @media (min-width: 600px) { .word-list { grid-template-columns: repeat(2, 1fr); } }
+        .word-card { 
+            background: white; padding: 16px; border-radius: 18px; border: 2px solid var(--border-color); 
+            text-align: left; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow);
+        }
+        .word-card:hover { border-color: var(--primary-color); transform: translateY(-2px); }
+        .word-title { font-size: 20px; font-weight: 800; color: var(--primary-color); display: flex; justify-content: space-between; align-items: center;}
+        .word-pos { font-size: 13px; background: var(--badge-bg); color: var(--primary-color); padding: 3px 8px; border-radius: 10px; font-weight: 700; }
+        .word-cn { font-size: 16px; font-weight: 700; color: #333; margin: 6px 0 4px 0; }
+        .word-def { font-size: 13px; color: #666; font-style: italic; margin-bottom: 6px; }
+        .word-eg { font-size: 13px; color: #444; background: #f9f9f9; padding: 8px; border-radius: 10px; border-left: 3px solid var(--primary-color); }
+
+        .leaderboard-container { margin-top: 30px; background: white; padding: 20px; border-radius: 24px; box-shadow: var(--shadow); }
+        .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        .leaderboard-table th, .leaderboard-table td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
+        .leaderboard-table th { background-color: var(--badge-bg); color: var(--primary-color); font-weight: 800; }
+
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 28px; text-align: center; max-width: 90%; width: 420px; box-shadow: 0 15px 30px rgba(0,0,0,0.15); }
+
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-6px); } 50% { transform: translateX(6px); } 75% { transform: translateX(-6px); } 100% { transform: translateX(0); } }
+        .wrong-anim { animation: shake 0.4s; background-color: #ffebee !important; border-color: #ef5350 !important; color: #c62828 !important; }
+        .correct-anim { background-color: #e8f5e9 !important; border-color: #66bb6a !important; color: #2e7d32 !important; }
+    </style>
+</head>
+<body class="theme-sakura">
+
+<div class="container">
+    <div class="top-bar">
+        <button class="home-btn" onclick="goHome()">🌸 主選單</button>
+        <div id="score-display" class="hidden" style="font-weight: 800; color: var(--primary-color); font-size: 18px; background: white; padding: 6px 18px; border-radius: 20px; box-shadow: var(--shadow);">🏆 分數: <span id="current-score">0</span></div>
+    </div>
+
+    <!-- 主頁 -->
+    <div id="view-home">
+        <h1>🌸 F.2 English Glossary 溫習系統 🌸</h1>
+        <p style="color: #777; font-size: 14px; margin-top: -5px; margin-bottom: 15px;">St. Rose of Lima's College • Unit 1 & Unit 2</p>
+        
+        <div class="user-settings">
+            <label>🎀 學生姓名：</label>
+            <input type="text" id="player-name" value="Heidy">
+        </div>
+
+        <div class="settings-panel">
+            <button class="toggle-btn btn-theme-sakura" id="btn-theme" onclick="toggleTheme()">🌸 櫻花風</button>
+            <button class="toggle-btn btn-audio-off" id="btn-audio" onclick="toggleAudio()">🔇 自動朗讀: OFF</button>
+        </div>
+
+        <div class="unit-section-title">📚 Glossary 課文單元總覽 (共 73 詞 × 5例句)</div>
+        <div class="unit-grid" id="home-unit-grid"></div>
+
+        <div class="unit-section-title">🎮 選擇溫習挑戰模式</div>
+        <div class="menu-grid">
+            <button class="btn-special" onclick="openLV0()">📖 LV0 詞卡總覽 (預覽與發音)</button>
+            <button class="btn-primary" onclick="openChapterSelect('LV1')">🗣️ LV1 詞語跟讀 (看字朗讀)</button>
+            <button class="btn-primary" onclick="openChapterSelect('LV3')">✏️ LV3 例句填空 (四選一)</button>
+            <button class="btn-primary" onclick="openChapterSelect('LV4')">🧩 LV4 字母長度挑戰 (首字母提示)</button>
+            <button class="btn-primary" onclick="openChapterSelect('LV5')">📖 LV5 英文釋義模式 (Definition Matching)</button>
+            <button class="btn-accent" onclick="openChapterSelect('DICT')">🎧 默書測驗模式 (Dictation Mode)</button>
+            <button class="btn-special" style="grid-column: 1 / -1;" onclick="openChapterSelect('LV9')">🔥 LV9 不供詞拼寫 (無提示挑戰)</button>
+        </div>
+
+        <div class="leaderboard-container">
+            <h3>🏆 榮譽排行榜</h3>
+            <table class="leaderboard-table">
+                <thead><tr><th>玩家</th><th>模式</th><th>範圍</th><th>分數</th></tr></thead>
+                <tbody id="leaderboard-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- LV0 詞卡點讀 -->
+    <div id="view-lv0" class="hidden">
+        <h2>📖 點擊詞卡收聽英文發音</h2>
+        <div class="unit-tabs" id="lv0-tabs"></div>
+        <div class="word-list" id="lv0-word-list"></div>
+    </div>
+
+    <!-- 單元選擇 -->
+    <div id="view-chapter-select" class="hidden">
+        <h2 id="cs-title">請選擇測驗課文範圍</h2>
+        <div id="cs-buttons"></div>
+        <button class="btn-primary" style="width: 220px; margin-top: 20px;" onclick="startGame()">開始遊戲 🚀</button>
+    </div>
+
+    <!-- 遊戲挑戰 -->
+    <div id="view-game" class="hidden">
+        <div class="status-bar">進度: <span id="progress">0/10</span></div>
+        <div class="question-box">
+            <button class="speaker-icon" onclick="readQuestionManual()">📢</button>
+            <div id="question-text"></div>
+            <div id="input-area" class="hidden" style="width:100%; margin-top: 15px;">
+                <input type="text" id="answer-input" class="text-input" placeholder="請輸入答案" autocomplete="off">
+                <br><button class="btn-primary" onclick="checkInputAnswer()">檢查答案 ✅</button>
+            </div>
+        </div>
+        <div class="options-grid" id="options-area"></div>
+    </div>
+
+    <!-- 結算 -->
+    <div id="view-results" class="hidden">
+        <h1>🎉 完成挑戰！</h1>
+        <h2 id="res-name"></h2>
+        <div style="font-size: 55px; color: var(--primary-color); font-weight: 800; margin: 15px;" id="final-score">0分</div>
+        <button class="btn-primary" onclick="goHome()">返回主選單</button>
+    </div>
+</div>
+
+<div id="wrong-modal" class="modal hidden">
+    <div class="modal-content">
+        <h2 style="color: #ef5350; margin:0;">❌ 答錯囉！</h2>
+        <p style="font-size: 16px; margin-top: 10px; color: #666;">正確答案是：</p>
+        <div id="correct-ans" style="font-size: 28px; color: var(--primary-color); font-weight: 800; margin: 10px 0;"></div>
+        <div id="correct-extra" style="font-size: 15px; color: #555; margin-bottom: 15px;"></div>
+        <p style="font-size: 13px; color: #ff758c; font-weight:700;">🔄 本題將重排至隊尾，稍後需再次挑戰！</p>
+        <button class="btn-primary" onclick="closeModal()">繼續努力 🚀</button>
+    </div>
+</div>
+
+<script>
+    const UNITS = [
+        { id: 1, title: 'U1 Text 1: Big Data', desc: 'advertising, bestselling, big data, customize, optimize...' },
+        { id: 2, title: 'U1 Text 2: Handcrafted!', desc: 'artisan, bargain, haggle, shop around, sustainable, vendor...' },
+        { id: 3, title: 'U2 Text 2: Watching your step', desc: 'assume, bombard, digital footprint, doxing, privacy, trace...' },
+        { id: 4, title: 'U2 Life Skill: Social Media', desc: 'at risk of, direct message, hashtag, meme, spark, go viral...' }
+    ];
+
+    const WORD_DATA = [
+        // Unit 1 Text 1 (19)
+        { u: 1, w: 'advertising', pos: 'n. [uncountable]', cn: '廣告；廣告業', def: 'the activity and industry of advertising things to people', q: [
+            'Effective ____ can significantly boost a company\'s sales and brand recognition.',
+            'The company spent millions of dollars on television ____.',
+            'Online ____ has become essential for modern business marketing.',
+            'Many children are easily influenced by persuasive ____.',
+            'She decided to pursue a career in digital ____ after graduation.'
+        ]},
+        { u: 1, w: 'bestselling', pos: 'adj.', cn: '熱銷的；最暢銷的', def: 'describing a product bought by large numbers of people', q: [
+            'This author\'s latest novel quickly became a ____ book worldwide.',
+            'The store put its most ____ products near the front entrance.',
+            'Her new album reached the top of the ____ charts this week.',
+            'The company released a new edition of their ____ video game.',
+            'Toy shops often run out of stock for ____ items during Christmas.'
+        ]},
+        { u: 1, w: 'big data', pos: 'n. phr.', cn: '大數據', def: 'sets of information too large/complex to handle with standard methods', q: [
+            'Companies are increasingly relying on ____ to make informed business decisions.',
+            'Modern online platforms use ____ to analyze consumer shopping habits.',
+            'Analyzing ____ helps supermarket chains predict what items customers want.',
+            'Tech companies hire data scientists to process massive amounts of ____.',
+            'The use of ____ has revolutionized how targeted ads are created.'
+        ]},
+        { u: 1, w: 'bricks-and-mortar', pos: 'adj. / n. phr.', cn: '實體店面的；實體門市', def: 'a business operating from a shop building rather than only online', q: [
+            'The new ____ bookstore offers a cozy reading space for local residents.',
+            'Many traditional ____ retailers are opening online shops to survive.',
+            'Online shopping has caused many ____ stores to lose customers.',
+            'Some shoppers still prefer ____ shops because they can try products in person.',
+            'Renting a ____ retail space in central business districts is very expensive.'
+        ]},
+        { u: 1, w: 'coincide with', pos: 'v. phr.', cn: '與…同時發生；巧合', def: 'to take place at the same time', q: [
+            'The festival dates will ____ the local holiday celebrations this year.',
+            'The product launch was scheduled to ____ the annual trade show.',
+            'Her graduation ceremony happened to ____ her birthday.',
+            'Heavy rain began to ____ the start of the outdoor concert.',
+            'The opening of the new mall will ____ the start of the summer sale.'
+        ]},
+        { u: 1, w: 'cumbersome', pos: 'adj.', cn: '笨重的；繁瑣複雜的', def: 'large and heavy / slow or complicated', q: [
+            'Carrying that ____ luggage up the long flight of stairs was exhausting.',
+            'Old desktop computers were heavy and ____ compared to modern laptops.',
+            'The safety gear felt heavy and ____ during training.',
+            'The traditional registration process was slow and ____ for new users.',
+            'She packed her belongings in one large box instead of several ____ packages.'
+        ]},
+        { u: 1, w: 'customize', pos: 'v.', cn: '客製化；訂製', def: 'to make or change something to suit the needs of the user', q: [
+            'Customers can ____ their sneakers by choosing their favorite colors and patterns.',
+            'The app allows users to ____ their dashboard for a better user experience.',
+            'You can ____ your phone case with your name or favorite photos.',
+            'The furniture shop offers options to ____ the size and fabric of sofas.',
+            'Online stores often let buyers ____ their orders with personalized gifts.'
+        ]},
+        { u: 1, w: 'dietary supplement', pos: 'n. phr.', cn: '膳食補充劑；保健食品', def: 'vitamins/foods eaten in addition to what you usually eat', q: [
+            'Many athletes take ____s to enhance their performance and recovery.',
+            'Taking a daily ____ can help fill nutritional gaps in your diet.',
+            'Doctors recommend taking a vitamin C ____ during the winter flu season.',
+            'You should consult a doctor before starting any new ____.',
+            'Calcium ____s are commonly taken to maintain strong bones.'
+        ]},
+        { u: 1, w: 'embrace', pos: 'v.', cn: '欣然接受；擁抱（新觀念）', def: 'to accept an idea, proposal, or belief', q: [
+            'It\'s important to ____ new ideas to foster innovation in the workplace.',
+            'The school decided to ____ technology by giving every student a tablet.',
+            'We should learn to ____ changes rather than fear them.',
+            'Modern businesses must ____ digital tools to stay competitive.',
+            'She was willing to ____ different cultures while studying abroad.'
+        ]},
+        { u: 1, w: 'formulate', pos: 'v.', cn: '精心構思；制定', def: 'to create or prepare something carefully with attention to detail', q: [
+            'The marketing team met to ____ a clear strategy for the upcoming product launch.',
+            'Scientists worked tirelessly in the laboratory to ____ a safe vaccine.',
+            'Students were asked to ____ a hypothesis before starting the experiment.',
+            'The committee will ____ new rules to improve campus safety.',
+            'It takes time and careful thought to ____ an effective study plan.'
+        ]},
+        { u: 1, w: 'generic', pos: 'adj.', cn: '通用的；無品牌的', def: 'shared by or typical of a whole group; not specific', q: [
+            'The store sells ____ brands that are often cheaper than name-brand products.',
+            'He prefers buying ____ medicine because it contains the same active ingredients.',
+            'The document used a ____ template rather than a custom design.',
+            'They bought ____ cereal at the supermarket to save money.',
+            'The report provided a very ____ response without addressing specific details.'
+        ]},
+        { u: 1, w: 'individualized', pos: 'adj.', cn: '個人化的；因人而異的', def: 'designed for a particular person or thing', q: [
+            'The tutor designed an ____ study schedule to help her focus on her weak subjects.',
+            'Patients receive ____ medical care based on their specific health conditions.',
+            'Each student in the art class received ____ feedback from the teacher.',
+            'The fitness coach created an ____ workout routine for every client.',
+            'Special education programs provide ____ support for children with learning needs.'
+        ]},
+        { u: 1, w: 'lo and behold', pos: 'idiom', cn: '你看！瞧！（表示驚奇）', def: 'used for calling attention to a surprising thing', q: [
+            '____, the package arrived just in time for her birthday.',
+            'I searched for my missing keys everywhere, and ____, they were in my pocket.',
+            'We thought it would rain all day, but ____, the sun came out.',
+            'She opened the mysterious door, and ____, a hidden room appeared.',
+            'He turned on his old computer, and ____, it still worked perfectly.'
+        ]},
+        { u: 1, w: 'on-trend', pos: 'adj.', cn: '非常時髦的；引領潮流的', def: 'very fashionable', q: [
+            'The fashion line features ____ designs that appeal to modern consumers.',
+            'Her outfit was stylish, colourful, and completely ____.',
+            'Young teenagers always want to wear ____ clothes to school.',
+            'The interior designer picked ____ furniture for the newly renovated cafe.',
+            'Social media influencers help popularize ____ hairstyles and cosmetics.'
+        ]},
+        { u: 1, w: 'optimize', pos: 'v.', cn: '優化；使最佳化', def: 'to make something as good as it can be', q: [
+            'We need to ____ our study routine so that we can learn effectively.',
+            'Engineers altered the design to ____ the car\'s fuel efficiency.',
+            'The software update was created to ____ system performance and speed.',
+            'Athletes adjust their diets to ____ their physical energy before competitions.',
+            'Website owners try to ____ their content so it ranks higher on search engines.'
+        ]},
+        { u: 1, w: 'personalized', pos: 'adj.', cn: '個性化的；量身打造的', def: 'designed so that it is suitable for a particular person', q: [
+            'The company offers ____ gifts that make each purchase unique.',
+            'She received a ____ card with her name printed in gold letters.',
+            'Online streaming services provide ____ recommendations based on your history.',
+            'The teacher wrote a ____ message of encouragement on every student\'s paper.',
+            'The hotel welcomed its guests with ____ gift baskets in their rooms.'
+        ]},
+        { u: 1, w: 'prominent', pos: 'adj.', cn: '顯眼的；突出的', def: 'easily seen', q: [
+            'The brand\'s logo was displayed in a ____ position at the entrance of the store.',
+            'She played a ____ role in leading the school fundraising campaign.',
+            'The statue stands in a ____ place in the middle of the town square.',
+            'His name was listed in ____ letters on the cover of the magazine.',
+            'She wore a necklace with a ____ gemstone that caught everyone\'s attention.'
+        ]},
+        { u: 1, w: 'responsive', pos: 'adj.', cn: '反應敏捷的；積極回應的', def: 'reacting quickly and in a positive way', q: [
+            'The customer service desk was very ____ and quickly resolved our issue.',
+            'Modern websites must be ____ so they fit properly on mobile screens.',
+            'The teacher was very ____ to the students\' questions during class.',
+            'Emergency services were praised for being fast and ____ during the storm.',
+            'Touchscreen smartphones are much more ____ than older button phones.'
+        ]},
+        { u: 1, w: 'targeted', pos: 'adj.', cn: '目標明確的；有針對性的', def: 'aimed at a particular place or group of people', q: [
+            'The marketing team launched a ____ campaign aimed at young adults.',
+            'The charity organized a ____ program to assist elderly residents in need.',
+            'Online advertisements are often ____ based on user search history.',
+            'Teachers provide ____ help for students who struggle with grammar.',
+            'The government introduced ____ subsidies to support low-income families.'
+        ]},
+
+        // Unit 1 Text 2 (15)
+        { u: 2, w: 'artisan', pos: 'n.', cn: '手藝人；工匠', def: 'a person making things skillfully with their hands', q: [
+            'The ____ spent years perfecting his craft, creating beautiful wooden furniture.',
+            'Local ____s sell their handmade pottery and crafts at the weekend market.',
+            'Every piece of bread in this bakery is crafted by a skilled ____.',
+            'Supporting local ____s helps preserve traditional hand-making techniques.',
+            'She bought a hand-woven scarf directly from a talented street ____.'
+        ]},
+        { u: 2, w: 'bargain', pos: 'n.', cn: '撿便宜；便宜貨', def: 'a thing bought for less than the usual price', q: [
+            'I managed to grab a real ____ at the weekend market, buying a coat for half price.',
+            'The shoes were on sale for ten dollars, which was an incredible ____.',
+            'Fresh markets are famous for offering great ____s on seasonal fruit.',
+            'She loves hunting for ____s at garage sales and second-hand shops.',
+            'At that price, the laptop is a complete ____ that you shouldn\'t miss.'
+        ]},
+        { u: 2, w: 'deal', pos: 'n.', cn: '交易；協議', def: 'an agreement on particular conditions for buying or doing something', q: [
+            'They struck a ____ to collaborate on the upcoming project.',
+            'The travel agency offered a great discount ____ for summer holiday trips.',
+            'He closed a successful business ____ with an overseas company today.',
+            'If you buy two items today, you can get a special bundled ____.',
+            'Make sure you read the terms carefully before signing any contractual ____.'
+        ]},
+        { u: 2, w: 'dealer', pos: 'n.', cn: '商人；業者', def: 'a person whose business is buying and selling a product', q: [
+            'The art ____ showcased a variety of paintings from emerging artists.',
+            'He bought a second-hand car from a licensed vehicle ____.',
+            'The antique ____ explained the history behind the 19th-century clock.',
+            'Specialized coin ____s can evaluate the worth of old currencies.',
+            'The street vendor recommended an authorized ____ for electronic repairs.'
+        ]},
+        { u: 2, w: 'haggle', pos: 'v.', cn: '討價還價', def: 'to argue with somebody to reach an agreement about price', q: [
+            'Shoppers love to ____ with street vendors to get a lower price on souvenirs.',
+            'It is customary to ____ over prices when visiting traditional markets.',
+            'He managed to ____ the price down from fifty dollars to thirty dollars.',
+            'If you don\'t ____ at the flea market, you might pay too much.',
+            'My sister is too shy to ____, so she always pays the initial asking price.'
+        ]},
+        { u: 2, w: 'handcrafted', pos: 'adj.', cn: '手工製作的', def: 'made with skill by hand, not by machine', q: [
+            'Each piece of jewelry in the shop is ____, showcasing great creativity.',
+            'She received a lovely ____ wooden box as a birthday present.',
+            'The market stall was filled with ____ leather bags and accessories.',
+            'People appreciate ____ items because no two pieces are exactly identical.',
+            'The cafe serves drinks in ____ ceramic mugs made by local artists.'
+        ]},
+        { u: 2, w: 'second-hand', pos: 'adj.', cn: '二手的；用過的', def: 'owned by somebody else before', q: [
+            'Buying ____ books is a great way to save money and support recycling.',
+            'He bought a ____ bicycle that was still in excellent condition.',
+            'Many students purchase ____ textbooks from older schoolmates.',
+            'You can find unique vintage clothing at ____ thrift shops.',
+            'My parents bought a ____ sofa for our living room.'
+        ]},
+        { u: 2, w: 'shop around', pos: 'v. phr.', cn: '貨比三家', def: 'to compare prices of goods offered by different shops', q: [
+            'Before making a purchase, it\'s wise to ____ for the best prices.',
+            'You should ____ at different electronics stores before buying a laptop.',
+            'Smart consumers always ____ to compare warranties and service quality.',
+            'Instead of buying the first phone she saw, she decided to ____ first.',
+            'If you take time to ____, you can save a lot of money on flights.'
+        ]},
+        { u: 2, w: 'source', pos: 'n.', cn: '來源；貨源', def: 'a place, person or thing that you get something from', q: [
+            'The farmers\' market is a great ____ for fresh, local produce.',
+            'The internet is a primary ____ of information for research papers.',
+            'You should always verify the reliability of a news ____ before sharing it.',
+            'Fresh spring water is the main ____ of drinking water for the village.',
+            'The restaurant tries to ____ its ingredients from nearby organic farms.'
+        ]},
+        { u: 2, w: 'special offer', pos: 'n. phr.', cn: '特價優惠', def: 'a product sold at less than its usual price', q: [
+            'The bakery has a ____ today: buy two cupcakes and get one free.',
+            'Check their website regularly to catch any limited-time ____.',
+            'Supermarkets put promotional tags on items that are on ____.',
+            'Take advantage of this weekend\'s ____ before prices go back up.',
+            'The store announced a ____ for students during the back-to-school sale.'
+        ]},
+        { u: 2, w: 'stall', pos: 'n.', cn: '攤位；攤檔', def: 'a small shop/table with an open front at a market', q: [
+            'We bought some delicious homemade snacks from a small street ____.',
+            'The night market has hundreds of food ____s offering local delicacies.',
+            'She set up a wooden ____ at the school fair to sell handicrafts.',
+            'The flower ____ on the corner sells fresh roses every morning.',
+            'Crowds gathered around the game ____ hoping to win plush toys.'
+        ]},
+        { u: 2, w: 'sustainable', pos: 'adj.', cn: '永續的；環保的', def: 'involving natural products in a way that does not harm the environment', q: [
+            'The company promotes ____ living by using biodegradable packaging materials.',
+            'Solar and wind energy are clean and ____ sources of power.',
+            'Using reusable bags is an easy step towards a more ____ lifestyle.',
+            'The school built a garden to teach students about ____ agriculture.',
+            'Fashion brands are under pressure to adopt ____ production practices.'
+        ]},
+        { u: 2, w: 'tag', pos: 'n.', cn: '標籤', def: 'a small piece attached to something to identify or give info', q: [
+            'Each item had a ____ that listed its price and care instructions.',
+            'Please don\'t remove the price ____ if you might need to return the shirt.',
+            'The suitcase had a name ____ attached to its handle for identification.',
+            'She checked the luggage ____ to make sure it was going to the right destination.',
+            'Every product in the store has a barcode printed on its paper ____.'
+        ]},
+        { u: 2, w: 'vendor', pos: 'n.', cn: '攤販；賣主', def: 'a company or person that sells a particular product', q: [
+            'The ____ at the food truck served delicious tacos that quickly gained popularity.',
+            'Street ____s lined the crowded avenue selling drinks and souvenirs.',
+            'The school invited local software ____s to demonstrate educational tools.',
+            'You can buy fresh flowers from the local market ____.',
+            'The event organized space for over fifty craft ____s to display their goods.'
+        ]},
+        { u: 2, w: 'vintage', pos: 'adj.', cn: '復古的；經典的', def: 'typical of a period in the past and of high quality', q: [
+            'She wore a stunning ____ dress from the 1980s to the school party.',
+            'My grandfather collects ____ record players and classic vinyl albums.',
+            'The living room was decorated with ____ posters and antique furniture.',
+            'He found a pair of ____ sunglasses at a flea market downtown.',
+            'The car show featured dozens of restored ____ automobiles.'
+        ]},
+
+        // Unit 2 Text 2 (22)
+        { u: 3, w: 'assume', pos: 'v.', cn: '假定；設想', def: 'to think or accept that something is true without proof', q: [
+            'If you haven\'t heard by Friday, ____ I\'m not coming.',
+            'Don\'t ____ that everyone shares the same opinions as you.',
+            'Scientists cannot simply ____ results without conducting thorough experiments.',
+            'People often ____ he is quiet because he doesn\'t talk much in class.',
+            'We shouldn\'t ____ someone\'s background based solely on their appearance.'
+        ]},
+        { u: 3, w: 'access', pos: 'n. / v.', cn: '存取權限；進入', def: 'the right to enter a place, use something, or see someone', q: [
+            '____ to the Google Docs is restricted to senior management.',
+            'All students have free ____ to the school library computer lab.',
+            'You need a valid password to gain ____ to your online account.',
+            'The new ramp allows wheelchair users to easily ____ the building.',
+            'Living in the city gives residents convenient ____ to public transport.'
+        ]},
+        { u: 3, w: 'bombard', pos: 'v.', cn: '轟炸；大量訊息灌爆', def: 'to attack somebody with a lot of questions or information', q: [
+            'The children ____ her with endless questions after the show.',
+            'Consumers are often ____ed with targeted advertisements on social media.',
+            'Journalists began to ____ the celebrity with questions about her new film.',
+            'Email users get ____ed with spam messages every single day.',
+            'Students were ____ed with study materials right before the final exams.'
+        ]},
+        { u: 3, w: 'browse', pos: 'v.', cn: '隨意翻看；瀏覽', def: 'to look at a lot of things in a shop or website', q: [
+            'I spent the whole afternoon ____ online stores to check out new clothes.',
+            'Feel free to ____ around the bookstore while you wait for your friend.',
+            'She likes to ____ social media feeds during her commuting time.',
+            'Shoppers love to ____ through the items on display at weekend markets.',
+            'You can ____ the catalog to see if there are any books you like.'
+        ]},
+        { u: 3, w: 'consequence', pos: 'n.', cn: '後果；結果', def: 'a result of something that has happened, especially unpleasant', q: [
+            'He always makes quick decisions and never thinks about their ____.',
+            'Failing to study regularly can lead to serious academic ____s.',
+            'Global warming is a direct ____ of severe environmental pollution.',
+            'Every action you take carries a potential ____ that you must accept.',
+            'Driving without a seatbelt can have fatal ____s in an accident.'
+        ]},
+        { u: 3, w: 'digital footprint', pos: 'n. phr.', cn: '數位足跡', def: 'info about a person existing on the internet from online activity', q: [
+            'This app gives users a holistic view of their ____.',
+            'Every photo and comment you post online adds to your ____.',
+            'Teenagers should be educated on how to maintain a positive ____.',
+            'Employers often check a job applicant\'s ____ before making an offer.',
+            'Cleaning up your ____ is essential for protecting your online privacy.'
+        ]},
+        { u: 3, w: 'doxing', pos: 'n.', cn: '起底；網路肉搜', def: 'publicly providing personally identifiable info about an individual online', q: [
+            'Publicly available databases and social media websites can be used for ____.',
+            '____ is a malicious practice where someone publishes private info online.',
+            'Many online gamers have become victims of ____ after heated arguments.',
+            'Laws are being updated to criminalize ____ and protect internet users.',
+            'Victims of ____ often face severe harassment and safety threats.'
+        ]},
+        { u: 3, w: 'eavesdrop', pos: 'v.', cn: '偷聽；竊聽', def: 'to listen secretly to what other people are saying', q: [
+            'It is impolite to ____ on private conversations between classmates.',
+            'She sat quietly in the corner, trying not to ____ on her parents\' talk.',
+            'The spy managed to ____ on the secret meeting through a hidden microphone.',
+            'He pretended to read a book while attempting to ____ on their discussion.',
+            'You shouldn\'t ____ when your friends are discussing personal matters.'
+        ]},
+        { u: 3, w: 'extend to', pos: 'v. phr.', cn: '延伸至；涵蓋', def: 'to include or affect someone or something', q: [
+            'The invitation did not ____ family members.',
+            'The new discount offers will ____ all registered members next month.',
+            'The school rules ____ behavior both on and off campus grounds.',
+            'Support services will ____ residents living in surrounding villages.',
+            'Her kindness and generosity ____ everyone she meets in her daily life.'
+        ]},
+        { u: 3, w: 'hack', pos: 'v. / n.', cn: '駭入；非法入侵電腦', def: 'to secretly look at/change info on computer without permission', q: [
+            'Somebody ____ed into the company\'s central database last night.',
+            'Cybercriminals try to ____ personal accounts to steal sensitive financial data.',
+            'It is illegal to ____ into computer systems without proper authorization.',
+            'He learned how to secure his Wi-Fi network so no one could ____ it.',
+            'A skilled programmer showed how easy it was to ____ an outdated website.'
+        ]},
+        { u: 3, w: 'harass', pos: 'v.', cn: '騷擾；打擾', def: 'to annoy or worry somebody by putting pressure or being unpleasant', q: [
+            'Stop ____ing me while I am trying to focus on my homework!',
+            'School policies strictly prohibit students from ____ing their peers online.',
+            'Phone scammers continue to ____ elderly residents with fake emergency calls.',
+            'Nobody should be allowed to intimidate or ____ others in the workplace.',
+            'The police warned the man not to follow or ____ his neighbor.'
+        ]},
+        { u: 3, w: 'innocent', pos: 'adj.', cn: '清白的；無辜的', def: 'not guilty of a particular crime', q: [
+            'The police released the teenager after confirming that she was completely ____.',
+            'The court declared him ____ of all charges due to a lack of evidence.',
+            'Children often have ____ curiosity about the world around them.',
+            'An ____ bystander was injured during the street dispute.',
+            'She gave an ____ smile that instantly reassured everyone in the room.'
+        ]},
+        { u: 3, w: 'long-lasting', pos: 'adj.', cn: '長期的；持久的', def: 'continuing for a long period of time', q: [
+            'True friendship brings ____ happiness to our daily lives.',
+            'Exercise and good sleep habits have ____ benefits for your health.',
+            'The peace treaty created a ____ agreement between the two nations.',
+            'Using quality paint ensures a durable and ____ finish on the walls.',
+            'Childhood memories often leave a ____ impression on our personalities.'
+        ]},
+        { u: 3, w: 'misleading', pos: 'adj.', cn: '誤導性的', def: 'causing someone to believe something that is not true', q: [
+            'Adverts must not create a ____ impression about product quality.',
+            'Fake news articles often contain ____ headlines to attract clicks.',
+            'The map was confusing and gave ____ directions to tourists.',
+            'Giving ____ information during an investigation is a serious offense.',
+            'The packaging was ____ because the box was mostly empty inside.'
+        ]},
+        { u: 3, w: 'permission', pos: 'n.', cn: '許可；批准', def: 'being allowed to do something', q: [
+            'You must ask for ____ from your parents before going out late.',
+            'Students need written ____ from the principal to hold a campus event.',
+            'Do not use someone\'s property without getting their explicit ____ first.',
+            'She received ____ to submit her English assignment two days late.',
+            'The app asks for ____ to access your phone location and camera.'
+        ]},
+        { u: 3, w: 'privacy', pos: 'n.', cn: '隱私', def: 'the right to keep personal life/info secret', q: [
+            'Despite recent lawsuits upholding rights to ____, the media keeps invading it.',
+            'You should adjust your social media settings to protect your personal ____.',
+            'Everyone deserves a reasonable level of ____ in their own home.',
+            'Sharing passwords with friends can compromise your online ____.',
+            'Data protection laws ensure that customer ____ is strictly maintained.'
+        ]},
+        { u: 3, w: 'reliance', pos: 'n.', cn: '依賴；信任', def: 'the state of depending on or trusting in something/someone', q: [
+            'Your ____ on her experience is very wise.',
+            'Excessive ____ on smartphones can reduce our face-to-face social skills.',
+            'Over-____ on fossil fuels has contributed significantly to climate change.',
+            'The company is trying to reduce its ____ on imported raw materials.',
+            'Modern society has a heavy ____ on internet connectivity for daily work.'
+        ]},
+        { u: 3, w: 'severe', pos: 'adj.', cn: '嚴重的；嚴厲的', def: 'extremely bad or serious', q: [
+            'In parts of the country, there is a ____ water shortage.',
+            'The storm caused ____ damage to trees and power lines across the city.',
+            'He suffered a ____ headache after sitting in front of the screen all day.',
+            'Violating school regulations will result in ____ disciplinary action.',
+            'The patient showed signs of ____ allergic reactions after eating nuts.'
+        ]},
+        { u: 3, w: 'snippet', pos: 'n.', cn: '片段；小道消息', def: 'a small piece of information or news', q: [
+            'The teacher read a brief ____ of the article to introduce the topic.',
+            'I heard a short ____ of a song on the radio and loved it instantly.',
+            'Social media videos show interesting ____s of celebrities\' daily lives.',
+            'The reporter shared a code ____ to demonstrate the software glitch.',
+            'Read this small ____ from the book to get a sense of the storyline.'
+        ]},
+        { u: 3, w: 'stir', pos: 'v.', cn: '激起；引起（情緒）', def: 'to make somebody excited or feel something strongly', q: [
+            'The touching story managed to ____ deep emotions among the audience.',
+            'The news about the unexpected election result caused a huge ____ in town.',
+            'Her speech was powerful enough to ____ enthusiasm among young voters.',
+            'The sudden price increase is sure to ____ debate among consumers.',
+            'Soft music can ____ peaceful memories of childhood days.'
+        ]},
+        { u: 3, w: 'track', pos: 'v.', cn: '追蹤；跟蹤', def: 'to follow a person/thing using proof or electronic equipment', q: [
+            'The delivery app allows customers to ____ the real-time location of food.',
+            'Scientists use GPS tags to ____ the migration routes of wild birds.',
+            'Fitness watches help users ____ their daily steps and heart rate.',
+            'Police officers used security cameras to ____ the suspect\'s movements.',
+            'You can use this software to ____ your monthly household expenses.'
+        ]},
+        { u: 3, w: 'trace', pos: 'n. / v.', cn: '追溯；痕跡', def: 'a mark or sign showing that somebody/something existed', q: [
+            'The phone company was unable to ____ the anonymous call.',
+            'Detectives searched the crime scene to find any ____ of DNA evidence.',
+            'Historians try to ____ the origin of ancient customs back to prehistoric times.',
+            'The missing hiker disappeared without leaving a single ____ behind.',
+            'She could still feel a faint ____ of perfume in the empty room.'
+        ]},
+
+        // Unit 2 Life Skill (17)
+        { u: 4, w: 'at risk of', pos: 'prep. phr.', cn: '面臨…的風險', def: 'in a dangerous situation', q: [
+            'All houses within 100 metres of the sea are ____ flooding.',
+            'Teenagers who skip meals are ____ developing nutritional deficiencies.',
+            'Rare animal species in this forest are ____ extinction due to hunting.',
+            'Drivers who use phones while driving are ____ causing severe accidents.',
+            'People who don\'t back up their files are ____ losing important data.'
+        ]},
+        { u: 4, w: 'community', pos: 'n.', cn: '社區；社群', def: 'the people living in an area or sharing common interests', q: [
+            'Local volunteers organized a cleanup event to improve their ____.',
+            'The school plays an active role in serving the local ____.',
+            'She joined an online learning ____ to practice speaking English.',
+            'Members of the neighborhood ____ gathered to discuss park renovations.',
+            'Building a supportive ____ helps people feel connected and valued.'
+        ]},
+        { u: 4, w: 'direct message', pos: 'n. phr.', cn: '私訊；直接訊息', def: 'a private message sent on social media', q: [
+            'Feel free to send me a ____ on Instagram if you have questions.',
+            'She sent a private ____ to her classmate to ask about the homework.',
+            'Influencers receive thousands of ____s from fans every week.',
+            'You should never share your personal password in a ____.',
+            'He got a notification that he received a new ____ on Twitter.'
+        ]},
+        { u: 4, w: 'effective', pos: 'adj.', cn: '有效的；起作用的', def: 'successful and working in the way intended', q: [
+            'It\'s an extremely ____ cure for a headache.',
+            'Group discussion is an ____ way to generate creative project ideas.',
+            'The new traffic control system proved to be very ____ in reducing jams.',
+            'Time management is key to becoming an ____ and productive student.',
+            'Wearing a mask remains an ____ measure against spreading viruses.'
+        ]},
+        { u: 4, w: 'hashtag', pos: 'n.', cn: '主題標籤（#）', def: 'a word with # in front indicating the topic of a post', q: [
+            'Don\'t forget to add a trending ____ to make your post visible.',
+            'She searched the ____ #HongKongFood to find popular dessert cafes.',
+            'Using a popular ____ can significantly increase your video views.',
+            'Campaigns often create a unique ____ so supporters can follow updates.',
+            'Make sure your ____ is relevant to the content of your photo.'
+        ]},
+        { u: 4, w: 'informative', pos: 'adj.', cn: '提供豐富資訊的', def: 'providing many useful facts or ideas', q: [
+            'The documentary was highly ____ and easy for students to understand.',
+            'The science museum put on an ____ exhibition about space exploration.',
+            'She gave an ____ presentation on the history of environmental protection.',
+            'The guidebook contains lots of ____ tips for first-time travelers.',
+            'We attended an ____ seminar regarding online safety and digital security.'
+        ]},
+        { u: 4, w: 'invade', pos: 'v.', cn: '侵犯；干擾', def: 'to get involved in something in an unwanted way', q: [
+            'Paparazzi taking unauthorized photos of celebrities ____ their privacy.',
+            'We shouldn\'t let negative thoughts ____ our minds during difficult times.',
+            'Loud construction noise began to ____ the quiet library atmosphere.',
+            'Pests will ____ your kitchen if food crumbs are left unattended on tables.',
+            'Unwanted pop-up ads can ____ your browser window while studying online.'
+        ]},
+        { u: 4, w: 'keep up with', pos: 'v. phr.', cn: '與…保持聯繫', def: 'to write, phone, or meet regularly so you don\'t forget each other', q: [
+            'She wants to ____ her classmates after graduation.',
+            'It can be challenging to ____ the latest technological trends.',
+            'He ran faster to ____ the leading group of runners in the race.',
+            'Social media makes it easier to ____ news from all around the world.',
+            'She reads news articles daily to ____ current global affairs.'
+        ]},
+        { u: 4, w: 'like-minded', pos: 'adj.', cn: '志同道合的', def: 'having similar interests and opinions', q: [
+            'She joined an online art club to share creative ideas with ____ friends.',
+            'The workshop brought together ____ individuals passionate about music.',
+            'Working with ____ teammates makes group projects much more enjoyable.',
+            'It is comforting to find a ____ community that shares your values.',
+            'He enjoys attending coding meetups to connect with ____ programmers.'
+        ]},
+        { u: 4, w: 'look out for', pos: 'v. phr.', cn: '關照；互相照應', def: 'to take care of somebody and make sure nothing bad happens', q: [
+            'The teacher told students to ____ each other during the trip.',
+            'You should ____ pedestrians when driving through residential streets.',
+            'Good friends always ____ one another in times of difficulty.',
+            'Be sure to ____ special promotions when shopping at the supermarket.',
+            'Parents always ____ their children\'s safety and health.'
+        ]},
+        { u: 4, w: 'meme', pos: 'n.', cn: '網路迷因；梗圖', def: 'a humorous image/video passed quickly between internet users', q: [
+            'That adorable cat ____ went viral across social media overnight.',
+            'Students created a funny ____ about upcoming final examinations.',
+            'My brother sent me a hilarious ____ that made me laugh out loud.',
+            'Internet users shared a relatable ____ about waking up early on Mondays.',
+            'Some ____s become so popular that they become part of pop culture.'
+        ]},
+        { u: 4, w: 'on a daily basis', pos: 'adv. phr.', cn: '每天；日常性地', def: 'doing something every day or as part of usual routine', q: [
+            'Doctors visit the clinic ____ to provide treatment for patients.',
+            'Drinking enough water ____ is essential for good health.',
+            'She practices playing the piano ____ to prepare for her concert.',
+            'Buses and trains operate ____ to transport thousands of commuters.',
+            'Cleaning your study desk ____ helps maintain a tidy environment.'
+        ]},
+        { u: 4, w: 'spark', pos: 'v.', cn: '引發；挑起', def: 'to cause the start of something, especially argument/discussion', q: [
+            'The debate topic ____ed a passionate discussion among students.',
+            'Small misunderstandings can sometimes ____ big arguments between friends.',
+            'The inspirational lecture helped ____ her interest in science careers.',
+            'A single match can ____ a dangerous wildfire in dry summer forests.',
+            'The new policy announcement is likely to ____ controversy online.'
+        ]},
+        { u: 4, w: 'thread', pos: 'n.', cn: '網路討論串', def: 'a connected group of pieces of writing on the internet', q: [
+            'I read a very useful forum ____ that shared vocabulary learning tips.',
+            'She posted a long Twitter ____ explaining the background of the news.',
+            'Users left hundreds of comments on the discussion ____.',
+            'You can search the forum ____ to find answers to common questions.',
+            'The online ____ was filled with helpful advice from senior students.'
+        ]},
+        { u: 4, w: 'troll', pos: 'n.', cn: '網路酸民；故意挑釁者', def: 'someone leaving offensive messages online just to get a reaction', q: [
+            'A well-constructed ____ will provoke irate responses online.',
+            'Internet platforms employ moderators to block offensive ____s.',
+            'You should ignore malicious messages left by an online ____.',
+            'Some ____s post negative comments just to seek attention from others.',
+            'Don\'t feed the ____ by replying to their provocative posts.'
+        ]},
+        { u: 4, w: 'uplifting', pos: 'adj.', cn: '令人振奮的；鼓舞人心的', def: 'making you feel happier and more hopeful', q: [
+            'For me, it was a marvellously ____ music performance.',
+            'Her encouraging words had an ____ effect on the entire team.',
+            'We watched an ____ movie about overcoming hardship with courage.',
+            'Reading inspiring stories can provide an ____ feeling on a sad day.',
+            'The community choir sang an ____ song that cheered up the audience.'
+        ]},
+        { u: 4, w: 'go viral', pos: 'v. phr.', cn: '在網路上瘋傳', def: 'becoming popular very quickly through internet communication', q: [
+            'The short dance video ____ and gained millions of views in hours.',
+            'An inspiring act of kindness can ____ on social media within days.',
+            'Many content creators dream of producing a video that will ____.',
+            'The news about the cute panda baby went ____ across global platforms.',
+            'Funny animal clips frequently ____ because people love sharing them.'
+        ]}
+    ];
+
+    let currentMode = '', selectedUnitId = 0, score = 0, currentQIndex = 0;
+    let gameQueue = [];
+    let currentQFailed = false;
+    let isSakuraTheme = true;
+    let isAutoAudio = false; // Default to OFF
+    const synth = window.speechSynthesis;
+
+    function renderHomeUnits() {
+        const grid = document.getElementById('home-unit-grid');
+        grid.innerHTML = '';
+        UNITS.forEach(u => {
+            const count = WORD_DATA.filter(w => w.u === u.id).length;
+            const card = document.createElement('div');
+            card.className = 'unit-card';
+            card.onclick = () => { openLV0(u.id); };
+            card.innerHTML = `
+                <div class="unit-card-title">📌 ${u.title} (${count}字)</div>
+                <div class="unit-card-desc">${u.desc}</div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function showView(id) {
+        document.querySelectorAll('.container > div[id^="view-"]').forEach(v => v.classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
+    }
+
+    function goHome() {
+        if(synth.speaking) synth.cancel();
+        showView('view-home');
+        updateLeaderboardDisplay();
+        document.getElementById('score-display').classList.add('hidden');
+    }
+
+    function toggleTheme() {
+        isSakuraTheme = !isSakuraTheme;
+        const btn = document.getElementById('btn-theme');
+        if(isSakuraTheme) {
+            document.body.className = 'theme-sakura';
+            btn.innerText = '🌸 櫻花風';
+            btn.className = 'toggle-btn btn-theme-sakura';
+        } else {
+            document.body.className = 'theme-matcha';
+            btn.innerText = '🍵 抹茶風';
+            btn.className = 'toggle-btn btn-theme-matcha';
+        }
+    }
+
+    function toggleAudio() {
+        isAutoAudio = !isAutoAudio;
+        const btn = document.getElementById('btn-audio');
+        if(isAutoAudio) {
+            btn.innerText = '🔊 自動朗讀: ON';
+            btn.className = 'toggle-btn btn-audio-on';
+        } else {
+            btn.innerText = '🔇 自動朗讀: OFF';
+            btn.className = 'toggle-btn btn-audio-off';
+        }
+    }
+
+    function openLV0(unitId = 0) {
+        showView('view-lv0');
+        renderLV0Tabs(unitId);
+        loadLV0Words(unitId);
+    }
+
+    function renderLV0Tabs(activeUnitId) {
+        const tabsDiv = document.getElementById('lv0-tabs');
+        tabsDiv.innerHTML = `<button class="unit-tab ${activeUnitId === 0 ? 'active' : ''}" onclick="openLV0(0)">✨ 全部單詞 (${WORD_DATA.length})</button>`;
+        UNITS.forEach(u => {
+            tabsDiv.innerHTML += `<button class="unit-tab ${activeUnitId === u.id ? 'active' : ''}" onclick="openLV0(${u.id})">${u.title.split(':')[0]}</button>`;
+        });
+    }
+
+    function loadLV0Words(unitId) {
+        const listDiv = document.getElementById('lv0-word-list');
+        listDiv.innerHTML = '';
+        let filtered = unitId === 0 ? WORD_DATA : WORD_DATA.filter(w => w.u === unitId);
+        filtered.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'word-card';
+            card.onclick = () => speakText(item.w, 'en-US');
+            let sampleSentence = Array.isArray(item.q) ? item.q[0] : item.q;
+            card.innerHTML = `
+                <div class="word-title">
+                    <span>${item.w}</span>
+                    <span class="word-pos">${item.pos}</span>
+                </div>
+                <div class="word-cn">💡 ${item.cn}</div>
+                <div class="word-def">📖 ${item.def}</div>
+                <div class="word-eg">💬 ${sampleSentence.replace('____', `<b><u>${item.w}</u></b>`)}</div>
+            `;
+            listDiv.appendChild(card);
+        });
+    }
+
+    function openChapterSelect(mode) {
+        currentMode = mode;
+        selectedUnitId = 0;
+        
+        const btnArea = document.getElementById('cs-buttons');
+        btnArea.innerHTML = '';
+
+        UNITS.forEach(u => {
+            btnArea.innerHTML += `<button class="chapter-btn" id="btn-u${u.id}" onclick="selectUnit(${u.id})">📌 ${u.title}</button>`;
+        });
+        btnArea.innerHTML += `<button class="chapter-btn selected" id="btn-u0" onclick="selectUnit(0)">🌟 全範圍總溫習 (${WORD_DATA.length}個單詞)</button>`;
+
+        showView('view-chapter-select');
+    }
+
+    function selectUnit(uId) {
+        selectedUnitId = uId;
+        document.querySelectorAll('.chapter-btn').forEach(b => b.classList.remove('selected'));
+        document.getElementById('btn-u' + uId).classList.add('selected');
+    }
+
+    function startGame() {
+        if (selectedUnitId === null || selectedUnitId === undefined) { alert('請先選擇溫習單元！'); return; }
+        
+        let rawWords = selectedUnitId === 0 ? WORD_DATA : WORD_DATA.filter(w => w.u === selectedUnitId);
+
+        gameQueue = rawWords.map(item => ({
+            w: item.w, 
+            pos: item.pos,
+            cn: item.cn,
+            def: item.def,
+            qSentences: Array.isArray(item.q) ? item.q : [item.q],
+            requeued: false
+        })).sort(() => Math.random() - 0.5);
+
+        score = 0; currentQIndex = 0;
+        document.getElementById('score-display').classList.remove('hidden');
+        document.getElementById('current-score').innerText = score;
+        showView('view-game');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        if (currentQIndex >= gameQueue.length) { finishGame(); return; }
+        
+        currentQFailed = false;
+        let q = gameQueue[currentQIndex];
+        // 每次載入題目時從該詞的 5 組例句中隨機抽取 1 條
+        q.currentSentence = q.qSentences[Math.floor(Math.random() * q.qSentences.length)];
+
+        document.getElementById('progress').innerText = `${currentQIndex + 1} / ${gameQueue.length}`;
+        
+        let textDiv = document.getElementById('question-text');
+        let optArea = document.getElementById('options-area');
+        let inputArea = document.getElementById('input-area');
+        
+        optArea.innerHTML = '';
+        inputArea.classList.add('hidden');
+        textDiv.style.fontSize = "20px";
+
+        if (currentMode === 'LV1') {
+            textDiv.innerHTML = `
+                <div style="font-size: 42px; font-weight:800; color:var(--primary-color);">${q.w}</div>
+                <div style="font-size: 16px; color:#888; margin-top:5px;">${q.pos}</div>
+                <div style="font-size: 20px; font-weight:700; color:#333; margin-top:10px;">💡 ${q.cn}</div>
+            `;
+            optArea.innerHTML = `<button class="btn-primary" onclick="handleCorrectAnswer()" style="grid-column: 1/-1">唸完了，下一題 ➡️</button>`;
+        } else if (currentMode === 'LV3') {
+            textDiv.innerHTML = `
+                <div style="font-size: 18px; color:#555; margin-bottom:10px;">💬 例句填空：</div>
+                <div>${q.currentSentence}</div>
+            `;
+            renderOptions(q.w);
+        } else if (currentMode === 'LV4') {
+            let firstLetterHint = q.w.substring(0, 2) + "... (" + q.w.length + " letters)";
+            textDiv.innerHTML = `
+                <div style="font-size: 18px; color:#555; margin-bottom:10px;">🧩 首字母/長度提示填空：</div>
+                <div>${q.currentSentence.replace('____', `<u>${firstLetterHint}</u>`)}</div>
+            `;
+            inputArea.classList.remove('hidden');
+            document.getElementById('answer-input').value = '';
+            document.getElementById('answer-input').placeholder = '請輸入完整英文單詞';
+            document.getElementById('answer-input').focus();
+        } else if (currentMode === 'LV5') {
+            textDiv.innerHTML = `
+                <div style="font-size: 18px; color:#555; margin-bottom:10px;">📖 English Definition Matching:</div>
+                <div style="font-weight:700; font-style:italic; color:#333; margin-bottom:8px;">"${q.def}"</div>
+                <div style="font-size: 14px; color:#888;">Part of speech: <b>${q.pos}</b></div>
+            `;
+            renderOptions(q.w);
+        } else if (currentMode === 'DICT') {
+            textDiv.innerHTML = `
+                <div style="font-size: 22px; font-weight:800; color:var(--primary-color); margin-bottom:10px;">🎧 Dictation Mode</div>
+                <div style="font-size: 16px; color:#666; margin-bottom:10px;">請點擊右上角 📢 按鈕聽發音並拼寫單詞</div>
+                <div style="font-size: 14px; color:#888;">Part of speech: <b>${q.pos}</b></div>
+            `;
+            inputArea.classList.remove('hidden');
+            document.getElementById('answer-input').value = '';
+            document.getElementById('answer-input').placeholder = 'Type the word here';
+            document.getElementById('answer-input').focus();
+        } else if (currentMode === 'LV9') {
+            textDiv.innerHTML = `
+                <div style="font-size: 18px; color:#555; margin-bottom:10px;">🔥 挑戰無提示填空：</div>
+                <div>${q.currentSentence}</div>
+            `;
+            inputArea.classList.remove('hidden');
+            document.getElementById('answer-input').value = '';
+            document.getElementById('answer-input').placeholder = '請輸入英文單詞/短語';
+            document.getElementById('answer-input').focus();
+        }
+        
+        if(isAutoAudio) {
+            readQuestionAuto();
+        }
+    }
+
+    function renderOptions(correctW) {
+        let opts = [correctW];
+        while(opts.length < Math.min(4, WORD_DATA.length)) {
+            let rand = WORD_DATA[Math.floor(Math.random()*WORD_DATA.length)].w;
+            if(!opts.includes(rand)) opts.push(rand);
+        }
+        opts.sort(() => Math.random() - 0.5).forEach(o => {
+            let b = document.createElement('button');
+            b.innerText = o;
+            b.onclick = () => {
+                if(o === correctW) {
+                    b.classList.add('correct-anim');
+                    handleCorrectAnswer();
+                } else {
+                    b.classList.add('wrong-anim');
+                    setTimeout(() => b.classList.remove('wrong-anim'), 500);
+                    currentQFailed = true;
+                    showWrong(correctW);
+                }
+            };
+            document.getElementById('options-area').appendChild(b);
+        });
+    }
+
+    function normalize(str) {
+        return str.trim().toLowerCase().replace(/[\s\-_,.'"]+/g, '');
+    }
+
+    function checkInputAnswer() {
+        let val = document.getElementById('answer-input').value;
+        let q = gameQueue[currentQIndex];
+        
+        if(normalize(val) === normalize(q.w)) {
+            document.getElementById('answer-input').classList.add('correct-anim');
+            handleCorrectAnswer();
+        } else {
+            document.getElementById('answer-input').classList.add('wrong-anim');
+            setTimeout(() => document.getElementById('answer-input').classList.remove('wrong-anim'), 500);
+            currentQFailed = true;
+            showWrong(q.w);
+        }
+    }
+
+    function showWrong(ans) {
+        let q = gameQueue[currentQIndex];
+        document.getElementById('correct-ans').innerText = ans;
+        document.getElementById('correct-extra').innerText = `💡 ${q.pos} - ${q.cn}`;
+        document.getElementById('wrong-modal').classList.remove('hidden');
+
+        // 錯題自動重練：若尚未重排，將錯題加入隊尾
+        if (!q.requeued) {
+            q.requeued = true;
+            gameQueue.push({
+                w: q.w,
+                pos: q.pos,
+                cn: q.cn,
+                def: q.def,
+                qSentences: q.qSentences,
+                requeued: true
+            });
+        }
+
+        if(isAutoAudio) speakText("Incorrect. The answer is " + ans, 'en-US');
+    }
+
+    function closeModal() {
+        document.getElementById('wrong-modal').classList.add('hidden');
+    }
+
+    function handleCorrectAnswer() {
+        let pts = currentMode === 'LV9' ? 20 : 10;
+        let q = gameQueue[currentQIndex];
+        
+        speakText(q.w, 'en-US');
+
+        // 僅首考答對給分（重排題不重複得分）
+        if (!currentQFailed && !q.requeued && currentMode !== 'LV1') {
+            score += pts;
+            document.getElementById('current-score').innerText = score;
+        }
+
+        setTimeout(() => {
+            currentQIndex++;
+            loadQuestion();
+        }, 1100);
+    }
+
+    function readQuestionAuto() {
+        let q = gameQueue[currentQIndex];
+        if (currentMode === 'LV1' || currentMode === 'DICT') {
+            speakText(q.w, 'en-US');
+        } else if (currentMode === 'LV5') {
+            speakText(q.def, 'en-US');
+        } else if (currentMode === 'LV3' || currentMode === 'LV4' || currentMode === 'LV9') {
+            speakText(q.currentSentence.replace('____', 'blank'), 'en-US');
+        }
+    }
+
+    function readQuestionManual() {
+        let q = gameQueue[currentQIndex];
+        if (currentMode === 'LV1' || currentMode === 'DICT') {
+            speakText(q.w, 'en-US');
+        } else if (currentMode === 'LV5') {
+            speakText(q.def, 'en-US');
+        } else {
+            speakText(q.currentSentence.replace('____', 'blank'), 'en-US');
+        }
+    }
+
+    function speakText(t, lang = 'en-US') {
+        synth.cancel();
+        let u = new SpeechSynthesisUtterance(t);
+        u.lang = lang;
+        u.rate = 0.85;
+        synth.speak(u);
+    }
+
+    function finishGame() {
+        showView('view-results');
+        let name = document.getElementById('player-name').value || 'Heidy';
+        document.getElementById('res-name').innerText = `太棒了，${name}！完成本次挑戰 🎉`;
+        document.getElementById('final-score').innerText = score + "分";
+        
+        let unitText = selectedUnitId === 0 ? '全範圍' : `Unit ${selectedUnitId}`;
+        saveToLeaderboard(name, currentMode, unitText, score);
+    }
+
+    function saveToLeaderboard(name, mode, rangeText, score) {
+        let list = JSON.parse(localStorage.getItem('f2_glossary_rank') || '[]');
+        list.unshift({ name, mode, rangeText, score });
+        localStorage.setItem('f2_glossary_rank', JSON.stringify(list.slice(0, 10)));
+    }
+
+    function updateLeaderboardDisplay() {
+        let list = JSON.parse(localStorage.getItem('f2_glossary_rank') || '[]');
+        let html = list.map(i => `<tr><td>${i.name}</td><td>${i.mode}</td><td>${i.rangeText}</td><td><b>${i.score}</b></td></tr>`).join('');
+        document.getElementById('leaderboard-body').innerHTML = html || '<tr><td colspan="4">暫無挑戰記錄</td></tr>';
+    }
+
+    window.onload = () => {
+        renderHomeUnits();
+        updateLeaderboardDisplay();
+    };
+</script>
+</body>
+</html>
