@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>《歷代文言小故事》1、2、4、9、10 - F2A Unit Test</title>
+    <style>
+        :root {
+            --primary: #2c3e50; --accent: #3498db; --success: #27ae60;
+            --error: #e74c3c; --bg: #f0f3f5; 
+            --note-orange: #f39c12; --exercise-red: #e74c3c; --translate-green: #27ae60; --highlight-blue: #3498db;
+        }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; padding: 10px; display: flex; justify-content: center; }
+        #game-box { width: 100%; max-width: 850px; background: white; padding: 20px; border-radius: 25px; box-shadow: 0 12px 40px rgba(0,0,0,0.15); min-height: 95vh; }
+        .settings-bar { background: #eee; padding: 10px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .chapter-card { border: 2px solid #edf2f7; border-radius: 18px; padding: 15px; margin-bottom: 15px; background: #fff; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+        .mode-btn { padding: 14px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.9em; color: white; transition: 0.2s; }
+        .btn-lv0 { background: #9b59b6; } .btn-lv1 { background: #c0392b; } .btn-lv2 { background: #2c3e50; grid-column: span 2; }
+        .full-text-box { background: #f8f9fa; border-left: 5px solid var(--accent); padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .section-title { font-weight: bold; color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;}
+        .source-full { font-size: 1.5em; line-height: 2.2; letter-spacing: 1.5px; margin-bottom: 25px; color: #2d3436; }
+        .trans-full { font-size: 1.15em; color: #4a5568; line-height: 1.8; }
+        .answer-section { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .ans-box { padding: 12px; border-radius: 8px; font-size: 0.85em; line-height: 1.6; }
+        .box-note { background: #fff5e6; border: 1px solid #f39c12; }
+        .box-exercise { background: #fdf2f2; border: 1px solid #e74c3c; }
+        .box-translate { background: #f0fff4; border: 1px solid #27ae60; grid-column: span 2; }
+        .char-span { cursor: pointer; padding: 0 1px; border-radius: 4px; transition: 0.2s; display: inline-block; position: relative; }
+        .char-span:hover { background: #dfe6e9; }
+        
+        /* 1. 注釋 (黃/橙字)：圓滑自然下括弧 (︶) */
+        .note-orange { 
+            color: var(--note-orange); 
+            font-weight: bold; 
+            position: relative;
+            padding-bottom: 5px;
+        }
+        .note-orange::after {
+            content: "";
+            position: absolute;
+            left: 5%;
+            right: 5%;
+            bottom: 0;
+            height: 4px;
+            border-bottom: 2px solid var(--note-orange);
+            border-radius: 0 0 50% 50%;
+        }
+
+        /* 2. 練習字詞：淺紅色背景高亮 */
+        .exercise-red { 
+            color: var(--exercise-red); 
+            font-weight: bold; 
+            background-color: #ffeef0; 
+            padding: 2px 0; 
+        }
+
+        /* 加點字/關鍵字：圓滑紅色下括弧 (︶) */
+        .target-underline {
+            position: relative;
+            padding-bottom: 5px;
+        }
+        .target-underline::after {
+            content: "";
+            position: absolute;
+            left: 5%;
+            right: 5%;
+            bottom: 0;
+            height: 4px;
+            border-bottom: 2px solid var(--exercise-red);
+            border-radius: 0 0 50% 50%;
+        }
+
+        /* 3. 翻譯：淺綠色背景高亮 */
+        .trans-green { color: var(--translate-green); font-weight: bold; background-color: #e6ffed; padding: 2px 0; }
+        .blue-highlight { color: var(--highlight-blue); border-bottom: 3px solid var(--highlight-blue); font-weight: bold; }
+        
+        .opt-btn { display: block; width: 100%; padding: 18px; margin: 12px 0; border: 2px solid #eee; border-radius: 12px; background: white; text-align: left; cursor: pointer; font-size: 1.1em; }
+        .correct { background: var(--success) !important; color: white; border-color: var(--success); }
+        .wrong { background: var(--error) !important; color: white; border-color: var(--error); }
+        .dictation-input { width: 100%; padding: 15px; font-size: 1.2em; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; margin: 20px 0; }
+        .feedback-msg { padding: 15px; border-radius: 10px; font-weight: bold; margin-top: 10px; display: none; }
+        .hidden { display: none !important; }
+        .footer { margin-top: 30px; display: flex; gap: 10px; position: sticky; bottom: 0; background: white; padding: 10px; border-top: 1px solid #eee; }
+        .nav-btn { flex: 1; padding: 16px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; background: #bdc3c7; }
+    </style>
+</head>
+<body>
+<div id="game-box">
+    <div id="menu">
+        <h2 style="text-align:center;">《歷代文言小故事》<br>1、2、4、9、10</h2>
+        <div class="settings-bar">
+            <label style="cursor:pointer; font-weight:bold;"><input type="checkbox" id="auto-read-toggle" checked> 自動朗讀題目 (ON/OFF)</label>
+        </div>
+        <div id="chapter-list"></div>
+    </div>
+    <div id="screen-lv0" class="hidden">
+        <h2 id="lv0-head"></h2>
+        <div class="full-text-box">
+            <div class="section-title">原文 <span style="cursor:pointer; font-size: 0.8em; color:var(--accent);" onclick="speakTextId('raw')">🔊 朗讀全段</span></div>
+            <div id="lv0-source" class="source-full"></div>
+            <div id="source-tag" style="text-align: right; color: #999; margin-top: -15px; margin-bottom: 20px;"></div>
+            <div class="section-title">釋文 <span style="cursor:pointer; font-size: 0.8em; color:var(--accent);" onclick="speakTextId('trans')">🔊 朗讀全段</span></div>
+            <div id="lv0-trans" class="trans-full"></div>
+            <div class="answer-section">
+                <div class="ans-box box-note"><b style="color:var(--note-orange);">🧡 注釋 (Orange)</b><div id="lv0-notes-list"></div></div>
+                <div class="ans-box box-exercise"><b style="color:var(--exercise-red);">❤️ 練習字詞 (Red)</b><div id="lv0-ex-list"></div></div>
+                <div class="ans-box box-translate"><b style="color:var(--translate-green);">💚 翻譯/理解題目 (Green)</b><div id="lv0-trans-list"></div></div>
+            </div>
+        </div>
+        <div class="footer"><button class="nav-btn" onclick="showMenu()">返回目錄</button></div>
+    </div>
+    <div id="screen-quiz" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items: center;"><span id="mode-badge" style="color:white; padding:4px 10px; border-radius:5px; font-size:0.9em; font-weight:bold;"></span><span id="quiz-progress" style="font-weight:bold; color:#666;"></span></div>
+        <div id="quiz-q-box" style="margin-top:20px;">
+            <div id="quiz-source-context" style="background:#fff9db; padding:18px; border-radius:15px; margin-bottom:20px; line-height:1.8; font-size:1.15em; border:1px solid #ffeaa7;"></div>
+            <h3 id="quiz-question" style="color:var(--primary); line-height:1.4;"></h3>
+            <div id="quiz-options" class="hidden"></div>
+            <div id="quiz-dictation" class="hidden"><input type="text" id="user-input" class="dictation-input" placeholder="在此輸入答案..."><button class="nav-btn" style="background:var(--accent); color:white; width:100%;" onclick="checkDictation()">提交答案</button></div>
+            <div id="feedback-msg" class="feedback-msg"></div>
+        </div>
+        <div class="footer"><button id="next-btn" class="nav-btn hidden" style="background:var(--success); color:white;" onclick="nextQ()">下一題</button><button class="nav-btn" onclick="showMenu()">返回目錄</button></div>
+    </div>
+</div>
+
+<script>
+const chaptersData = {
+    1: {
+        t: "1. 晏子使楚", tag: "節選自《晏子春秋》",
+        fullSource: "晏子使楚，楚人以晏子短，為小門於大門之側而延晏子。晏子不入，曰：「使狗國者從狗門入，今臣使楚，不當從此門入。」儐者更道，從大門入。見楚王。王曰：「齊無人耶？使子為使。」晏子對曰：「齊之臨淄三百閭，張袂成陰，揮汗成雨，比肩繼踵而在，何為無人？」王曰：「然則何為使子？」晏子曰：「齊命使，各有所主。其賢者使賢主，不肖者使不肖主。嬰最不肖，故宜使楚矣。」",
+        fullTrans: "晏子出使楚國，楚人因為晏子矮小，便在大門的旁邊造一個小門來請晏子入城。晏子不進入小門，說：「出使狗國的人才從狗門進入，現在臣出使楚國，不應該從這個門進入。」招待賓客的人於是改道，讓晏子從大門進入。晏子拜見楚王。楚王說：「齊國沒有人嗎？派遣你來當使臣。」晏子回答說：「齊國的臨淄城有三百條里巷，人們張開衣袖便遮蔽太陽成為陰天，揮灑汗水便成了天降大雨，走在路上肩並著肩，腳跟挨著腳跟，怎麼說齊國沒有人呢？」楚王說：「既然這樣，那麼為什麼派你出使？」晏子說：「齊國派遣使者，各有一定的出使對象。那些有才能的人出使到賢明的君主那裏去，沒有才能的人出使到沒有才能的君主那裏去。我最沒才能，所以適合出使到楚國來。」",
+        notes: { 
+            "延": { ans: "請", o: ["請", "延長", "推遲"] },
+            "儐者": { ans: "招待賓客的人", o: ["招待賓客的人", "隨從", "守門人"] },
+            "臨淄": { ans: "齊國國都，今山東臨淄市", o: ["齊國國都，今山東臨淄市", "楚國國都", "趙國國都"] },
+            "閭": { ans: "里巷；鄰里", o: ["里巷；鄰里", "城門", "房屋"] },
+            "袂": { ans: "衣袖", o: ["衣袖", "衣領", "裙擺"] },
+            "比肩繼踵": { ans: "肩並著肩，腳跟挨著腳跟", o: ["肩並著肩，腳跟挨著腳跟", "互相比較", "爭先恐後"] },
+            "齊命使": { ans: "齊國派遣使者", o: ["齊國派遣使者", "齊國的命運", "齊國命令使者"] },
+            "所主": { ans: "一定的對象", o: ["一定的對象", "主人", "主要目的"] },
+            "不肖者": { ans: "沒有才能的人", o: ["沒有才能的人", "不孝順的人", "長得不像的人"] }
+        },
+        exercises: { 
+            "晏子使楚": { target: "使", ans: "出使", o: ["出使", "使用", "使喚"] }, 
+            "齊無人耶": { target: "耶", ans: "嗎", o: ["嗎", "呢", "啊"] }, 
+            "使子為使": { target: "子", ans: "你", o: ["你", "兒子", "先生"] }, 
+            "張袂成陰": { target: "張", ans: "舉起", o: ["舉起", "張開", "誇張"] } 
+        },
+        translations: { 
+            "然則何為使子？": { ans: "既然是這樣，那麼為什麼派你出使？", o: ["既然是這樣，那麼為什麼派你出使？", "然後為什麼要出使呢？", "那麼你為了什麼出使？"] }, 
+            "其賢者使賢主，不肖者使不肖主。": { ans: "那些有才能的人出使到賢明的君主那裏去，沒有才能的人出使到沒有才能的君主那裏去。", o: ["那些有才能的人出使到賢明的君主那裏去，沒有才能的人出使到沒有才能的君主那裏去。", "賢能的人可以使君主賢能，不肖的人使君主不肖。", "賢能的使者出使賢明國家，不肖的使者出使不肖國家。"] }, 
+            "嬰最不肖，故宜使楚矣。": { ans: "我最沒才能，所以適合出使到楚國來。", o: ["我最沒才能，所以適合出使到楚國來。", "我最不孝順，所以被趕到楚國。", "我長得最不像樣，所以去楚國。"] } 
+        }
+    },
+    2: {
+        t: "2. 齊人有好獵者", tag: "節選自《呂氏春秋》",
+        fullSource: "齊人有好獵者，曠日持久，而不得獸。入則愧其家室，出則愧其知友州里。惟其所以不得之故，則狗惡也。欲得良狗，則家貧無以。於是還疾耕，疾耕則家富，家富則有以求良狗，良狗則數得獸矣。田獵之獲，常過人矣。非獨獵也，百事也盡然。",
+        fullTrans: "齊國有個愛好打獵的人，浪費了很多時間，卻沒能捕獲野獸。回到家面對他家裏的人就感到慚愧，出外面對他的知交好友和鄉里鄰居也感到羞愧。他思考之所以沒有收穫的原因，乃是獵狗很差劣。他希望得到優良的狗，可是家庭貧困沒辦法用來買良狗。於是他回去努力耕作，努力耕作家庭就富裕起來，家庭富裕便有辦法用來買良狗，有了良狗就幾次都獵得野獸了。打獵的收穫，常常多過他人。不僅簡單是打獵，做各種事情都是這樣。",
+        notes: { 
+            "州里": { ans: "此指鄉里鄰居", o: ["此指鄉里鄰居", "州官", "故鄉"] },
+            "田": { ans: "同「畋」，打獵", o: ["同「畋」，打獵", "田地", "耕種"] }
+        },
+        exercises: { 
+            "出則愧其知友州里": { target: "知", ans: "親密", o: ["親密", "知道", "智慧"] }, 
+            "惟其所以不得之故": { target: "惟", ans: "思考", o: ["思考", "只有", "因為"] }, 
+            "則狗惡也": { target: "惡", ans: "劣", o: ["劣", "兇惡", "討厭"] }, 
+            "良狗則數得獸矣": { target: "數", ans: "多次", o: ["多次", "數量", "計算"] } 
+        },
+        translations: { 
+            "入則愧其家室。": { ans: "回到家面對他家裏的人就感到慚愧。", o: ["回到家面對他家裏的人就感到慚愧。", "進入家裡覺得家室很羞愧。", "因為愧疚所以不回家。"] }, 
+            "於是還疾耕。": { ans: "於是他回去努力耕作。", o: ["於是他回去努力耕作。", "於是生病還在耕作。", "於是趕快回去。"] }, 
+            "非獨獵也，百事也盡然。": { ans: "不僅簡單是打獵，做各種事都是這樣。", o: ["不僅簡單是打獵，做各種事都是這樣。", "不只是打獵，一百件事都做完了。", "不是只有獵人，所有人都一樣。"] } 
+        }
+    },
+    4: {
+        t: "4. 曾母投杼而走", tag: "節選自《戰國策》",
+        fullSource: "費人有與曾子同名族者而殺人。人告曾子母曰：「曾參殺人。」曾子之母曰：「吾子不殺人。」織自若。有頃焉，人又曰：「曾參殺人。」其母尚織自若也。頃之，一人又告之曰：「曾參殺人。」其母懼，投杼踰牆而走。",
+        fullTrans: "費地有一個與曾子同姓同名的人殺了人。有人告訴曾子的母親說：「曾參殺了人。」曾子的母親說：「我的兒子不會殺人的。」她像原來一樣織布。一會兒，又有人說：「曾參殺了人。」他的母親還像原來一樣織布。不久，又有人告訴她說：「曾參殺了人。」他的母親害怕了，扔下梭子翻過牆逃跑。",
+        notes: { 
+            "費": { ans: "古地名，今山東境內", o: ["古地名，今山東境內", "花費", "姓氏"] },
+            "曾子": { ans: "指曾參，孔子的學生", o: ["指曾參，孔子的學生", "曾祖父", "古人名"] },
+            "杼": { ans: "織布的梭子", o: ["織布的梭子", "木頭", "兵器"] }
+        },
+        exercises: { 
+            "織自若": { target: "自若", ans: "像原來一樣", o: ["像原來一樣", "自己高興", "若無其事"] }, 
+            "有頃焉": { target: "有頃", ans: "一會兒", o: ["一會兒", "很久", "傾斜"] }, 
+            "其母尚織自若也": { target: "尚", ans: "還", o: ["還", "尚且", "和尚"] } 
+        },
+        translations: { 
+            "其母懼，投杼踰牆而走。": { ans: "他的母親害怕了，扔下梭子翻過牆逃跑。", o: ["他的母親害怕了，扔下梭子翻過牆逃跑。", "他的母親害怕，丟下東西走在牆邊。", "他的母親懼怕，投擲梭子打破牆壁。"] } 
+        }
+    },
+    9: {
+        t: "9. 季札帶寶劍過徐君", tag: "節選自《新序》",
+        fullSource: "延陵季子將西聘晉，帶寶劍以過徐君。徐君觀劍，不言而色欲之。延陵季子為有上國之使，未獻也，然其心許之矣。反，則徐君死於楚，於是脫劍致之嗣君。嗣君曰：「先君無命，孤不敢受劍。」於是季子以劍帶徐君墓而去。",
+        fullTrans: "延陵季子將受晉國的邀請而去西方，帶著寶劍拜訪徐君。徐君觀賞季子的寶劍，沒開口而神色上想要這把劍。延陵季子因為有出使晉國的任務，沒有獻上寶劍，然而他的心裏已答應徐君了。延陵季子返回後，徐君已在楚國死去了，於是他解下寶劍送給繼承君位的人。繼承君位的人說：「已去世的君父沒有遺命，我不敢接受寶劍。」於是延陵季子把寶劍掛在徐君的墳墓就離開了。",
+        notes: { 
+            "延陵季子": { ans: "即春秋時吳國公子季札，封於延陵，故世稱延陵季子", o: ["即春秋時吳國公子季札，封於延陵，故世稱延陵季子", "晉國的使臣", "楚國的公子"] },
+            "徐君": { ans: "徐國國君。徐國，古地名，在今安徽境內", o: ["徐國國君。徐國，古地名，在今安徽境內", "姓徐的君子", "徐州的刺史"] },
+            "上國": { ans: "指晉國", o: ["指晉國", "指吳國", "天朝"] },
+            "嗣君": { ans: "繼承君位的人", o: ["繼承君位的人", "伺候君主的人", "國君的弟弟"] },
+            "帶": { ans: "掛", o: ["掛", "腰帶", "帶領"] }
+        },
+        exercises: { 
+            "為有上國之使": { target: "使", ans: "出使任務", o: ["出使任務", "使者", "使用"] }, 
+            "反，則徐君死於楚": { target: "反", ans: "同「返」", o: ["同「返」", "反對", "相反"] }, 
+            "於是脫劍致之嗣君": { target: "脫、致", ans: "解下、送", o: ["解下、送", "脫落", "逃脫"] }, 
+            "先君無命": { target: "先君", ans: "已去世的", o: ["已去世的", "先前的君主", "祖先"] }, 
+            "孤不敢受劍": { target: "孤", ans: "我，國君自稱", o: ["我，國君自稱", "孤單", "孤兒"] } 
+        },
+        translations: { 
+            "延陵季子將西聘晉。": { ans: "延陵季子將受晉國的邀請而去西方。", o: ["延陵季子將受晉國的邀請而去西方。", "延陵季子向西邊聘請晉國人。", "延陵季子要去西邊的晉國應聘。"] }, 
+            "不言而色欲之。": { ans: "沒開口而神色上想要這把劍。", o: ["沒開口而神色上想要這把劍。", "不說話但是顏色很好看。", "不說話是因為想要它。"] }, 
+            "然其心許之矣。": { ans: "然而他心裏已答應徐君了。", o: ["然而他心裏已答應徐君了。", "然而他心裡允許了。", "雖然心裡稱許他。"] } 
+        }
+    },
+    10: {
+        t: "10. 趙威后問齊使", tag: "節選自《戰國策》",
+        fullSource: "齊王使使者問趙威后。書未發，威后問使者曰：「歲亦無恙耶？民亦無恙耶？王亦無恙耶？」使者不說，曰：「臣奉使使威后，今不問王而先問歲與民，豈先賤而後尊貴者乎？」威后曰：「不然。苟無歲，何以有民？苟無民，何以有君？故有舍本而問末者耶？」",
+        fullTrans: "齊王派使者問候趙威后。未打開書信，威后便問使者說：「年成（今年的收成）沒有受災害嗎？百姓沒有受災害嗎？齊王沒有受災害嗎？」使者不悅，說：「臣奉命出使威后，現在不先問候齊王而先問年成和百姓，豈不是以卑賤為先而以尊貴者為後嗎？」威后說：「不是這樣。如果沒有好的年成，怎麼能保住百姓？如果沒有百姓，怎麼能保住君主？所以哪有拋棄根本而詢問次要的呢？」",
+        notes: { 
+            "威后": { ans: "趙惠文王妻；此時趙孝成王年幼，由其母主政", o: ["趙惠文王妻；此時趙孝成王年幼，由其母主政", "齊國的王后", "威嚴的皇后"] }
+        },
+        exercises: { 
+            "齊王使使者問": { target: "使", ans: "派", o: ["派", "出使", "使用"] }, 
+            "書未發": { target: "發", ans: "打開", o: ["打開", "發生", "發送"] }, 
+            "歲亦無恙": { target: "歲、恙", ans: "年成、災害", o: ["年成、災害", "歲數、生病", "歲月、恙蟲"] }, 
+            "使者不說": { target: "說", ans: "同「悅」", o: ["同「悅」", "不說話", "說服"] }, 
+            "不然": { target: "然", ans: "對", o: ["對", "不是這樣", "然後"] } 
+        },
+        translations: { 
+            "苟無歲，何以有民？": { ans: "如果沒有好的年成，怎樣能保住百姓。", o: ["如果沒有好的年成，怎樣能保住百姓。", "如果沒有歲月，怎麼會有人民？", "苟且偷生，如何面對百姓？"] }, 
+            "故有舍本而問末者耶？": { ans: "所以哪有拋棄根本而詢問次要的呢？", o: ["所以哪有拋棄根本而詢問次要的呢？", "所以有捨棄本子去問末尾的嗎？", "故意捨本逐末難道對嗎？"] } 
+        }
+    }
+};
+
+let currentChapter = null, quizPool = [], qIdx = 0, isDictationMode = false;
+
+function init() {
+    const list = document.getElementById('chapter-list'); list.innerHTML = '';
+    for (let id in chaptersData) {
+        const item = chaptersData[id]; const card = document.createElement('div');
+        card.className = 'chapter-card'; card.innerHTML = `<div style="font-weight:bold;">${item.t}</div><div class="btn-group">
+            <button class="mode-btn btn-lv0" onclick="startLV0(${id})">LV0 全篇對照</button>
+            <button class="mode-btn btn-lv1" onclick="startQuiz(${id}, false)">LV1 選擇挑戰</button>
+            <button class="mode-btn btn-lv2" onclick="startQuiz(${id}, true)">LV2 默寫挑戰</button></div>`;
+        list.appendChild(card);
+    }
+}
+
+function startLV0(id) {
+    const c = chaptersData[id]; currentChapter = c;
+    document.getElementById('lv0-head').innerText = c.t; document.getElementById('source-tag').innerText = `(${c.tag})`;
+    
+    let s = c.fullSource;
+    let charMap = Array(s.length).fill(null);
+
+    // 1. 處理綠色翻譯
+    for(let k in c.translations) {
+        let start = 0, idx = -1;
+        while((idx = s.indexOf(k, start)) !== -1) {
+            for(let i = idx; i < idx + k.length; i++) {
+                charMap[i] = { type: 'trans' };
+            }
+            start = idx + 1;
+        }
+    }
+
+    // 2. 處理橙/黃色注釋 (圓滑下括弧 ︶)
+    for(let k in c.notes) {
+        let start = 0, idx = -1;
+        while((idx = s.indexOf(k, start)) !== -1) {
+            for(let i = idx; i < idx + k.length; i++) {
+                if(!charMap[i]) charMap[i] = { type: 'note' };
+            }
+            start = idx + 1;
+        }
+    }
+
+    // 3. 處理紅色練習字詞（紅色背景高亮 + 加點字加圓滑下括弧 ︶）
+    for(let phrase in c.exercises) {
+        let target = c.exercises[phrase].target;
+        let targets = target ? target.split('、') : [];
+        let start = 0, idx = -1;
+        
+        while((idx = s.indexOf(phrase, start)) !== -1) {
+            for(let i = idx; i < idx + phrase.length; i++) {
+                let char = s[i];
+                let isTarget = targets.includes(char);
+                if(!charMap[i] || charMap[i].type !== 'trans') {
+                    charMap[i] = { type: 'exercise', isTarget: isTarget };
+                }
+            }
+            start = idx + 1;
+        }
+    }
+
+    // 渲染 HTML
+    let html = "";
+    for(let i = 0; i < s.length; i++) {
+        let char = s[i];
+        let map = charMap[i];
+        let cls = "char-span";
+
+        if(map) {
+            if(map.type === 'trans') cls += " trans-green";
+            else if(map.type === 'note') cls += " note-orange";
+            else if(map.type === 'exercise') {
+                cls += " exercise-red";
+                if(map.isTarget) cls += " target-underline";
+            }
+        }
+
+        html += `<span class="${cls}" onclick="speak('${char}')">${char}</span>`;
+    }
+
+    document.getElementById('lv0-source').innerHTML = html; 
+    document.getElementById('lv0-trans').innerText = c.fullTrans;
+
+    // 渲染列表
+    let nH = ""; 
+    for(let k in c.notes) nH += `• <b>${k}</b>: ${c.notes[k].ans}<br>`; 
+    document.getElementById('lv0-notes-list').innerHTML = nH;
+
+    let eH = ""; 
+    for(let phrase in c.exercises) {
+        let ex = c.exercises[phrase];
+        let formattedPhrase = phrase;
+        if(ex.target) {
+            ex.target.split('、').forEach(t => {
+                formattedPhrase = formattedPhrase.replace(new RegExp(t, 'g'), `<u>${t}</u>`);
+            });
+        }
+        eH += `• <b>${formattedPhrase}</b>: ${ex.ans}<br>`; 
+    }
+    document.getElementById('lv0-ex-list').innerHTML = eH;
+
+    let tH = ""; 
+    for(let k in c.translations) tH += `• <b>${k}</b><br> 👉 ${c.translations[k].ans}<br>`; 
+    document.getElementById('lv0-trans-list').innerHTML = tH;
+
+    window.curRaw = c.fullSource; window.curTrans = c.fullTrans; switchScreen('screen-lv0');
+}
+
+function startQuiz(id, dictation) {
+    const c = chaptersData[id]; currentChapter = c; isDictationMode = dictation; quizPool = [];
+    
+    // 建立題目池
+    for(let k in c.notes) {
+        quizPool.push({ type: "注釋", q: `「${k}」的意思是？`, a: c.notes[k].ans, o: c.notes[k].o, kw: [k] });
+    }
+    for(let phrase in c.exercises) {
+        let ex = c.exercises[phrase];
+        let formattedQ = phrase;
+        if(ex.target) {
+            ex.target.split('、').forEach(t => {
+                formattedQ = formattedQ.replace(new RegExp(t, 'g'), `<u>${t}</u>`);
+            });
+        }
+        quizPool.push({ type: "練習", q: `「${formattedQ}」中加點/底線字的意思是？`, a: ex.ans, o: ex.o, kw: [phrase] });
+    }
+    for(let k in c.translations) {
+        quizPool.push({ type: "翻譯/理解", q: `題目：「${k}」`, a: c.translations[k].ans, o: c.translations[k].o, kw: [k] });
+    }
+
+    quizPool.sort(() => Math.random() - 0.5); qIdx = 0; window.curRaw = c.fullSource; switchScreen('screen-quiz');
+    const b = document.getElementById('mode-badge'); b.innerText = isDictationMode ? "LV2 默寫挑戰" : "LV1 選擇挑戰"; b.style.background = isDictationMode ? "#2c3e50" : "#c0392b"; renderQ();
+}
+
+function renderQ() {
+    const q = quizPool[qIdx]; document.getElementById('quiz-progress').innerText = `${qIdx+1} / ${quizPool.length}`;
+    document.getElementById('quiz-question').innerHTML = `【${q.type}題】${q.q}`;
+    let context = window.curRaw;
+    q.kw.forEach(k => { if(context.indexOf(k) !== -1) context = context.replace(new RegExp(k, 'g'), `<span class="blue-highlight">${k}</span>`); });
+    document.getElementById('quiz-source-context').innerHTML = context;
+    document.getElementById('feedback-msg').style.display = "none"; document.getElementById('next-btn').classList.add('hidden');
+    
+    const optContainer = document.getElementById('quiz-options');
+    const dictContainer = document.getElementById('quiz-dictation');
+
+    if(isDictationMode) {
+        optContainer.classList.add('hidden'); dictContainer.classList.remove('hidden');
+        document.getElementById('user-input').value = ""; document.getElementById('user-input').disabled = false; document.getElementById('user-input').focus();
+    } else {
+        dictContainer.classList.add('hidden'); optContainer.classList.remove('hidden');
+        optContainer.innerHTML = '';
+        [...q.o].sort(() => Math.random() - 0.5).forEach(o => {
+            const btn = document.createElement('button'); btn.className = 'opt-btn'; btn.innerText = o;
+            btn.onclick = () => handleAnswer(o === q.a, q.a, btn); optContainer.appendChild(btn);
+        });
+    }
+    if(document.getElementById('auto-read-toggle').checked) {
+        let speakText = q.q.replace(/<[^>]+>/g, '');
+        speak(speakText);
+    }
+}
+
+function handleAnswer(isCorrect, correctAns, btn = null) {
+    document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+    if(isCorrect) { if(btn) btn.classList.add('correct'); speakFeedback(true); } 
+    else { if(btn) btn.classList.add('wrong'); document.querySelectorAll('.opt-btn').forEach(b => { if(b.innerText === correctAns) b.classList.add('correct'); }); speakFeedback(false, correctAns); }
+    document.getElementById('next-btn').classList.remove('hidden');
+}
+
+function checkDictation() {
+    const q = quizPool[qIdx], input = document.getElementById('user-input').value.trim();
+    const clean = (s) => s.replace(/[，。！？：、()（）_]/g, "");
+    const isCorrect = clean(input) === clean(q.a), fb = document.getElementById('feedback-msg');
+    fb.style.display = "block"; document.getElementById('user-input').disabled = true;
+    if(isCorrect) { fb.innerText = "答對了！"; fb.style.background = "#e6ffed"; fb.style.color = "#27ae60"; speakFeedback(true); } 
+    else { fb.innerText = `答錯了。正確答案係：${q.a}`; fb.style.background = "#fdf2f2"; fb.style.color = "#e74c3c"; speakFeedback(false, q.a); }
+    document.getElementById('next-btn').classList.remove('hidden');
+}
+
+function nextQ() { 
+    qIdx++; 
+    if(qIdx < quizPool.length) renderQ(); 
+    else { alert("🎉 完成挑戰！"); showMenu(); } 
+}
+
+function speak(t) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang='zh-HK'; u.rate=0.9; window.speechSynthesis.speak(u); }
+function speakFeedback(isC, ans = "") { window.speechSynthesis.cancel(); let msg = isC ? "答對了" : `答錯了，正確答案係 ${ans}`; const u = new SpeechSynthesisUtterance(msg); u.lang='zh-HK'; u.rate=0.9; window.speechSynthesis.speak(u); }
+function speakTextId(type) { speak(type==='raw'?window.curRaw:window.curTrans); }
+function switchScreen(id) { ['menu','screen-lv0','screen-quiz'].forEach(s => document.getElementById(s).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); window.speechSynthesis.cancel(); }
+function showMenu() { switchScreen('menu'); }
+window.onload = init;
+</script>
+</body>
+</html>
