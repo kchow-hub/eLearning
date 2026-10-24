@@ -121,7 +121,16 @@
         .answer-box { position: absolute; border: 3px dashed var(--correct-color); border-radius: 10px; background: rgba(39,174,96,.12); pointer-events: none; }
         .circle-tip { font-size: 13px; color: var(--sub-text); text-align: center; margin-bottom: 10px; }
 
-        .check-btn { width: 100%; margin-bottom: 10px; background: #8e44ad; }
+        /* 洗腦模式：答錯震一震，錯第二次閃出正確答案 */
+        #game-play { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-7px); } 40%, 80% { transform: translateX(7px); } }
+        .shake { animation: shake .45s; }
+        .mark.shake { animation: none; opacity: .9; }
+        @keyframes hint { 0%, 100% { box-shadow: 0 0 0 0 rgba(39,174,96,.0); } 50% { box-shadow: 0 0 0 7px rgba(39,174,96,.55); } }
+        .hint { border-color: var(--correct-color) !important; background: #e8f8f5 !important; animation: hint 1s infinite; }
+        .bank-btn { touch-action: none; }
+        .drag-ghost { position: fixed; z-index: 20; pointer-events: none; opacity: .9; transform: scale(1.06); box-shadow: 0 8px 20px rgba(0,0,0,.25); }
+        .chip.drop-over { border-color: var(--primary-color); background: var(--primary-light); transform: scale(1.12); }
 
         .feedback { display: none; gap: 8px; align-items: flex-start; padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 15px; line-height: 1.5; text-align: left; }
         .feedback.good { background: #e8f8f5; border-left: 4px solid var(--correct-color); }
@@ -599,35 +608,54 @@
         });
     }
 
-    // 只計第一次作答：答錯會即時顯示正確答案，並記入「要再溫習的題目」
-    function answerOption(btn, value, q) {
-        document.querySelectorAll('#q-body .option-btn').forEach(b => { b.disabled = true; if (b.dataset.value === q.ans) b.classList.add('correct'); });
-        if (value === q.ans) {
-            stars++; playSound('correct');
-            showFeedback(true, '✅ 答對了！', q);
-            speakText(`答對了！正確答案是：${q.ans}`);
-        } else {
-            btn.classList.add('wrong'); playSound('wrong');
-            wrongList.push(q);
-            showFeedback(false, `💡 沒關係，記住工作紙重點喔！正確答案是：<b style="color:var(--correct-color)">${escapeHTML(q.ans)}</b>`, q);
-            speakText(`不對喔，正確答案是：${q.ans}`);
-        }
-        finishQuestion();
+    // ---------- 洗腦模式 ----------
+    // 答錯即時變紅，要答對才可以進入下一題；只有第一次就答對才有 ⭐。
+    // 同一個位置錯第一次只變紅；錯第二次就閃出正確答案並讀出來。
+    function missed(times, hintText, showHint) {
+        playSound('wrong');
+        state.anyMiss = true;
+        if (times >= 2) { showHint(); speakText(hintText); }
+        else speakText('再試一次！');
+    }
+    function flash(node, cls) {
+        node.classList.remove(cls); void node.offsetWidth; node.classList.add(cls);
+        setTimeout(() => node.classList.remove(cls), 900);
     }
 
-    // 配對 / 填充 / 唱名：先點格，再點答案
+    function answerOption(btn, value, q) {
+        if (state.done || btn.disabled) return;
+        if (value === q.ans) {
+            state.done = true;
+            document.querySelectorAll('#q-body .option-btn').forEach(b => { b.disabled = true; b.classList.remove('hint'); });
+            btn.classList.add('correct');
+            playSound('correct');
+            if (!state.anyMiss) stars++; else wrongList.push(q);
+            showFeedback(true, state.anyMiss ? '✅ 做到了！記住這個答案喔！' : '✅ 答對了！', q);
+            speakText(`答對了！正確答案是：${q.ans}`);
+            finishQuestion();
+        } else {
+            btn.classList.add('wrong'); btn.disabled = true; flash(btn, 'shake');
+            state.misses = (state.misses || 0) + 1;
+            const right = [...document.querySelectorAll('#q-body .option-btn')].find(b => b.dataset.value === q.ans);
+            missed(state.misses, `正確答案是：${q.ans}`, () => right.classList.add('hint'));
+        }
+    }
+
+    // 配對 / 填充 / 唱名：拖答案卡到格上（或先點格，再點答案卡）
     function renderBlanks(body, q) {
         const bank = el('div', 'bank' + (q.bank.every(b => !b.text) ? ' short' : ''));
-        state.chips = [];
+        state.chips = []; state.cards = {};
         q.bank.forEach(b => {
             const item = el('div', 'bank-item');
             const btn = el('button', 'bank-btn', b.text ? `${b.key}. ${b.text}` : b.key);
-            btn.onclick = () => fillChip(b.key);
+            btn.addEventListener('pointerdown', e => startDrag(e, b.key, btn));
+            state.cards[b.key] = btn;
             item.appendChild(btn);
             item.appendChild(speakBtn(q.solfege ? SOLFEGE_SAY[b.key] : `${b.key}，${b.text}`, true));
             bank.appendChild(item);
         });
         body.appendChild(bank);
+        body.appendChild(el('div', 'circle-tip', '✋ 按住答案卡拖到格上；或者先點格，再點答案卡'));
 
         const rows = el('div', q.layout === 'cards' ? 'card-rows' : 'fill-rows');
         q.rows.forEach(parts => {
@@ -638,7 +666,7 @@
                 else if (p.img) { const im = el('img'); im.src = p.img; im.alt = '作曲家'; im.onclick = () => openLightbox(p.img); row.appendChild(im); }
                 else {
                     const chip = el('span', 'chip', '?');
-                    chip.dataset.ans = p.ans;
+                    chip.dataset.ans = p.ans; chip.misses = 0;
                     chip.onclick = () => selectChip(chip);
                     state.chips.push(chip);
                     text.appendChild(chip);
@@ -650,136 +678,175 @@
             rows.appendChild(row);
         });
         body.appendChild(rows);
-
-        const check = el('button', 'main-btn check-btn', '✅ 檢查答案');
-        check.disabled = true;
-        check.onclick = () => checkBlanks(q);
-        state.checkBtn = check;
-        body.appendChild(check);
+        state.q = q;
         selectChip(state.chips[0]);
     }
 
     function selectChip(chip) {
-        if (state.done || !chip) return;
+        if (!chip || chip.classList.contains('good')) return;
         state.chips.forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
         state.active = chip;
     }
 
-    function fillChip(key) {
-        if (state.done || !state.active) return;
-        const chip = state.active;
-        chip.textContent = key; chip.dataset.value = key; chip.classList.add('filled');
-        const next = state.chips.find(c => !c.dataset.value);
-        selectChip(next || chip);
-        state.checkBtn.disabled = state.chips.some(c => !c.dataset.value);
+    // 拖拉：移動少過 8px 就當作「點一下」，填入目前選中的格
+    function startDrag(e, key, btn) {
+        if (state.done) return;
+        e.preventDefault();
+        const x0 = e.clientX, y0 = e.clientY;
+        let ghost = null, over = null;
+        const chipAt = (x, y) => { const t = document.elementFromPoint(x, y); return t && t.closest('.chip'); };
+        const move = ev => {
+            if (!ghost && Math.hypot(ev.clientX - x0, ev.clientY - y0) < 8) return;
+            if (!ghost) {
+                ghost = btn.cloneNode(true); ghost.classList.add('drag-ghost');
+                ghost.style.width = btn.offsetWidth + 'px';
+                document.body.appendChild(ghost);
+            }
+            ghost.style.left = (ev.clientX - btn.offsetWidth / 2) + 'px';
+            ghost.style.top = (ev.clientY - 28) + 'px';
+            const c = chipAt(ev.clientX, ev.clientY);
+            if (over && over !== c) over.classList.remove('drop-over');
+            over = c && !c.classList.contains('good') ? c : null;
+            if (over) over.classList.add('drop-over');
+        };
+        const up = ev => {
+            window.removeEventListener('pointermove', move);
+            window.removeEventListener('pointerup', up);
+            window.removeEventListener('pointercancel', up);
+            if (over) over.classList.remove('drop-over');
+            if (ghost) {
+                ghost.remove();
+                const c = chipAt(ev.clientX, ev.clientY);
+                if (c && !c.classList.contains('good')) dropKey(key, c);
+            } else if (state.active) dropKey(key, state.active);
+        };
+        window.addEventListener('pointermove', move);
+        window.addEventListener('pointerup', up);
+        window.addEventListener('pointercancel', up);
     }
 
-    function checkBlanks(q) {
-        state.done = true;
-        let got = 0;
-        state.chips.forEach(c => {
-            c.classList.remove('active', 'filled');
-            if (c.dataset.value === c.dataset.ans) { got++; c.classList.add('good'); }
-            else { c.classList.add('bad'); c.innerHTML = `${escapeHTML(c.dataset.value)}<span class="fix">→ ${escapeHTML(c.dataset.ans)}</span>`; }
-        });
-        document.querySelectorAll('#q-body .bank-btn').forEach(b => b.disabled = true);
-        state.checkBtn.classList.add('hidden');
-        scoreParts(q, got, state.chips.length);
+    function dropKey(key, chip) {
+        if (state.done || chip.classList.contains('good')) return;
+        const q = state.q;
+        state.chips.forEach(c => c.classList.remove('hint'));
+        Object.values(state.cards).forEach(c => c.classList.remove('hint'));
+        if (key === chip.dataset.ans) {
+            chip.textContent = key;
+            chip.classList.remove('active', 'bad');
+            chip.classList.add('good');
+            if (chip.misses === 0) stars++;
+            $('star-count').innerText = stars;
+            playSound('correct');
+            const next = state.chips.find(c => !c.classList.contains('good'));
+            if (next) { selectChip(next); speakText('答對了！'); }
+            else finishParts(q);
+        } else {
+            chip.misses++;
+            chip.textContent = key; chip.classList.add('bad'); flash(chip, 'shake');
+            setTimeout(() => { if (!chip.classList.contains('good')) { chip.textContent = '?'; chip.classList.remove('bad'); } }, 900);
+            selectChip(chip);
+            const right = q.bank.find(b => b.key === chip.dataset.ans);
+            const say = q.solfege ? SOLFEGE_SAY[right.key] : `${right.key}，${right.text}`;
+            missed(chip.misses, `正確答案是：${say}`, () => state.cards[right.key].classList.add('hint'));
+        }
     }
 
-    // 圈出圖片 (丙部)
+    // 圈出圖片 (丙部)：要圈的點了變綠 ⭕，不用圈的點了變紅 ✖️
     function renderPick(body, q) {
         const grid = el('div', 'pick-grid');
+        state.misses = 0; state.tapped = new Set();
         state.cards = q.items.map(it => {
             const card = el('div', 'pick-card');
             const im = el('img'); im.src = it.img; im.alt = it.label;
             const label = el('div', 'pick-label');
             label.append(el('span', 'letter', it.label), speakBtn(it.label, true));
             card.append(im, label);
-            card.onclick = () => { if (!state.done) card.classList.toggle('selected'); };
+            card.onclick = () => tapPick(q, card, it);
             grid.appendChild(card);
             return { card, it };
         });
         body.appendChild(grid);
-        body.appendChild(el('div', 'circle-tip', '👆 點選要圈的圖片，再點一次可以取消'));
-        const check = el('button', 'main-btn check-btn', '✅ 檢查答案');
-        check.onclick = () => {
-            state.done = true; check.classList.add('hidden');
-            let got = 0;
-            state.cards.forEach(({ card, it }) => {
-                const ok = card.classList.contains('selected') === it.ans;
-                if (ok) got++;
-                card.classList.add(ok ? 'good' : 'bad');
-                card.appendChild(el('span', 'verdict', it.ans ? '⭕' : '✖️'));
-            });
-            scoreParts(q, got, state.cards.length);
-        };
-        body.appendChild(check);
+        body.appendChild(el('div', 'circle-tip', `👆 點選要圈的圖片（共 ${q.items.filter(i => i.ans).length} 張）`));
     }
 
-    // 在樂譜上點一下畫圈
+    function tapPick(q, card, it) {
+        if (state.done || card.classList.contains('good')) return;
+        state.cards.forEach(c => c.card.classList.remove('hint'));
+        if (it.ans) {
+            card.classList.add('good'); card.appendChild(el('span', 'verdict', '⭕'));
+            playSound('correct');
+            if (state.misses === 0) stars++;
+            $('star-count').innerText = stars;
+            if (state.cards.every(c => !c.it.ans || c.card.classList.contains('good'))) {
+                // 不用圈而又沒有點錯的圖，每張 1 粒星
+                state.cards.forEach(c => { if (!c.it.ans && !state.tapped.has(c.it.label)) stars++; });
+                finishParts(q);
+            } else speakText('答對了！');
+        } else {
+            state.misses++; state.tapped.add(it.label);
+            flash(card, 'shake'); card.classList.add('bad');
+            setTimeout(() => card.classList.remove('bad'), 900);
+            const left = state.cards.filter(c => c.it.ans && !c.card.classList.contains('good'));
+            missed(state.misses, `${it.label} 不是巴洛克時期的藝術。要圈 ${left.map(c => c.it.label).join(' 和 ')}`, () => left.forEach(c => c.card.classList.add('hint')));
+        }
+    }
+
+    // 在樂譜上點一下畫圈：圈中就變綠色留下，圈錯就閃紅色然後消失
     function renderCircle(body, q) {
         const wrap = el('div', 'circle-wrap');
         const im = el('img'); im.src = q.img; im.alt = '樂譜'; im.draggable = false;
         wrap.appendChild(im);
-        state.marks = [];
+        state.found = new Set(); state.misses = 0;
         const need = q.targets.length;
+        const inside = (x, y, t) => t.rects.some(([rx, ry, rw, rh]) => x >= rx - 1.5 && x <= rx + rw + 1.5 && y >= ry - 2 && y <= ry + rh + 2);
         wrap.onclick = e => {
             if (state.done) return;
             const r = wrap.getBoundingClientRect();
             const x = (e.clientX - r.left) / r.width * 100, y = (e.clientY - r.top) / r.height * 100;
-            const near = state.marks.findIndex(m => Math.abs(m.x - x) < 5 && Math.abs(m.y - y) < 7);
-            if (near >= 0) { state.marks[near].el.remove(); state.marks.splice(near, 1); }
-            else {
-                if (state.marks.length >= need) { state.marks[0].el.remove(); state.marks.shift(); }
-                const m = el('div', 'mark pending'); m.style.left = x + '%'; m.style.top = y + '%';
-                wrap.appendChild(m);
-                state.marks.push({ x, y, el: m });
+            const m = el('div', 'mark'); m.style.left = x + '%'; m.style.top = y + '%';
+            wrap.appendChild(m);
+            if (q.targets.some((t, i) => state.found.has(i) && inside(x, y, t))) { m.remove(); return; }
+            const ti = q.targets.findIndex((t, i) => !state.found.has(i) && inside(x, y, t));
+            if (ti >= 0) {
+                state.found.add(ti); m.classList.add('good');
+                wrap.querySelectorAll('.answer-box').forEach(b => b.remove());
+                playSound('correct');
+                if (state.misses === 0) stars++;
+                $('star-count').innerText = stars;
+                if (state.found.size === need) finishParts(q); else speakText('答對了！再圈一個！');
+            } else {
+                state.misses++;
+                flash(m, 'shake');
+                setTimeout(() => m.remove(), 900);
+                missed(state.misses, '看看綠色虛線框，正確答案在這裡！', () => {
+                    wrap.querySelectorAll('.answer-box').forEach(b => b.remove());
+                    q.targets.forEach((t, i) => {
+                        if (state.found.has(i)) return;
+                        t.rects.forEach(([rx, ry, rw, rh]) => {
+                            const b = el('div', 'answer-box');
+                            Object.assign(b.style, { left: rx + '%', top: ry + '%', width: rw + '%', height: rh + '%' });
+                            wrap.appendChild(b);
+                        });
+                    });
+                });
             }
-            check.disabled = state.marks.length !== need;
         };
         body.appendChild(wrap);
-        body.appendChild(el('div', 'circle-tip', `👆 用手指點樂譜畫圈（要圈 ${need} 個），點同一個圈可以取消`));
-        const check = el('button', 'main-btn check-btn', '✅ 檢查答案');
-        check.disabled = true;
-        check.onclick = () => {
-            state.done = true; check.classList.add('hidden');
-            const hit = (m, t) => t.rects.some(([rx, ry, rw, rh]) => m.x >= rx - 1.5 && m.x <= rx + rw + 1.5 && m.y >= ry - 2 && m.y <= ry + rh + 2);
-            const used = new Set();
-            let got = 0;
-            state.marks.forEach(m => {
-                const ti = q.targets.findIndex((t, i) => !used.has(i) && hit(m, t));
-                if (ti >= 0) { used.add(ti); got++; m.el.className = 'mark good'; }
-                else m.el.className = 'mark';
-            });
-            // 顯示沒有圈中的正確位置
-            q.targets.forEach((t, i) => {
-                if (used.has(i)) return;
-                t.rects.forEach(([rx, ry, rw, rh]) => {
-                    const b = el('div', 'answer-box');
-                    Object.assign(b.style, { left: rx + '%', top: ry + '%', width: rw + '%', height: rh + '%' });
-                    wrap.appendChild(b);
-                });
-            });
-            scoreParts(q, got, need);
-        };
-        body.appendChild(check);
+        body.appendChild(el('div', 'circle-tip', `👆 用手指點樂譜畫圈（要圈 ${need} 個）`));
     }
 
-    // 多格題目：每格 1 粒星
-    function scoreParts(q, got, total) {
-        stars += got;
-        if (got === total) {
-            playSound('correct');
-            showFeedback(true, `✅ 全部答對！得到 ${got} 粒星！`, q);
-            speakText(`全部答對！得到 ${got} 粒星！`);
-        } else {
-            playSound('wrong');
+    // 多格題目全部做對後
+    function finishParts(q) {
+        state.done = true;
+        $('star-count').innerText = stars;
+        if (state.anyMiss) {
             wrongList.push(q);
-            const msg = q.type === 'circle' ? '綠色虛線框是正確的位置。' : q.type === 'pick' ? '⭕ 是要圈的，✖️ 是不用圈的。' : '紅色格旁邊是正確答案。';
-            showFeedback(false, `💡 答對 ${got} / ${total}。${msg}`, q);
-            speakText(`答對 ${got} 個，總共 ${total} 個。看看正確答案吧！`);
+            showFeedback(false, '✅ 全部做到了！有錯過的地方，記住正確答案喔！', q);
+            speakText('全部做到了！記住正確答案喔！');
+        } else {
+            showFeedback(true, '✅ 全部一次答對，太厲害了！', q);
+            speakText('全部一次答對，太厲害了！');
         }
         finishQuestion();
     }
