@@ -174,7 +174,65 @@
         .mark.bar.good { background: var(--correct-color); }
         .order-tip { font-size: 18px; font-weight: bold; text-align: center; color: #6c3483; margin-bottom: 8px; }
 
+        /* 照工作紙填寫：答案格放在工作紙圖上 */
+        .ov-scroll { overflow-x: auto; margin-bottom: 6px; border: 1px solid #eee; border-radius: 12px; background: white; -webkit-overflow-scrolling: touch; }
+        .ov-wrap { position: relative; }
+        .ov-wrap > img { width: 100%; display: block; user-select: none; -webkit-user-drag: none; }
+        .ov-chip { position: absolute; transform: translate(-50%, -50%); min-width: 28px; padding: 0 5px; margin: 0; font-size: 16px; line-height: 1.55; border-width: 2px; z-index: 2; }
+        .ov-chip img { height: 24px; margin: 0; }
+        .ov-chip.tight { min-width: 22px; padding: 0 2px; font-size: 14px; }
+        .ov-chip.has-img.good .k { display: none; }
+        .ov-chip.drop-over { transform: translate(-50%, -50%) scale(1.15); }
+        .bar-mode { cursor: crosshair; }
+        .ov-wrap .mark.bar { top: 38% !important; height: 70%; }
+        .plays { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+        .play-btn.small { width: auto; flex: 1 1 28%; padding: 10px 6px; font-size: 15px; margin: 0; }
+
+        /* 選項左右並排、拍子記號 */
+        .side-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        .side-grid .option-row { flex-direction: column; align-items: stretch; margin: 0; }
+        .side-grid .speak-btn { align-self: center; }
+        .side-grid .option-btn { text-align: center; }
+        .side-grid .option-btn img { margin: 6px auto 0; }
+        .frac { display: inline-flex; flex-direction: column; align-items: center; font-weight: bold; font-size: 28px; line-height: 1.05; }
+        .frac.small { font-size: 15px; }
+
+        /* 砌節奏 */
+        .rbank { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; background: #fafafa; border: 1px dashed #ddd; border-radius: 14px; margin-bottom: 6px; }
+        .rcard { background: white; border: 2px solid #e6d3ee; border-radius: 12px; padding: 4px 6px; cursor: pointer; }
+        .rcard img { height: 44px; display: block; pointer-events: none; }
+        .cbox-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 12px; }
+        .cbox-grid.many { grid-template-columns: 1fr 1fr; }
+        .cbox { border: 3px solid #ccc; border-radius: 14px; padding: 8px; background: white; cursor: pointer; min-height: 96px; }
+        .cbox.active { border-color: var(--primary-color); box-shadow: 0 0 0 3px var(--primary-light); }
+        .cbox.good { border-color: var(--correct-color); background: #e8f8f5; }
+        .cbox-head { display: flex; align-items: center; gap: 8px; font-weight: bold; }
+        .cbox-del { margin-left: auto; border: none; background: #eee; border-radius: 8px; padding: 4px 10px; font-size: 16px; cursor: pointer; }
+        .cbox-area { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 4px; min-height: 48px; padding-top: 4px; }
+        .cbox-area img { height: 40px; }
+        .cbox-hint { margin-top: 6px; font-size: 13px; color: var(--correct-color); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .cbox-hint img { max-width: 100%; height: 40px; }
+
+        /* 畫音符 */
+        .dn-note { position: absolute; aspect-ratio: 1.45; transform: translate(-50%, -50%); border: 3px solid var(--wrong-color); border-radius: 50%; background: rgba(231,76,60,.18); pointer-events: none; }
+        .dn-note.good { border-color: var(--correct-color); background: rgba(39,174,96,.3); }
+        .dn-ghost { border-style: dashed; border-color: var(--correct-color); background: none; animation: hint 1s infinite; }
+        .dn-note.ledger::after { content: ''; position: absolute; left: -35%; right: -35%; top: 50%; border-top: 2px solid #333; }
+        .dn-ctrl { display: flex; gap: 8px; margin-bottom: 8px; }
+        .dn-btn { flex: 1; padding: 12px 4px; border: none; border-radius: 12px; background: #eee; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .dn-btn.ok { background: var(--correct-color); color: white; }
+
+        /* 主選單：每課分筆記題 / 工作紙 */
+        .part-row { display: flex; gap: 8px; padding: 0 12px 12px; }
+        .part-btn { flex: 1; border: none; border-radius: 12px; padding: 10px 6px; font-weight: bold; font-size: 15px; cursor: pointer; color: white; line-height: 1.35; }
+        .part-btn small { display: block; font-size: 11px; font-weight: normal; opacity: .95; }
+        .menu-item-box.lesson { flex-direction: column; }
+        .menu-item-box.lesson .menu-content { cursor: default; }
+
         @media (max-width: 480px) {
+            .cbox-grid.many { grid-template-columns: 1fr; }
+            .rcard img { height: 36px; }
+            .ov-chip { font-size: 14px; min-width: 24px; }
             .card-rows img { height: 90px; }
             .pick-card img { height: 120px; }
             .pick-grid.small .pick-card img { height: 54px; }
@@ -212,24 +270,33 @@
                 </div>
             </div>
 
-            <div class="menu-item-box" style="border: 2px solid var(--baroque-gold);">
-                <div class="menu-content" onclick="startLesson('lesson1')" style="background: #fffdf5;">
+            <div class="menu-item-box lesson" style="border: 2px solid #b38f00; background: #fffdf5;">
+                <div class="menu-content">
                     <span class="menu-btn-title" style="color:#b38f00">🎵 第一課：音符、附點音符和連結線</span>
-                    <span class="menu-btn-sub" style="color:#8a6d00;" id="sub-lesson1"></span>
+                </div>
+                <div class="part-row">
+                    <button class="part-btn" style="background:#b38f00" onclick="startLesson('lesson1', 'notes')">📖 筆記題<small id="sub-lesson1-notes"></small></button>
+                    <button class="part-btn" style="background:#b38f00" onclick="startLesson('lesson1', 'ws')">📝 工作紙<small id="sub-lesson1-ws"></small></button>
                 </div>
             </div>
 
-            <div class="menu-item-box" style="border: 2px solid var(--accent-orange);">
-                <div class="menu-content" onclick="startLesson('lesson2')" style="background: #fffbf5;">
-                    <span class="menu-btn-title" style="color:var(--accent-orange)">🍎 第二課：單拍子和複拍子</span>
-                    <span class="menu-btn-sub" style="color:#d35400;" id="sub-lesson2"></span>
+            <div class="menu-item-box lesson" style="border: 2px solid #d35400; background: #fffbf5;">
+                <div class="menu-content">
+                    <span class="menu-btn-title" style="color:#d35400">🍎 第二課：單拍子和複拍子</span>
+                </div>
+                <div class="part-row">
+                    <button class="part-btn" style="background:#d35400" onclick="startLesson('lesson2', 'notes')">📖 筆記題<small id="sub-lesson2-notes"></small></button>
+                    <button class="part-btn" style="background:#d35400" onclick="startLesson('lesson2', 'ws')">📝 工作紙<small id="sub-lesson2-ws"></small></button>
                 </div>
             </div>
 
-            <div class="menu-item-box" style="border: 2px solid #2980b9;">
-                <div class="menu-content" onclick="startLesson('rhythm')" style="background: #f4f9fd;">
+            <div class="menu-item-box lesson" style="border: 2px solid #2980b9; background: #f4f9fd;">
+                <div class="menu-content">
                     <span class="menu-btn-title" style="color:#2980b9">🥁 節奏創作</span>
-                    <span class="menu-btn-sub" style="color:#1f618d;" id="sub-rhythm"></span>
+                </div>
+                <div class="part-row">
+                    <button class="part-btn" style="background:#2980b9" onclick="startLesson('rhythm', 'notes')">📖 重點題<small id="sub-rhythm-notes"></small></button>
+                    <button class="part-btn" style="background:#2980b9" onclick="startLesson('rhythm', 'ws')">📝 工作紙<small id="sub-rhythm-ws"></small></button>
                 </div>
             </div>
 
@@ -321,6 +388,58 @@
     // 小節線位置 (由答案紙紅線計出來)：每條線一個目標
     const bars = (xs, names) => xs.map((x, i) => ({ name: names ? names[i] : '小節線', rects: [[x - 3.5, 0, 7, 100]] }));
     const BEAT_RHYTHM = { unit: 0.5, bar: 4, accents: [0] };  // 四分音符 = 0.5 秒
+    // 答案在工作紙圖上的位置 [x%, y%]（由答案紙計出來）
+    const GEO = {
+        'l1-equal': [["2", 29.5, 9.1], ["2", 77.8, 9.1], ["4", 29.5, 35.8], ["2", 77.8, 35.8], ["4", 29.5, 64.0], ["8", 77.8, 64.1], ["3", 29.5, 89.9], ["3", 77.8, 89.7]],
+        'l1-sum': [["3", 29.4, 12.4], ["5", 82.9, 11.2], ["1", 29.3, 40.9], ["4", 82.9, 40.8], ["4", 30.4, 64.3], ["8", 82.9, 63.5], ["2.5", 30.7, 88.6], ["1.5", 82.1, 90.6]],
+        'l1-tiebox': [[19.6, 20.3], [74.3, 20.3], [19.7, 52.4], [74.5, 52.4], [20.5, 84.6], [75.4, 84.6]],
+        'l1-add1': [[33.4, 18.4], [55.1, 18.4], [87.1, 18.4]],
+        'l1-add2': [[19.3, 23.0], [50.4, 23.0], [69.2, 23.0]],
+        'l1-add3': [[33.4, 22.0], [50.4, 22.0], [75.8, 22.0]],
+        'l1-add4': [[47.5, 21.3], [67.3, 21.3], [89.0, 21.3]],
+        'l1-ch1': [[50.3, 57.3], [81.5, 56.6]],
+        'l1-ch2': [[29.7, 56.6], [49.6, 56.6], [64.4, 56.1], [87.8, 61.6]],
+        'l1-ch3': [[15.4, 62.5], [46.5, 58.7], [69.4, 55.7], [89.0, 54.2]],
+        'l1-names1': [["B", 34.2, 23.9], ["C", 41.2, 23.9], ["D", 47.6, 23.9], ["B", 56.4, 23.9], ["C", 62.6, 23.9], ["D", 69.0, 23.9], ["B", 78.7, 23.9], ["C", 86.5, 23.9], ["D", 92.0, 23.9], ["B", 34.2, 59.1], ["A", 40.5, 59.1], ["G", 46.9, 59.1], ["B", 56.7, 59.1], ["A", 62.9, 59.1], ["G", 69.4, 59.1], ["B", 79.1, 59.1], ["A", 85.4, 59.1], ["G", 91.8, 59.1], ["C", 34.2, 95.5], ["E", 41.1, 95.5], ["G", 47.4, 95.5], ["C", 56.3, 95.5], ["E", 63.2, 95.5], ["G", 69.5, 95.5], ["C", 79.2, 95.5], ["E", 86.1, 95.5], ["G", 92.4, 95.5]],
+        'l1-copy1': [[25.67, 35.29, 46.26, 56.15, 66.04], [1.4, 28.2, 51.6, 74.1, 97.6, 98.3]],
+        'l1-copy2': [[27.17, 37.86, 49.71, 60.4, 71.39], [1.9, 28.3, 51.5, 73.7, 96.8, 97.5]],
+        'l1-copy3': [[27.63, 37.63, 48.42, 58.42, 68.42], [1.4, 27.9, 51.1, 73.4, 96.6, 97.3]],
+        'l1-names2': [["F", 20.5, 29.4], ["D", 50.7, 29.4], ["G", 80.0, 29.4], ["A", 20.9, 62.0], ["B", 49.9, 62.0], ["E", 78.5, 62.0], ["C", 22.0, 93.7], ["A", 50.8, 93.7], ["C", 79.8, 93.7]],
+        'l2-table': [["D", 12.5, 95.5], ["E", 33.7, 95.5], ["A", 55.0, 95.3], ["B", 76.3, 95.3], ["C", 97.5, 95.3]],
+        'l2-simple': [["單", 92.4, 7.3], ["複", 92.4, 27.5], ["單", 93.4, 49.6], ["單", 93.7, 72.6], ["複", 92.4, 94.2]],
+        'l2-beat1': [["4", 26.9, 86.3], ["5", 32.6, 86.3], ["6", 37.7, 86.3], ["1", 44.2, 86.3], ["2", 49.2, 86.3], ["3", 52.8, 86.3], ["4", 58.5, 86.3], ["5", 63.6, 86.3], ["6", 67.2, 86.3], ["1", 74.4, 86.3], ["2", 79.4, 86.3], ["3", 83.0, 86.3], ["4", 88.8, 86.3], ["5", 91.6, 86.3], ["6", 93.8, 86.3]],
+        'l2-beat1-bars': [41.2, 72.7],
+        'l2-beat2': [["2", 16.1, 86.8], ["3", 21.2, 86.8], ["4", 27.6, 86.8], ["5", 31.9, 86.8], ["6", 35.5, 86.8], ["1", 42.0, 86.8], ["2", 47.0, 86.8], ["3", 52.1, 86.8], ["4", 57.8, 86.8], ["5", 62.9, 86.8], ["6", 66.5, 86.8], ["1", 72.2, 86.8], ["2", 78.7, 86.8], ["3", 82.3, 86.8], ["4", 88.0, 86.8], ["5", 91.6, 86.8], ["6", 94.5, 86.8]],
+        'l2-beat2-bars': [39.9, 70.3],
+        'l2-beat3': [["2", 14.7, 86.7], ["3", 18.3, 86.7], ["4", 21.2, 86.7], ["5", 24.0, 86.7], ["6", 26.9, 86.7], ["1", 34.1, 86.7], ["2", 39.1, 86.7], ["3", 44.9, 86.7], ["4", 49.9, 86.7], ["5", 54.9, 86.7], ["6", 58.5, 86.7], ["1", 65.7, 86.7], ["2", 70.8, 86.7], ["3", 74.4, 86.7], ["4", 80.1, 86.7], ["5", 85.2, 86.7], ["6", 88.8, 86.7]],
+        'l2-beat3-bars': [28.6, 63.1],
+        'l2-beat4': [["2", 16.1, 87.5], ["3", 21.9, 87.5], ["4", 29.8, 87.5], ["5", 31.9, 87.5], ["6", 33.4, 87.5], ["1", 39.1, 87.5], ["2", 44.2, 87.5], ["3", 49.9, 87.5], ["4", 56.4, 87.5], ["5", 62.1, 87.5], ["6", 67.2, 87.5], ["1", 73.7, 87.5], ["2", 78.7, 87.5], ["3", 82.3, 87.5], ["4", 89.5, 87.5], ["5", 92.4, 87.5], ["6", 95.2, 87.5]],
+        'l2-beat4-bars': [34.1, 70.3],
+        'l2-beat5': [["2", 16.8, 86.8], ["3", 20.4, 86.8], ["4", 26.2, 86.8], ["5", 31.2, 86.8], ["6", 34.8, 86.8], ["1", 42.0, 86.8], ["2", 44.9, 86.8], ["3", 47.8, 86.8], ["4", 51.3, 86.8], ["5", 56.4, 86.8], ["6", 62.1, 86.8], ["1", 67.9, 86.8], ["2", 73.7, 86.8], ["3", 79.4, 86.8], ["4", 85.2, 86.8], ["5", 90.2, 86.8], ["6", 92.4, 86.8]],
+        'l2-beat5-bars': [37.8, 65.3],
+        'l2-sig': [["4/4", 3.2, 6.4], ["9/8", 3.6, 29.0], ["6/8", 3.6, 50.4], ["6/8", 3.6, 71.7], ["2/4", 3.6, 93.1]],
+        'l2-names1': [["F", 21.5, 90.0], ["B", 35.3, 90.0], ["D", 48.2, 90.0], ["C", 61.2, 90.0], ["C", 74.3, 90.0], ["G", 86.3, 90.0]],
+        'l2-names2': [["E", 23.0, 90.3], ["A", 36.0, 90.3], ["C", 50.1, 90.3], ["B", 63.0, 90.3], ["G", 76.1, 90.3], ["D", 89.2, 90.3]],
+        'l2-draw': [[28.43, 35.66, 42.89, 50.25, 57.61], [2.8, 25.6, 40.1, 54.6, 69.1, 83.5, 98.0]]
+    };
+    // 填在工作紙圖上的格：answers 沒有給就用答案紙上的字
+    const zonesOf = (key, answers) => GEO[key].map((z, i) => answers ? { ans: answers[i], x: z[0], y: z[1] } : { ans: z[0], x: z[1], y: z[2] });
+    // 答案紙上擠在一起的數字 (例如附點四分音符下的 4 5 6) 拉開少少，格子才不會重疊
+    const spread = (zones, gap) => {
+        const out = zones.map(z => ({ ...z })), groups = [];
+        out.forEach((z, i) => { if (i && z.x - out[i - 1].x < gap) groups[groups.length - 1].push(z); else groups.push([z]); });
+        groups.forEach(g => { const mid = g.reduce((n, z) => n + z.x, 0) / g.length; g.forEach((z, i) => { z.x = Math.max(z.x - gap, Math.min(z.x + gap, mid + (i - (g.length - 1) / 2) * gap)); }); });
+        return out;
+    };
+    // 砌節奏用的節奏卡：v 是長度 (十六分音符 = 1)
+    const card = (id, img, v, say) => ({ id, img: I + img, v, say });
+    const CARDS_1 = [card('dq', 'card-dq.png', 6, '附點四分音符'), card('e', 'card-e.png', 2, '八分音符'), card('s4', 'card-s4.png', 4, '四個十六分音符'),
+                     card('ess', 'card-ess.png', 4, '八分音符和兩個十六分音符'), card('des', 'card-des.png', 4, '附點八分音符和十六分音符'), card('ee', 'card-ee.png', 4, '兩個八分音符'),
+                     card('q', 'card-q.png', 4, '四分音符'), card('h', 'card-h.png', 8, '二分音符'), card('dh', 'card-dh.png', 12, '附點二分音符')];
+    const CARD_W = card('w', 'card-w.png', 16, '全音符');
+    const CARDS_68 = [card('e3', 'card-68-e3.png', 6, '三個八分音符'), card('q', 'card-68-q.png', 4, '四分音符'), card('e', 'card-68-e.png', 2, '八分音符'), card('dq', 'card-68-dq.png', 6, '附點四分音符')];
+    const CARDS_COPY = [card('des', 'card-cp-des.png', 4, '附點八分音符和十六分音符'), card('q', 'card-cp-q.png', 4, '四分音符'), card('ess', 'card-cp-ess.png', 4, '八分音符和兩個十六分音符'),
+                        card('sse', 'card-cp-sse.png', 4, '兩個十六分音符和八分音符'), card('dq', 'card-cp-dq.png', 6, '附點四分音符'), card('e', 'card-cp-e.png', 2, '八分音符'), card('ee', 'card-cp-ee.png', 4, '兩個八分音符')];
 
     const questionBank = {
         lesson1: {
@@ -365,24 +484,21 @@
                   why: "三拍 + 一拍 = 四拍；半拍 + 半拍 = 一拍" }
             ],
             exam: [
-                { page: "1", type: "mc", q: "(一) 1. 細心聆聽節奏，然後選出正確的答案。", play: { seq: [.25, .25, .25, .25, 1, .25, .25, .5, 1], ...BEAT_RHYTHM },
+                { page: "1", type: "mc", layout: 'side', q: "(一) 1. 細心聆聽節奏，然後圈出代表正確答案的英文字母。", play: { seq: [.25, .25, .25, .25, 1, .25, .25, .5, 1], ...BEAT_RHYTHM },
                   options: ["A", "B"], optImg: { A: I + 'l1-ls1a.png', B: I + 'l1-ls1b.png' }, ans: "A",
                   why: "A 的第三組是兩個十六分音符 + 一個八分音符；B 是兩個八分音符。" },
-                { page: "1", type: "mc", q: "(一) 2. 細心聆聽節奏，然後選出正確的答案。", play: { seq: [1, 1, .5, .25, .25, 1], ...BEAT_RHYTHM },
+                { page: "1", type: "mc", layout: 'side', q: "(一) 2. 細心聆聽節奏，然後圈出代表正確答案的英文字母。", play: { seq: [1, 1, .5, .25, .25, 1], ...BEAT_RHYTHM },
                   options: ["A", "B"], optImg: { A: I + 'l1-ls2a.png', B: I + 'l1-ls2b.png' }, ans: "B",
                   why: "B 開始是兩個四分音符 (Ta Ta)；A 開始是附點四分音符 + 八分音符 (Tum Ti)。" },
-                { page: "1", type: "mc", q: "(一) 3. 細心聆聽節奏，然後選出正確的答案。", play: { seq: [.75, .25, .75, .25, .5, .5, 1], ...BEAT_RHYTHM },
+                { page: "1", type: "mc", layout: 'side', q: "(一) 3. 細心聆聽節奏，然後圈出代表正確答案的英文字母。", play: { seq: [.75, .25, .75, .25, .5, .5, 1], ...BEAT_RHYTHM },
                   options: ["A", "B"], optImg: { A: I + 'l1-ls3a.png', B: I + 'l1-ls3b.png' }, ans: "A",
                   why: "A 的第三組是兩個八分音符 (Ti-ti)；B 是八分音符 + 兩個十六分音符。" },
-                { page: "2", type: "mc", q: "(一) 4. 細心聆聽節奏，然後選出正確的答案。", play: { seq: [.5, .25, .25, -1, .5, .5, -1], ...BEAT_RHYTHM },
+                { page: "2", type: "mc", layout: 'side', q: "(一) 4. 細心聆聽節奏，然後圈出代表正確答案的英文字母。", play: { seq: [.5, .25, .25, -1, .5, .5, -1], ...BEAT_RHYTHM },
                   options: ["A", "B"], optImg: { A: I + 'l1-ls4a.png', B: I + 'l1-ls4b.png' }, ans: "B",
                   why: "B 最後是四分休止符 (不發聲)；A 最後是四分音符。" },
-                { page: "2", type: "blanks", q: "(二) 請在橫線上填上正確的數字。", img: I + 'l1-p2-equal.png',
-                  bank: letters('234568').map(b => ({ key: b.key })),
-                  rows: [["A. 1 個二分音符 =", { ans: "2" }, "個四分音符"], ["B. 1 個四分音符 =", { ans: "2" }, "個八分音符"],
-                         ["C. 1 個四分音符 =", { ans: "4" }, "個十六分音符"], ["D. 1 個八分音符 =", { ans: "2" }, "個十六分音符"],
-                         ["E. 1 個全音符 =", { ans: "4" }, "個四分音符"], ["F. 1 個二分音符 =", { ans: "8" }, "個十六分音符"],
-                         ["G. 1 個附點二分音符 =", { ans: "3" }, "個四分音符"], ["H. 1 個附點四分音符 =", { ans: "3" }, "個八分音符"]] },
+                { page: "2", type: "overlay", q: "(二) 請在橫線上填上正確的數字。", img: I + 'ov-l1-equal.png', minW: 520,
+                  bank: ["1", "2", "3", "4", "6", "8"].map(k => ({ key: k })), zones: zonesOf('l1-equal'),
+                  why: "A 2｜B 2｜C 4｜D 2｜E 4｜F 8｜G 3｜H 3" },
                 { page: "3", type: "circle", q: "(三) 1. 在以下五線譜中圈出連結音符。", img: I + 'l1-tie1.png',
                   ignore: [[13.5, 33.6, 12.5, 62.5]],
                   targets: [{ name: "連結音符", rects: [[41.0, 45, 12.1, 52]] }, { name: "連結音符", rects: [[57.3, 37, 12.0, 52]] }, { name: "連結音符", rects: [[79.5, 33, 12.0, 52]] }],
@@ -391,60 +507,43 @@
                   targets: [{ name: "連結音符", rects: [[31.9, 15, 12, 48]] }, { name: "連結音符", rects: [[43.9, 15, 12, 48]] },
                             { name: "連結音符", rects: [[55.9, 15, 12, 48]] }, { name: "連結音符", rects: [[84.5, 40, 12, 46]] }],
                   why: "連結線連着兩個相同音高的音符。連着不同音高的弧線是圓滑線，不用圈。" },
-                { page: "3", type: "blanks", q: "(四) 把以下音符時值的總和寫在橫線上。", img: I + 'l1-p3-sum.png',
-                  bank: ["1", "1.5", "2.5", "3", "4", "5", "8"].map(k => ({ key: k })),
-                  rows: [["1. 二分音符 + 四分音符 =", { ans: "3" }, "拍"], ["2. 全音符 + 四分音符 =", { ans: "5" }, "拍"],
-                         ["3. 八分音符 + 八分音符 =", { ans: "1" }, "拍"], ["4. 二分音符 + 二分音符 =", { ans: "4" }, "拍"],
-                         ["5. 附點二分音符 + 四分音符 =", { ans: "4" }, "拍"], ["6. 全音符 + 全音符 =", { ans: "8" }, "拍"],
-                         ["7. 二分音符 + 八分音符 =", { ans: "2.5" }, "拍"], ["8. 八分音符 + 四分音符 =", { ans: "1.5" }, "拍"]] },
-                { page: "4", type: "blanks", q: "(五) 在方格內為以下連結音加上適當的音符。", img: I + 'l1-p4-tie-box.png',
+                { page: "3", type: "overlay", q: "(四) 把以下音符時值的總和寫在橫線上。", img: I + 'ov-l1-sum.png', minW: 520,
+                  bank: ["1", "1.5", "2", "2.5", "3", "4", "5", "8"].map(k => ({ key: k })), zones: zonesOf('l1-sum'),
+                  why: "1. 2+1=3｜2. 4+1=5｜3. ½+½=1｜4. 2+2=4｜5. 3+1=4｜6. 4+4=8｜7. 2+½=2.5｜8. ½+1=1.5" },
+                { page: "4", type: "overlay", q: "(五) 在方格內為以下連結音加上適當的音符。", img: I + 'ov-l1-tiebox.png', minW: 480,
                   bank: noteBank(['全', '附二分', '二分', '四分']),
-                  rows: [["1. 二分音符 連", { ans: "二分" }, "= 4 拍"], ["2. 四分音符 連", { ans: "二分" }, "= 3 拍"],
-                         ["3. 附點二分音符 連", { ans: "附二分" }, "= 6 拍"], ["4. 附點二分音符 連", { ans: "四分" }, "= 4 拍"],
-                         ["5. 全音符 連", { ans: "附二分" }, "= 7 拍"], ["6. 二分音符 連", { ans: "附二分" }, "= 5 拍"]],
+                  zones: zonesOf('l1-tiebox', ['二分', '二分', '附二分', '四分', '附二分', '附二分']),
                   why: "4 = 2 + 2｜3 = 1 + 2｜6 = 3 + 3｜4 = 3 + 1｜7 = 4 + 3｜5 = 2 + 3" },
-                { page: "4", type: "blanks", q: "(六) 1. 4/4 拍子：在有 * 號的地方加上一個音符。", img: I + 'l1-add1.png',
-                  bank: noteBank(['全', '附二分', '二分', '四分']),
-                  rows: [["第 1 個 *", { ans: "二分" }], ["第 2 個 *", { ans: "四分" }], ["第 3 個 *", { ans: "全" }]],
-                  why: "每小節要有 4 拍：2 + 1 + 1｜3 + 1｜4" },
-                { page: "4", type: "blanks", q: "(六) 2. 3/4 拍子：在有 * 號的地方加上一個音符。", img: I + 'l1-add2.png',
-                  bank: noteBank(['全', '附二分', '二分', '四分']),
-                  rows: [["第 1 個 *", { ans: "四分" }], ["第 2 個 *", { ans: "二分" }], ["第 3 個 *", { ans: "附二分" }]],
-                  why: "每小節要有 3 拍：1 + 1 + 1｜2 + 1｜3" },
-                { page: "4", type: "blanks", q: "(六) 3. 2/4 拍子：在有 * 號的地方加上一個音符。", img: I + 'l1-add3.png',
-                  bank: noteBank(['全', '附二分', '二分', '四分']),
-                  rows: [["第 1 個 *", { ans: "二分" }], ["第 2 個 *", { ans: "四分" }], ["第 3 個 *", { ans: "四分" }]],
-                  why: "每小節要有 2 拍：2｜1 + 1｜1 + 1" },
-                { page: "4", type: "blanks", q: "(六) 4. 3/4 拍子：在有 * 號的地方加上一個音符。", img: I + 'l1-add4.png',
-                  bank: noteBank(['全', '附二分', '二分', '四分']),
-                  rows: [["第 1 個 *", { ans: "附二分" }], ["第 2 個 *", { ans: "四分" }], ["第 3 個 *", { ans: "二分" }]],
-                  why: "每小節要有 3 拍：3｜1 + 1 + 1｜2 + 1" },
-                { page: "5", type: "mc", q: "(七) A. 抄寫節奏：哪一個和題目的節奏一模一樣？", img: I + 'l1-copy-a.png',
-                  options: ["A", "B", "C"], optImg: { A: I + 'l1-copy-a-x1.png', B: I + 'l1-copy-a-ok.png', C: I + 'l1-copy-a-x2.png' }, ans: "B",
+                ...[[1, '4/4', ['二分', '四分', '全'], "每小節要有 4 拍：2 + 1 + 1｜3 + 1｜4"],
+                    [2, '3/4', ['四分', '二分', '附二分'], "每小節要有 3 拍：1 + 1 + 1｜2 + 1｜3"],
+                    [3, '2/4', ['二分', '四分', '四分'], "每小節要有 2 拍：2｜1 + 1｜1 + 1"],
+                    [4, '3/4', ['附二分', '四分', '二分'], "每小節要有 3 拍：3｜1 + 1 + 1｜2 + 1"]]
+                    .map(([n, ts, ans, why]) => ({ page: "4", type: "overlay", q: `(六) ${n}. 在有 * 號的地方加上一個音符。(${ts} 拍子)`, img: I + `ov-l1-add${n}.png`, minW: 600,
+                        bank: noteBank(['全', '附二分', '二分', '四分']), zones: zonesOf(`l1-add${n}`, ans), why })),
+                { page: "5", type: "compose", q: "(七) A. 請在方格內抄寫以下節奏。", img: I + 'l1-copy-a.png', cards: CARDS_COPY,
+                  boxes: [{ label: 'A.', mode: 'exact', target: ['des', 'q', 'des', 'ess'], hint: I + 'l1-copy-a.png' }],
                   why: "抄寫節奏要一個一個音符對清楚，次序不可以調亂。" },
-                { page: "5", type: "mc", q: "(七) B. 抄寫節奏：哪一個和題目的節奏一模一樣？", img: I + 'l1-copy-b.png',
-                  options: ["A", "B", "C"], optImg: { A: I + 'l1-copy-b-x1.png', B: I + 'l1-copy-b-x2.png', C: I + 'l1-copy-b-ok.png' }, ans: "C",
+                { page: "5", type: "compose", q: "(七) B. 請在方格內抄寫以下節奏。", img: I + 'l1-copy-b.png', cards: CARDS_COPY,
+                  boxes: [{ label: 'B.', mode: 'exact', target: ['sse', 'dq', 'e', 'ee'], hint: I + 'l1-copy-b.png' }],
                   why: "抄寫節奏要一個一個音符對清楚，次序不可以調亂。" },
-                { page: "5", type: "blanks", q: "挑戰題 1. 3/4 拍子：在有 * 號的地方加上一個音符。", img: I + 'l1-ch1.png',
-                  bank: noteBank(['二分', '四分', '八分', '十六分']),
-                  rows: [["第 1 個 *", { ans: "八分" }], ["第 2 個 *", { ans: "四分" }]],
+                { page: "5", type: "overlay", q: "挑戰題 1. 在有 * 號的地方加上一個音符。(3/4 拍子)", img: I + 'ov-l1-ch1.png', minW: 420,
+                  bank: noteBank(['二分', '四分', '八分', '十六分']), zones: zonesOf('l1-ch1', ['八分', '四分']),
                   why: "第 1 小節：二分 2 + 八分 ½ = 2½，欠 ½ 拍 → 八分音符｜第 2 小節：二分 2，欠 1 拍 → 四分音符" },
-                { page: "5", type: "blanks", q: "挑戰題 2. 4/4 拍子：在有 * 號的地方加上一個音符。", img: I + 'l1-ch2.png',
-                  bank: noteBank(['全', '二分', '四分', '八分']),
-                  rows: [["第 1 個 *", { ans: "八分" }], ["第 2 個 *", { ans: "二分" }], ["第 3 個 *", { ans: "四分" }], ["第 4 個 *", { ans: "全" }]],
+                { page: "5", type: "overlay", q: "挑戰題 2. 在有 * 號的地方加上一個音符。(4/4 拍子)", img: I + 'ov-l1-ch2.png', minW: 620,
+                  bank: noteBank(['全', '二分', '四分', '八分']), zones: zonesOf('l1-ch2', ['八分', '二分', '四分', '全']),
                   why: "第 1 小節已有 3½ 拍，欠 ½｜第 2 小節已有 2 拍，欠 2｜第 3 小節已有 3 拍，欠 1｜第 4 小節是空的，欠 4" },
-                { page: "5", type: "blanks", q: "挑戰題 3. 2/4 拍子：在有 * 號的地方加上一個音符。", img: I + 'l1-ch3.png',
-                  bank: noteBank(['四分', '八分', '十六分']),
-                  rows: [["第 1 個 *", { ans: "十六分" }], ["第 2 個 *", { ans: "十六分" }], ["第 3 個 *", { ans: "八分" }], ["第 4 個 *", { ans: "四分" }]],
+                { page: "5", type: "overlay", q: "挑戰題 3. 在有 * 號的地方加上一個音符。(2/4 拍子)", img: I + 'ov-l1-ch3.png', minW: 620,
+                  bank: noteBank(['四分', '八分', '十六分']), zones: zonesOf('l1-ch3', ['十六分', '十六分', '八分', '四分']),
                   why: "第 1 小節已有 1¾ 拍，欠 ¼｜第 2 小節已有 1¾ 拍，欠 ¼｜第 3 小節已有 1½ 拍，欠 ½｜第 4 小節已有 1 拍，欠 1" },
-                { page: "6", type: "blanks", q: "辨認音名練習 1. 請在五線譜上抄寫以下音符及音名。", img: I + 'l1-names-copy.png',
-                  bank: letters('ABCDEFG'),
-                  rows: [["1.", { ans: "B" }, { ans: "C" }, { ans: "D" }, "｜", { ans: "B" }, { ans: "C" }, { ans: "D" }, "｜", { ans: "B" }, { ans: "C" }, { ans: "D" }],
-                         ["2.", { ans: "B" }, { ans: "A" }, { ans: "G" }, "｜", { ans: "B" }, { ans: "A" }, { ans: "G" }, "｜", { ans: "B" }, { ans: "A" }, { ans: "G" }],
-                         ["3.", { ans: "C" }, { ans: "E" }, { ans: "G" }, "｜", { ans: "C" }, { ans: "E" }, { ans: "G" }, "｜", { ans: "C" }, { ans: "E" }, { ans: "G" }]] },
-                { page: "6", type: "blanks", q: "辨認音名練習 2. 在 ☆ 內填上正確的音名。", img: I + 'l1-names-star.png',
-                  bank: letters('ABCDEFG'),
-                  rows: [["第 1 行", { ans: "F" }, { ans: "D" }, { ans: "G" }], ["第 2 行", { ans: "A" }, { ans: "B" }, { ans: "E" }], ["第 3 行", { ans: "C" }, { ans: "A" }, { ans: "C" }]] }
+                ...[[1, 'B C D', [4, 5, 6]], [2, 'B A G', [4, 3, 2]], [3, 'C E G', [-2, 0, 2]]].map(([n, names, steps]) => ({
+                    page: "6", type: "drawnote", q: `辨認音名練習（一）1. 第 ${n} 行：請在五線譜上抄寫以下音符 (${names})。`, img: I + `dn-l1-copy${n}.png`, minW: 560,
+                    lines: GEO[`l1-copy${n}`][0],
+                    slots: GEO['l1-names1'].filter(z => Math.abs(z[2] - [23.9, 59.1, 95.5][n - 1]) < 2).map((z, i) => ({ x: (z[1] * 4.85 - 8) / 4.72, step: steps[i % 3], name: z[0] })),  // 音名圖 (x 60–545pt) → 五線譜圖 (x 68–540pt)
+                    why: `每小節照抄第一小節的 ${names}。` })),
+                { page: "6", type: "overlay", q: "辨認音名練習（一）1. 請在橫線上寫上音名。", img: I + 'ov-l1-names1.png', minW: 600,
+                  bank: letters('ABCDEFG'), zones: zonesOf('l1-names1') },
+                { page: "6", type: "overlay", q: "辨認音名練習（一）2. 在 ☆ 內填上正確的音名。", img: I + 'ov-l1-names2.png', minW: 380,
+                  bank: letters('ABCDEFG'), zones: zonesOf('l1-names2'), why: "F D G｜A B E｜C A C" }
             ]
         },
         lesson2: {
@@ -476,46 +575,45 @@
                 { page: 5, q: "6/8 拍子的六個八分音符怎樣分組？", img: I + 'n2-34-68.png', options: ["每 3 個一組，共 2 拍", "每 2 個一組，共 3 拍", "6 個一組，共 1 拍"], ans: "每 3 個一組，共 2 拍" }
             ],
             exam: [
-                { page: "1", type: "mc", q: "(一) 1. 細心聆聽樂句，然後選出正確的拍子記號。", play: { seq: [1, 1, 1, 1, 1, 1, 1, 1, 1, 3], unit: 0.5, bar: 3, accents: [0] },
+                { page: "1", type: "mc", layout: 'side', q: "(一) 1. 細心聆聽以下的樂句，然後圈出正確的拍子記號。", play: { seq: [1, 1, 1, 1, 1, 1, 1, 1, 1, 3], unit: 0.5, bar: 3, accents: [0] },
                   options: ["2/4", "3/4"], ans: "3/4", why: "每小節三拍：強 弱 弱 → 3/4" },
-                { page: "1", type: "mc", q: "(一) 2. 細心聆聽樂句，然後選出正確的拍子記號。", play: { seq: [1, 1, 1, 1, 1, 1, 2], unit: 0.5, bar: 2, accents: [0] },
+                { page: "1", type: "mc", layout: 'side', q: "(一) 2. 細心聆聽以下的樂句，然後圈出正確的拍子記號。", play: { seq: [1, 1, 1, 1, 1, 1, 2], unit: 0.5, bar: 2, accents: [0] },
                   options: ["2/4", "3/4"], ans: "2/4", why: "每小節兩拍：強 弱 → 2/4" },
-                { page: "1", type: "mc", q: "(一) 3. 細心聆聽樂句，然後選出正確的拍子記號。", play: { seq: [1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 3], unit: 0.25, bar: 6, accents: [0, 3] },
+                { page: "1", type: "mc", layout: 'side', q: "(一) 3. 細心聆聽以下的樂句，然後圈出正確的拍子記號。", play: { seq: [1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 3], unit: 0.25, bar: 6, accents: [0, 3] },
                   options: ["4/4", "6/8"], ans: "6/8", why: "每拍分為 3 個音 (噠噠噠 噠噠噠) → 6/8 複拍子" },
-                { page: "1", type: "mc", q: "(一) 4. 細心聆聽樂句，然後選出正確的拍子記號。", play: { seq: [1, 1, 1, 1, .5, .5, .5, .5, 1, 1, 4], unit: 0.5, bar: 4, accents: [0, 2] },
+                { page: "1", type: "mc", layout: 'side', q: "(一) 4. 細心聆聽以下的樂句，然後圈出正確的拍子記號。", play: { seq: [1, 1, 1, 1, .5, .5, .5, .5, 1, 1, 4], unit: 0.5, bar: 4, accents: [0, 2] },
                   options: ["4/4", "6/8"], ans: "4/4", why: "每小節四拍：強 弱 次強 弱，每拍分為 2 個音 → 4/4" },
-                ...[['D', [3, 3, 1, 1, 1, 3]], ['E', [2, 1, 2, 1, 3, 3]], ['A', [1, 1, 1, 1, 1, 1, 2, 1, 3]], ['B', [1, 1, 1, 1, 1, 1, 3, 3]], ['C', [2, 1, 1, 1, 1, 1, 1, 1, 3]]]
-                    .map(([ans, seq], i) => ({ page: "2", type: "mc", q: `(二) 選段 ${i + 1}：細心聆聽節奏句，選出代表正確答案的英文字母。`, img: I + 'l2-p2-abcde.png',
-                        play: { seq, unit: 0.28, bar: 6, accents: [0, 3] }, options: ["A", "B", "C", "D", "E"], ans })),
-                { page: "3", type: "blanks", q: "(三) 辨別以下拍子記號是屬於單拍子或是複拍子。",
-                  bank: [{ key: "單", text: "單拍子" }, { key: "複", text: "複拍子" }],
-                  rows: [[{ img: I + 'l2-ts1.png' }, "1. 2/4 是", { ans: "單" }, "拍子"], [{ img: I + 'l2-ts2.png' }, "2. 6/8 是", { ans: "複" }, "拍子"],
-                         [{ img: I + 'l2-ts3.png' }, "3. 4/4 是", { ans: "單" }, "拍子"], [{ img: I + 'l2-ts4.png' }, "4. 3/4 是", { ans: "單" }, "拍子"],
-                         [{ img: I + 'l2-ts5.png' }, "5. 9/8 是", { ans: "複" }, "拍子"]],
-                  why: "下面是 4 的 (2/4、3/4、4/4) 是單拍子；6/8 和 9/8 每拍分為 3 個音，是複拍子。" },
+                { page: "2", type: "overlay", q: "(二) 細心聆聽選段中的節奏句，選出代表正確答案的英文字母，填在方格內。", img: I + 'ov-l2-table.png', minW: 460,
+                  plays: [[3, 3, 1, 1, 1, 3], [2, 1, 2, 1, 3, 3], [1, 1, 1, 1, 1, 1, 2, 1, 3], [1, 1, 1, 1, 1, 1, 3, 3], [2, 1, 1, 1, 1, 1, 1, 1, 3]]
+                      .map((seq, i) => ({ label: `選段 ${i + 1}`, play: { seq, unit: 0.28, bar: 6, accents: [0, 3] } })),
+                  bank: letters('ABCDE'), zones: zonesOf('l2-table'), why: "選段 1 D｜選段 2 E｜選段 3 A｜選段 4 B｜選段 5 C" },
+                { page: "3", type: "overlay", q: "(三) 辨別以下拍子記號是屬於單拍子或是複拍子，把答案填在橫線上。", img: I + 'ov-l2-simple.png', minW: 420,
+                  bank: [{ key: "單" }, { key: "複" }], zones: zonesOf('l2-simple'),
+                  why: "2/4、4/4、3/4 每拍分為 2 個音，是單拍子；6/8 和 9/8 每拍分為 3 個音，是複拍子。" },
                 { page: "4", type: "pick", q: "(四) 辨別以下哪些節奏組合是屬於 6/8 拍子記號，並把答案圈出來。", small: true, badText: "不是 6/8 拍子的節奏組合",
                   items: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => ({ img: I + `l2-68-${n}.png`, label: String(n), ans: [1, 4, 6, 7, 9].includes(n) })),
                   why: "6/8 拍子每小節六個八分音符，每 3 個一組。1、4、6、7、9 剛好是兩組 3 個八分音符。" },
-                ...[1, 2, 3, 4, 5].map(n => ({ page: "5", type: "circle", marker: 'bar', q: `(五) ${n}. 6/8 拍子：在適合的地方加上小節線。`, img: I + `l2-bar${n}.png`,
-                    targets: bars({ 1: [40.8, 72.0], 2: [39.5, 69.6], 3: [29.0, 62.9], 4: [34.2, 69.9], 5: [38.1, 65.1] }[n]),
-                    why: "6/8 拍子每小節有 6 個八分音符：數 1 2 3 4 5 6，夠 6 就加小節線。" })),
-                { page: "6", type: "blanks", q: "(六) 在方格內加上正確的拍子記號。",
-                  bank: ["2/4", "3/4", "4/4", "6/8", "9/8"].map(k => ({ key: k })),
-                  rows: [[{ img: I + 'l2-sig1.png' }, "1.", { ans: "4/4" }], [{ img: I + 'l2-sig2.png' }, "2.", { ans: "9/8" }], [{ img: I + 'l2-sig3.png' }, "3.", { ans: "6/8" }],
-                         [{ img: I + 'l2-sig4.png' }, "4.", { ans: "6/8" }], [{ img: I + 'l2-sig5.png' }, "5.", { ans: "2/4" }]],
+                ...[1, 2, 3, 4, 5].map(n => ({ page: "5", type: "overlay", q: `(五) ${n}. 在音符下寫上節拍及在適合的地方加上小節線。`, img: I + `ov-l2-beat${n}.png`, minW: 1200, tight: true,
+                    bank: ["1", "2", "3", "4", "5", "6"].map(k => ({ key: k })), zones: spread(zonesOf(`l2-beat${n}`), 2.2), bars: GEO[`l2-beat${n}-bars`],
+                    why: "6/8 拍子：在每個音符下數 1 2 3 4 5 6 (附點四分音符佔 3 個，四分音符佔 2 個)，數夠 6 就加小節線。" })),
+                { page: "6", type: "overlay", q: "(六) 在方格內加上正確的拍子記號。", img: I + 'ov-l2-sig.png', minW: 560,
+                  bank: ["2/4", "3/4", "4/4", "6/8", "9/8"].map(k => ({ key: k })), zones: zonesOf('l2-sig'),
                   why: "先數每小節有多少拍：1. 四拍 → 4/4｜2. 九個八分音符 → 9/8｜3. 和 4. 六個八分音符 → 6/8｜5. 兩拍 → 2/4" },
                 ...[[1, '4/4', [25.9, 52.0, 74.1, 96.5]], [2, '2/4', [29.3, 49.9, 74.0, 88.1]], [3, '6/8', [30.0, 52.2, 79.1, 97.7]], [4, '9/8', [29.8, 53.6, 75.4, 97.7]]]
-                    .map(([n, ts, xs]) => ({ page: "7", type: "circle", marker: 'bar', q: `挑戰題 ${n}. 根據 ${ts} 拍子記號，為節奏加上小節線及完結線。`, img: I + `l2-ch${n}.png`,
+                    .map(([n, ts, xs]) => ({ page: "7", type: "circle", marker: 'bar', q: `挑戰題 ${n}. 根據拍子記號，為以下節奏加上小節線及完結線。(${ts} 拍子)`, img: I + `l2-ch${n}.png`,
                         targets: bars(xs, ['小節線', '小節線', '小節線', '完結線']),
                         why: `${ts} 拍子：數夠一小節的拍數就加小節線，最後要加完結線。` })),
-                { page: "8", type: "blanks", q: "辨認音名練習 1. 在方格內填上正確的音名。",
-                  bank: letters('ABCDEFG'),
-                  rows: [[{ img: I + 'l2-names1.png' }, { ans: "F" }, { ans: "B" }, { ans: "D" }, { ans: "C" }, { ans: "C" }, { ans: "G" }],
-                         [{ img: I + 'l2-names2.png' }, { ans: "E" }, { ans: "A" }, { ans: "C" }, { ans: "B" }, { ans: "G" }, { ans: "D" }]] },
-                { page: "8", type: "circle", ordered: true, q: "辨認音名練習 2. 在五線譜上點出正確的音符。", img: I + 'l2-draw-ans.png',
-                  targets: [['B', 14, 26.0], ['D', 26.0, 40.2], ['G', 40.2, 54.5], ['E', 54.5, 68.8], ['F', 68.8, 82.9], ['A', 82.9, 97.2]]
-                      .map(([name, a, b]) => ({ name, rects: [[a + 1, 0, b - a - 2, 100]] })),
-                  why: "B D G E F A" }
+                { page: "8", type: "overlay", q: "辨認音名練習（二）1. 在方格內填上正確的音名。(第 1 行)", img: I + 'ov-l2-names1.png', minW: 440,
+                  bank: letters('ABCDEFG'), zones: zonesOf('l2-names1'), why: "F B D C C G" },
+                { page: "8", type: "overlay", q: "辨認音名練習（二）1. 在方格內填上正確的音名。(第 2 行)", img: I + 'ov-l2-names2.png', minW: 440,
+                  bank: letters('ABCDEFG'), zones: zonesOf('l2-names2'), why: "E A C B G D" },
+                { page: "8", type: "drawnote", q: "辨認音名練習（二）2. 在五線譜上畫上正確的音名。", img: I + 'dn-l2-draw.png', minW: 480,
+                  lines: GEO['l2-draw'][0],
+                  slots: [['B', 4], ['D', -1], ['G', 2], ['E', 0], ['F', 1], ['A', 3]].map(([name, step], i) => {
+                      const b = GEO['l2-draw'][1], x0 = i === 0 ? 14 : b[i], x1 = b[i + 1];
+                      return { x: (x0 + x1) / 2, step, name };
+                  }),
+                  why: "B 在第三線｜D 在第一線下面｜G 在第二線｜E 在第一線｜F 在第一間｜A 在第二間" }
             ]
         },
         rhythm: {
@@ -528,30 +626,31 @@
                 { page: 3, src: '工作紙', q: "創作「相似」的答句，即是怎樣？", options: ["節奏和問句有點像，但不完全一樣", "節奏和問句一模一樣", "節奏和問句完全不同"], ans: "節奏和問句有點像，但不完全一樣" }
             ],
             exam: [
-                ...[[1, '2/4', 2, 'B'], [2, '2/4', 2, 'A'], [3, '3/4', 3, 'C'], [4, '3/4', 3, 'B'], [5, '4/4', 4, 'A'], [6, '4/4', 4, 'C']].map(([n, ts, beats, ans]) => {
-                    const order = { A: ['ok', 'x1', 'x2'], B: ['x1', 'ok', 'x2'], C: ['x1', 'x2', 'ok'] }[ans];
-                    return { page: "1", type: "mc", q: `(一) ${n}. 根據 ${ts} 拍子記號，運用以下的節奏，哪一組剛好填滿一小節？`, img: I + 'r-bank1.png',
-                        options: ["A", "B", "C"], optImg: Object.fromEntries(order.map((o, i) => ['ABC'[i], I + `r1-${n}-${o}.png`])), ans,
-                        why: `${ts} 拍子每小節有 ${beats} 拍，加起來剛好 ${beats} 拍才對。` };
-                }),
-                ...[[1, 'C'], [2, 'A'], [3, 'B'], [4, 'A']].map(([n, ans]) => {
-                    const order = { A: ['ok', 'x1', 'x2'], B: ['x1', 'ok', 'x2'], C: ['x1', 'x2', 'ok'] }[ans];
-                    return { page: "2", type: "mc", q: `(二) ${n}. 根據 6/8 拍子記號，運用以下的節奏，哪一組剛好填滿一小節？`, img: I + 'r-bank2.png',
-                        options: ["A", "B", "C"], optImg: Object.fromEntries(order.map((o, i) => ['ABC'[i], I + `r2-${n}-${o}.png`])), ans,
-                        why: "6/8 拍子每小節有 6 個八分音符：三個八分音符 = 3，附點四分音符 = 3，四分音符 = 2，八分音符 = 1。" };
-                }),
-                { page: "2", type: "mc", q: "(三) 1. 根據 4/4 拍子記號，哪一個是與問句節奏「相同」的答句？", img: I + 'r-same1.png',
-                  options: ["A", "B", "C"], optImg: { A: I + 'r3-1-x1.png', B: I + 'r3-1-ok.png', C: I + 'r3-1-x2.png' }, ans: "B",
+                { page: "1", type: "compose", q: "(一) 根據拍子記號，運用以下的節奏，在方格內創作不同的節奏組合。", img: I + 'r-bank1.png', cards: CARDS_1,
+                  boxes: [['2/4', 8], ['2/4', 8], ['3/4', 12], ['3/4', 12], ['4/4', 16], ['4/4', 16]]
+                      .map(([ts, len], i) => ({ label: `${i + 1}.`, ts, len, mode: 'fill', hint: I + `r1-${i + 1}-ok.png` })),
+                  why: "2/4 每小節 2 拍，3/4 每小節 3 拍，4/4 每小節 4 拍。答案不只一個，只要剛好夠拍就可以。" },
+                { page: "2", type: "compose", q: "(二) 根據拍子記號，運用以下的節奏，在方格內創作不同的節奏組合。", img: I + 'r-bank2.png', cards: CARDS_68,
+                  boxes: [1, 2, 3, 4].map(n => ({ label: `${n}.`, ts: '6/8', len: 12, group: 6, mode: 'fill', hint: I + `r2-${n}-ok.png` })),
+                  why: "6/8 每小節有 6 個八分音符，要分成兩組，每組 3 個八分音符。" },
+                { page: "2", type: "compose", q: "(三) 1. 根據拍子記號，填寫與問句節奏相同的答句。", img: I + 'r-same1.png', cards: [...CARDS_1, CARD_W],
+                  boxes: [{ label: '第 3 小節', ts: '4/4', mode: 'exact', target: ['q', 'q', 'ee', 'q'], hint: I + 'r3-1-ok.png' },
+                          { label: '第 4 小節', ts: '4/4', mode: 'exact', target: ['w'], hint: I + 'r3-1-ok.png' }],
                   why: "「相同」的答句要和問句一模一樣：四分 四分 兩個八分 四分｜全音符" },
-                { page: "2", type: "mc", q: "(三) 2. 根據 6/8 拍子記號，哪一個是與問句節奏「相同」的答句？", img: I + 'r-same2.png',
-                  options: ["A", "B", "C"], optImg: { A: I + 'r3-2-ok.png', B: I + 'r3-2-x1.png', C: I + 'r3-2-x2.png' }, ans: "A",
+                { page: "2", type: "compose", q: "(三) 2. 根據拍子記號，填寫與問句節奏相同的答句。", img: I + 'r-same2.png', cards: CARDS_68,
+                  boxes: [{ label: '第 3 小節', ts: '6/8', mode: 'exact', target: ['dq', 'dq'], hint: I + 'r3-2-ok.png' },
+                          { label: '第 4 小節', ts: '6/8', mode: 'exact', target: ['q', 'e', 'dq'], hint: I + 'r3-2-ok.png' }],
                   why: "「相同」的答句要和問句一模一樣：附點四分 附點四分｜四分 八分 附點四分" },
-                { page: "3", type: "mc", q: "(四) 1. 根據 2/4 拍子記號，哪一個是與問句節奏「相似」的答句？", img: I + 'r-sim1.png',
-                  options: ["A", "B", "C"], optImg: { A: I + 'r4-1-x1.png', B: I + 'r4-1-x2.png', C: I + 'r4-1-ok.png' }, ans: "C",
-                  why: "「相似」是有點像但不完全一樣，而且每小節要夠 2 拍。一模一樣是「相同」；第二小節有 3 拍就不對。" },
-                { page: "3", type: "mc", q: "(四) 2. 根據 6/8 拍子記號，哪一個是與問句節奏「相似」的答句？", img: I + 'r-sim2.png',
-                  options: ["A", "B", "C"], optImg: { A: I + 'r4-2-ok.png', B: I + 'r4-2-x1.png', C: I + 'r4-2-x2.png' }, ans: "A",
-                  why: "「相似」是有點像但不完全一樣，而且每小節要夠 6 個八分音符。一模一樣是「相同」；三個八分 + 四分只有 5 個，不夠。" }
+                { page: "3", type: "compose", q: "(四) 1. 根據拍子記號，創作與問句節奏相似的答句。", img: I + 'r-sim1.png', cards: CARDS_1,
+                  boxes: [{ label: '第 3 小節', ts: '2/4', len: 8, mode: 'fill', hint: I + 'r4-1-ok.png' },
+                          { label: '第 4 小節', ts: '2/4', len: 8, mode: 'fill', hint: I + 'r4-1-ok.png' }],
+                  notSame: [['s4', 'q'], ['h']],
+                  why: "「相似」是有點像但不完全一樣，每小節要夠 2 拍。例如：附點八分 十六分 四分｜二分" },
+                { page: "3", type: "compose", q: "(四) 2. 根據拍子記號，創作與問句節奏相似的答句。", img: I + 'r-sim2.png', cards: CARDS_68,
+                  boxes: [{ label: '第 3 小節', ts: '6/8', len: 12, group: 6, mode: 'fill', hint: I + 'r4-2-ok.png' },
+                          { label: '第 4 小節', ts: '6/8', len: 12, group: 6, mode: 'fill', hint: I + 'r4-2-ok.png' }],
+                  notSame: [['e3', 'dq'], ['q', 'e', 'dq']],
+                  why: "「相似」是有點像但不完全一樣，每小節要夠 6 個八分音符。例如：三個八分 附點四分｜附點四分 附點四分" }
             ]
         }
     };
@@ -582,6 +681,9 @@
         if (q.type === 'blanks') return q.rows.flat().filter(p => p && p.ans).length;
         if (q.type === 'pick') return q.items.length;
         if (q.type === 'circle') return q.targets.length;
+        if (q.type === 'overlay') return q.zones.length + (q.bars ? q.bars.length : 0);
+        if (q.type === 'compose') return q.boxes.length;
+        if (q.type === 'drawnote') return q.slots.length;
         return 1;
     }
     function totalStars(list) { return list.reduce((n, q) => n + starsOf(q), 0); }
@@ -594,7 +696,8 @@
         $('auto-read-toggle').checked = loadJSON('g3_muc_autoread', true);
         for (const key of Object.keys(questionBank)) {
             const L = questionBank[key];
-            $('sub-' + key).innerText = `單選題 ${L.questions.length} 題 + 考試格式 ${L.exam.length} 題（滿分 ${totalStars([...L.questions, ...L.exam])} ⭐）`;
+            $(`sub-${key}-notes`).innerText = `${L.questions.length} 題（${totalStars(L.questions)} ⭐）`;
+            $(`sub-${key}-ws`).innerText = `${L.exam.length} 題（${totalStars(L.exam)} ⭐）`;
         }
         $('sub-mock').innerText = `隨機 ${MOCK_SINGLE} 題單選題 + ${MOCK_EXAM} 題考試格式，每次都不同！`;
         $('sub-all').innerText = `全部 ${allSingles().length + allExams().length} 題（滿分 ${totalStars([...allSingles(), ...allExams()])} ⭐），考試前做一次！`;
@@ -704,7 +807,7 @@
     }
 
     // ---------- 開始 ----------
-    function startLesson(key) {
+    function startLesson(key, part) {
         if (key === 'mock') {
             const singles = shuffle(allSingles()).slice(0, MOCK_SINGLE);
             const exams = allExams();
@@ -715,12 +818,13 @@
             currentQList = [...shuffle(allSingles()), ...allExams()];
             currentTitle = "全部題目";
         } else {
+            // 筆記題隨機排列；工作紙題按工作紙次序
             const L = questionBank[key];
-            currentQList = [...shuffle([...L.questions]), ...L.exam];
-            currentTitle = L.title;
+            currentQList = part === 'notes' ? shuffle([...L.questions]) : [...L.exam];
+            currentTitle = `${L.title} ${part === 'notes' ? (key === 'rhythm' ? '重點題' : '筆記題') : '工作紙'}`;
         }
         $('lesson-header').innerText = key === 'mock' ? `🎯 模擬測驗：${MOCK_SINGLE} 題單選 + ${MOCK_EXAM} 題考試格式`
-            : key === 'all' ? '📚 全部題目大挑戰' : questionBank[key].header;
+            : key === 'all' ? '📚 全部題目大挑戰' : `${questionBank[key].header} ${part === 'notes' ? '📖 ' + (key === 'rhythm' ? '重點題' : '筆記題') : '📝 工作紙'}`;
         beginRound();
     }
 
@@ -747,7 +851,7 @@
         $('progress-text').innerText = `第 ${currentIndex + 1} / ${currentQList.length} 題`;
         $('progress-fill').style.width = `${currentIndex / currentQList.length * 100}%`;
         $('star-count').innerText = stars;
-        $('page-tag').innerHTML = (q.isExam ? '<span class="exam">📝 考試格式</span>' : '') + `📄 ${q.lesson} ${q.src} P.${escapeHTML(q.page)}`;
+        $('page-tag').innerHTML = (q.isExam ? '<span class="exam">📝 工作紙題</span>' : '') + `📄 ${q.lesson} ${q.src} P.${escapeHTML(q.page)}`;
         $('question-text').innerText = q.q;
         $('next-btn').disabled = true;
         $('next-btn').innerText = currentIndex === currentQList.length - 1 ? '看結果 🏁' : '下一題 👉';
@@ -755,7 +859,7 @@
 
         const body = $('q-body');
         body.innerHTML = '';
-        if (q.type !== 'circle') renderImages(body, q.img);
+        if (!['circle', 'overlay', 'drawnote'].includes(q.type)) renderImages(body, q.img);
         if (q.play) {
             const pb = el('button', 'play-btn', '▶️ 播放節奏');
             pb.onclick = () => playRhythm(q.play, pb);
@@ -764,6 +868,9 @@
         if (q.type === 'blanks') renderBlanks(body, q);
         else if (q.type === 'pick') renderPick(body, q);
         else if (q.type === 'circle') renderCircle(body, q);
+        else if (q.type === 'overlay') renderOverlay(body, q);
+        else if (q.type === 'compose') renderCompose(body, q);
+        else if (q.type === 'drawnote') renderDrawnote(body, q);
         else renderOptions(body, q);
 
         window.scrollTo(0, 0);
@@ -786,16 +893,21 @@
     // 單選題 (考試格式 'mc' 不打亂次序)
     function renderOptions(body, q) {
         const opts = q.type === 'mc' ? [...q.options] : shuffle([...q.options]);
+        // 'side'：照工作紙把選項左右並排 (例如 A、B 兩個節奏)
+        const holder = q.layout === 'side' ? el('div', 'side-grid') : body;
         opts.forEach(opt => {
             const row = el('div', 'option-row');
             const btn = el('button', 'option-btn');
-            btn.appendChild(el('span', 'opt-label', opt));
+            const frac = opt.match(/^(\d)\/(\d)$/);
+            if (frac) { const f = el('span', 'frac'); f.append(el('b', null, frac[1]), el('b', null, frac[2])); btn.appendChild(f); }
+            else btn.appendChild(el('span', 'opt-label', opt));
             if (q.optImg && q.optImg[opt]) { const im = el('img'); im.src = q.optImg[opt]; im.alt = opt; btn.appendChild(im); }
             btn.dataset.value = opt;
             btn.onclick = () => answerOption(btn, opt, q);
             row.append(btn, speakBtn(opt));
-            body.appendChild(row);
+            holder.appendChild(row);
         });
+        if (holder !== body) body.appendChild(holder);
     }
 
     // ---------- 洗腦模式 ----------
@@ -838,11 +950,11 @@
     function fillChip(chip, b) {
         chip.textContent = '';
         if (b && b.img) { const im = el('img'); im.src = b.img; im.alt = b.text; chip.appendChild(im); }
-        chip.appendChild(document.createTextNode(b ? b.key : '?'));
+        chip.appendChild(el('span', 'k', b ? b.key : '?'));
     }
 
     // 配對 / 填充：拖答案卡到格上（或先點格，再點答案卡）
-    function renderBlanks(body, q) {
+    function renderBank(body, q) {
         const bank = el('div', 'bank' + (q.bank.some(b => b.img) ? ' notes' : q.bank.every(b => !b.text) ? ' short' : ''));
         state.chips = []; state.cards = {};
         q.bank.forEach(b => {
@@ -858,6 +970,10 @@
         });
         body.appendChild(bank);
         body.appendChild(el('div', 'circle-tip', '✋ 按住答案卡拖到格上；或者先點格，再點答案卡'));
+    }
+
+    function renderBlanks(body, q) {
+        renderBank(body, q);
 
         const rows = el('div', q.layout === 'cards' ? 'card-rows' : 'fill-rows');
         q.rows.forEach(parts => {
@@ -942,7 +1058,7 @@
             playSound('correct');
             const next = state.chips.find(c => !c.classList.contains('good'));
             if (next) { selectChip(next); speakText('答對了！'); }
-            else finishParts(q);
+            else checkDone(q);
         } else {
             chip.misses++;
             chip.textContent = key; chip.classList.add('bad'); flash(chip, 'shake');
@@ -1057,6 +1173,236 @@
         body.appendChild(wrap);
         body.appendChild(el('div', 'circle-tip', isBar ? `👆 點樂譜上要加線的位置（共 ${need} 條）`
             : q.ordered ? `👆 按提示點樂譜上的音符（共 ${need} 個）` : `👆 用手指點樂譜畫圈（要圈 ${need} 個）`));
+    }
+
+    // ---------- 照工作紙填寫：答案格直接放在工作紙圖上 ----------
+    // zones 是要填的格；bars (如有) 是要加小節線的位置，點圖上空白的地方就加線
+    function renderOverlay(body, q) {
+        if (q.plays) {
+            const row = el('div', 'plays');
+            q.plays.forEach(p => {
+                const b = el('button', 'play-btn small', `▶️ ${p.label}`);
+                b.onclick = () => { playRhythm(p.play); };
+                row.appendChild(b);
+            });
+            body.appendChild(row);
+        }
+        renderBank(body, q);
+        const scroll = el('div', 'ov-scroll');
+        const wrap = el('div', 'ov-wrap');
+        wrap.style.minWidth = (q.minW || 0) + 'px';
+        const im = el('img'); im.src = q.img; im.alt = '工作紙'; im.draggable = false;
+        wrap.appendChild(im);
+        q.zones.forEach(z => {
+            const chip = el('span', 'chip ov-chip' + (q.bank.some(b => b.img) ? ' has-img' : '') + (q.tight ? ' tight' : ''));
+            chip.appendChild(el('span', 'k', '?'));
+            chip.style.left = z.x + '%'; chip.style.top = z.y + '%';
+            chip.dataset.ans = z.ans; chip.misses = 0;
+            chip.onclick = e => { e.stopPropagation(); selectChip(chip); };
+            state.chips.push(chip);
+            wrap.appendChild(chip);
+        });
+        state.q = q;
+        if (q.bars) {
+            state.barsFound = new Set(); state.barMisses = 0;
+            wrap.classList.add('bar-mode');
+            wrap.onclick = e => {
+                if (state.done || e.target.closest('.chip')) return;
+                const r = wrap.getBoundingClientRect();
+                const x = (e.clientX - r.left) / r.width * 100;
+                const m = el('div', 'mark bar'); m.style.left = x + '%';
+                wrap.appendChild(m);
+                const i = q.bars.findIndex((bx, n) => !state.barsFound.has(n) && Math.abs(bx - x) <= 3.5);
+                if (q.bars.some((bx, n) => state.barsFound.has(n) && Math.abs(bx - x) <= 3.5)) { m.remove(); return; }
+                if (i >= 0) {
+                    state.barsFound.add(i); m.classList.add('good'); m.style.left = q.bars[i] + '%';
+                    wrap.querySelectorAll('.answer-box').forEach(b => b.remove());
+                    playSound('correct');
+                    if (state.barMisses === 0) stars++;
+                    $('star-count').innerText = stars;
+                    if (state.barsFound.size < q.bars.length) speakText('答對了！再加一條小節線！'); else checkDone(q);
+                } else {
+                    state.barMisses++;
+                    flash(m, 'shake'); setTimeout(() => m.remove(), 900);
+                    missed(state.barMisses, '看看綠色虛線框，小節線要加在這裡！', () => {
+                        wrap.querySelectorAll('.answer-box').forEach(b => b.remove());
+                        q.bars.forEach((bx, n) => {
+                            if (state.barsFound.has(n)) return;
+                            const b = el('div', 'answer-box');
+                            Object.assign(b.style, { left: (bx - 3) + '%', top: '0', width: '6%', height: '78%' });
+                            wrap.appendChild(b);
+                        });
+                    });
+                }
+            };
+        }
+        scroll.appendChild(wrap);
+        body.appendChild(scroll);
+        if (q.minW) body.appendChild(el('div', 'circle-tip', '↔️ 工作紙太闊可以左右掃' + (q.bars ? '；點音符之間的空位加小節線' : '')));
+        selectChip(state.chips[0]);
+    }
+
+    // 填格 (和小節線) 全部做好才算完成
+    function checkDone(q) {
+        if (state.chips.some(c => !c.classList.contains('good'))) return;
+        if (q.bars && state.barsFound.size < q.bars.length) { speakText('節拍寫好了！現在點空位加小節線！'); return; }
+        finishParts(q);
+    }
+
+    // ---------- 砌節奏：點節奏卡放入方格 ----------
+    // mode 'exact'：要和 target 一模一樣 (抄寫 / 相同答句)，每放一張卡就檢查
+    // mode 'fill' ：剛好填滿 len (十六分音符 = 1)；group 是 6/8 每組的長度，不可以跨組；notSame 是不可以和問句一模一樣
+    function renderCompose(body, q) {
+        const cards = Object.fromEntries(q.cards.map(c => [c.id, c]));
+        const bank = el('div', 'rbank');
+        state.cardBtns = {};
+        q.cards.forEach(c => {
+            const b = el('button', 'rcard');
+            const im = el('img'); im.src = c.img; im.alt = c.say; b.appendChild(im);
+            b.onclick = () => addCard(c.id);
+            state.cardBtns[c.id] = b;
+            bank.appendChild(b);
+        });
+        body.appendChild(bank);
+        body.appendChild(el('div', 'circle-tip', '👆 先點方格，再點上面的節奏卡放進去；⌫ 可以刪除最後一個'));
+        const grid = el('div', 'cbox-grid' + (q.boxes.length > 2 ? ' many' : ''));
+        state.boxes = q.boxes.map((bx, i) => {
+            const len = bx.len || bx.target.reduce((n, id) => n + cards[id].v, 0);
+            const box = { ...bx, len, seq: [], misses: 0, done: false, i };
+            const node = el('div', 'cbox');
+            const head = el('div', 'cbox-head');
+            head.appendChild(el('span', 'cbox-label', bx.label));
+            if (bx.ts) { const f = el('span', 'frac small'); const [a, b] = bx.ts.split('/'); f.append(el('b', null, a), el('b', null, b)); head.appendChild(f); }
+            const del = el('button', 'cbox-del', '⌫');
+            del.onclick = e => { e.stopPropagation(); if (!box.done) { box.seq.pop(); drawBox(box); } selectBox(box); };
+            head.appendChild(del);
+            const area = el('div', 'cbox-area');
+            node.append(head, area);
+            node.onclick = () => selectBox(box);
+            box.node = node; box.area = area;
+            grid.appendChild(node);
+            return box;
+        });
+        body.appendChild(grid);
+        const drawBox = box => {
+            box.area.innerHTML = '';
+            box.seq.forEach(id => { const im = el('img'); im.src = cards[id].img; im.alt = cards[id].say; box.area.appendChild(im); });
+        };
+        const selectBox = box => {
+            if (!box || box.done) return;
+            state.boxes.forEach(b => b.node.classList.remove('active'));
+            box.node.classList.add('active'); state.activeBox = box;
+        };
+        const total = box => box.seq.reduce((n, id) => n + cards[id].v, 0);
+        const boxMiss = (box, msg, hintFn) => {
+            box.misses++; state.anyMiss = true;
+            playSound('wrong'); flash(box.node, 'shake');
+            if (box.misses >= 2) { hintFn(); speakText(msg + '。看看提示！'); } else speakText(msg + '，再試一次！');
+        };
+        const showExample = box => {
+            if (!box.hint || box.node.querySelector('.cbox-hint')) return;
+            const h = el('div', 'cbox-hint'); h.appendChild(el('span', null, '💡 例子：'));
+            const im = el('img'); im.src = box.hint; im.alt = '例子'; h.appendChild(im);
+            box.node.appendChild(h);
+        };
+        const complete = box => {
+            box.done = true; box.node.classList.remove('active'); box.node.classList.add('good');
+            Object.values(state.cardBtns).forEach(b => b.classList.remove('hint'));
+            playSound('correct');
+            if (box.misses === 0) stars++;
+            $('star-count').innerText = stars;
+            const next = state.boxes.find(b => !b.done);
+            if (next) { selectBox(next); speakText('答對了！'); } else finishParts(q);
+        };
+        function addCard(id) {
+            const box = state.activeBox;
+            if (state.done || !box || box.done) return;
+            const c = cards[id];
+            if (box.mode === 'exact') {
+                const want = box.target[box.seq.length];
+                if (id !== want) {
+                    flash(state.cardBtns[id], 'shake');
+                    return boxMiss(box, '不是這個節奏', () => { state.cardBtns[want].classList.add('hint'); speakText(`下一個是：${cards[want].say}`); });
+                }
+                box.seq.push(id); drawBox(box);
+                Object.values(state.cardBtns).forEach(b => b.classList.remove('hint'));
+                if (box.seq.length === box.target.length) complete(box);
+                return;
+            }
+            const t = total(box), nt = t + c.v;
+            if (nt > box.len) return boxMiss(box, '太多拍了', () => showExample(box));
+            if (box.group && t < box.group && nt > box.group) return boxMiss(box, '6/8 拍子要每 3 個八分音符一組', () => showExample(box));
+            box.seq.push(id); drawBox(box);
+            if (nt < box.len) return;
+            if (q.notSame && state.boxes.every((b, i) => (b === box || b.done) && b.seq.join() === q.notSame[i].join())) {
+                box.seq.pop(); drawBox(box);
+                return boxMiss(box, '要「相似」，不可以和問句一模一樣', () => showExample(box));
+            }
+            complete(box);
+        }
+        state.addCard = addCard;
+        selectBox(state.boxes[0]);
+    }
+
+    // ---------- 在五線譜上畫音符：點位置，用 ▲▼ 調高低，再按 ✔ ----------
+    // lines 是五條線的 y% (由上到下)；slots 是每個音符的位置 x% 和高度 step (第一線 E = 0，每升一級 +1)
+    function renderDrawnote(body, q) {
+        const scroll = el('div', 'ov-scroll');
+        const wrap = el('div', 'ov-wrap');
+        wrap.style.minWidth = (q.minW || 0) + 'px';
+        const im = el('img'); im.src = q.img; im.alt = '五線譜'; im.draggable = false;
+        wrap.appendChild(im);
+        scroll.appendChild(wrap);
+        const bottom = q.lines[4], half = (q.lines[4] - q.lines[0]) / 8;
+        const yOf = step => bottom - step * half;
+        state.slotDone = new Set();
+        const ctrl = el('div', 'dn-ctrl');
+        const up = el('button', 'dn-btn', '▲ 高一點'), down = el('button', 'dn-btn', '▼ 低一點'), ok = el('button', 'dn-btn ok', '✔ 確定');
+        ctrl.append(up, down, ok);
+        let cur = null;  // { slot, step, node }
+        const place = (node, slot, step) => {
+            node.style.left = q.slots[slot].x + '%'; node.style.top = yOf(step) + '%';
+            node.style.height = (half * 2 * 0.95) + '%';
+            node.classList.toggle('ledger', step <= -2 || step >= 10);
+        };
+        wrap.onclick = e => {
+            if (state.done) return;
+            const r = wrap.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width * 100, y = (e.clientY - r.top) / r.height * 100;
+            let slot = -1, best = 99;
+            q.slots.forEach((s, i) => { const d = Math.abs(s.x - x); if (!state.slotDone.has(i) && d < best) { best = d; slot = i; } });
+            if (slot < 0 || best > 8) return;
+            const step = Math.max(-4, Math.min(12, Math.round((bottom - y) / half)));
+            if (cur && cur.slot !== slot) cur.node.remove();
+            if (!cur || cur.slot !== slot) { cur = { slot, node: el('div', 'dn-note') }; wrap.appendChild(cur.node); }
+            cur.step = step; place(cur.node, slot, step);
+        };
+        up.onclick = () => { if (cur) { cur.step = Math.min(12, cur.step + 1); place(cur.node, cur.slot, cur.step); } };
+        down.onclick = () => { if (cur) { cur.step = Math.max(-4, cur.step - 1); place(cur.node, cur.slot, cur.step); } };
+        state.dnMisses = {};
+        ok.onclick = () => {
+            if (state.done || !cur) { if (!cur) speakText('先點五線譜，放一個音符。'); return; }
+            const s = q.slots[cur.slot];
+            if (cur.step === s.step) {
+                cur.node.classList.add('good'); state.slotDone.add(cur.slot);
+                wrap.querySelectorAll('.dn-ghost').forEach(g => g.remove());
+                playSound('correct');
+                if (!state.dnMisses[cur.slot]) stars++;
+                $('star-count').innerText = stars;
+                cur = null;
+                if (state.slotDone.size === q.slots.length) finishParts(q); else speakText('答對了！');
+            } else {
+                const n = state.dnMisses[cur.slot] = (state.dnMisses[cur.slot] || 0) + 1;
+                flash(cur.node, 'shake');
+                const slot = cur.slot;
+                missed(n, `正確位置是 ${s.name}，看看綠色虛線！`, () => {
+                    const g = el('div', 'dn-note dn-ghost'); place(g, slot, s.step); wrap.appendChild(g);
+                });
+            }
+        };
+        body.appendChild(scroll);
+        body.appendChild(ctrl);
+        body.appendChild(el('div', 'circle-tip', '👆 點五線譜放音符 → ▲▼ 調高低 → ✔ 確定' + (q.minW ? '；可以左右掃' : '')));
     }
 
     // 多格題目全部做對後
