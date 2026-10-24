@@ -121,6 +121,13 @@
         .answer-box { position: absolute; border: 3px dashed var(--correct-color); border-radius: 10px; background: rgba(39,174,96,.12); pointer-events: none; }
         .circle-tip { font-size: 13px; color: var(--sub-text); text-align: center; margin-bottom: 10px; }
 
+        /* 聆聽 */
+        .clip-box { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 14px; padding: 12px; background: #f2f8fd; border: 1px solid #d6eaf8; border-radius: 15px; }
+        .play-btn { width: 100%; background: #2980b9; font-size: 18px; }
+        .clip-video { width: 200px; height: 113px; border-radius: 8px; overflow: hidden; background: #000; }
+        .clip-video iframe { display: block; }
+        .clip-info { font-size: 12px; color: var(--sub-text); text-align: center; }
+
         /* 洗腦模式：答錯震一震，錯第二次閃出正確答案 */
         #game-play { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-7px); } 40%, 80% { transform: translateX(7px); } }
@@ -199,6 +206,13 @@
                     <span class="menu-btn-sub" style="color:#d35400;" id="sub-lesson2"></span>
                 </div>
                 <a href="https://www.youtube.com/watch?v=kPaUtnJTMn8&t=53s" target="_blank" rel="noopener" class="yt-btn" title="聽《春天》第一樂章">▶️</a>
+            </div>
+
+            <div class="menu-item-box" style="border: 2px solid #2980b9;">
+                <div class="menu-content" onclick="startLesson('listen')" style="background: #f2f8fd;">
+                    <span class="menu-btn-title" style="color:#2471a3">🎧 聆聽練習</span>
+                    <span class="menu-btn-sub" style="color:#1a5276;" id="sub-listen"></span>
+                </div>
             </div>
 
             <div class="menu-item-box" style="border: 2px solid var(--accent-purple);">
@@ -414,7 +428,40 @@
             ]
         }
     };
-    const MOCK_SINGLE = 15, MOCK_EXAM = 5;
+    // 聆聽題：根據老師 MUA 評估的「聆聽重點」。video = YouTube 影片 ID，start / end = 播放的秒數
+    const FEATURES = ["節奏模式不斷重覆", "大量裝飾音", "台階式力度強弱"];
+    const FEATURE_Q = "這段音樂有哪一個巴洛克時期的音樂特色？";
+    const SCENES = ["眾鳥歡唱", "溪流流動", "雷鳴和閃電"];
+    const SCENE_Q = "這段音樂描繪的是甚麼情景？";
+    const listeningBank = {
+        title: "聆聽練習",
+        header: "【🎧 聆聽練習】 MUA 評估聆聽重點",
+        questions: [
+            { tag: "🎧 聆聽重點 1：旋律及情景", piece: "韋瓦第《四季協奏曲‧春天》", q: SCENE_Q, video: "kPaUtnJTMn8", start: 79, end: 117, options: SCENES, ans: "眾鳥歡唱",
+              why: "以裝飾音描繪眾鳥歡唱的情景。" },
+            { tag: "🎧 聆聽重點 1：旋律及情景", piece: "韋瓦第《四季協奏曲‧春天》", q: SCENE_Q, video: "kPaUtnJTMn8", start: 117, end: 144, options: SCENES, ans: "溪流流動",
+              why: "以上下移動的旋律線條描繪溪流流動的情景。" },
+            { tag: "🎧 聆聽重點 1：旋律及情景", piece: "韋瓦第《四季協奏曲‧春天》", q: SCENE_Q, video: "kPaUtnJTMn8", start: 144, end: 174, options: SCENES, ans: "雷鳴和閃電",
+              why: "以重覆的節奏模式描繪雷鳴和閃電。" },
+            { tag: "🎧 聆聽重點 2：巴洛克音樂特色", piece: "韋瓦第《四季‧冬天》", q: FEATURE_Q, video: "bYNDA0MT4Qk", start: 0, options: FEATURES, ans: FEATURES[0] },
+            { tag: "🎧 聆聽重點 2：巴洛克音樂特色", piece: "巴哈《平均律》第 2 首", q: FEATURE_Q, video: "1GXHjxvSi24", start: 0, options: FEATURES, ans: FEATURES[0] },
+            { tag: "🎧 聆聽重點 2：巴洛克音樂特色", piece: "韋瓦第《四季‧夏天》急板", q: FEATURE_Q, video: "sL_K5Z1DeCc", start: 0, options: FEATURES, ans: FEATURES[0] },
+            { tag: "🎧 聆聽重點 2：巴洛克音樂特色", piece: "韓德爾《彌賽亞》序曲", q: FEATURE_Q, video: "yNguOV-lKCA", start: 0, options: FEATURES, ans: FEATURES[1] },
+            { tag: "🎧 聆聽重點 2：巴洛克音樂特色", piece: "巴哈《創意曲》第 5 首", q: FEATURE_Q, video: "1Eya7xi4GoU", start: 0, options: FEATURES, ans: FEATURES[1] },
+            { tag: "🎧 聆聽重點 2：巴洛克音樂特色", piece: "巴哈《創意曲》第 7 首", q: FEATURE_Q, video: "iI5lzwX785Y", start: 0, options: FEATURES, ans: FEATURES[1] },
+            { tag: "🎧 聆聽重點 2：巴洛克音樂特色", piece: "韓德爾《三重奏鳴曲》Op.5 No.6", q: FEATURE_Q, video: "QcUHp8RV9FQ", start: 0, options: FEATURES, ans: FEATURES[1] },
+            { tag: "🎧 聆聽重點 2：巴洛克音樂特色", piece: "韋瓦第《四季‧秋天》", q: FEATURE_Q, video: "g632Wbi17gg", start: 98, options: FEATURES, ans: FEATURES[2],
+              why: "強音 (forte) 與弱音 (piano) 不斷交替，形成台階式力度強弱。" },
+            { tag: "🎧 聆聽重點 2：巴洛克音樂特色", piece: "韋瓦第《四季‧春天》第一樂章", q: FEATURE_Q, video: "kPaUtnJTMn8", start: 0, options: FEATURES, ans: FEATURES[2],
+              why: "強音 (forte) 與弱音 (piano) 不斷交替，形成台階式力度強弱。" },
+            { tag: "🎧 聆聽重點 2：巴洛克音樂特色", piece: "韋瓦第《四季‧春天》第三樂章", q: FEATURE_Q, video: "5tTsyN9tsnQ", start: 36, options: FEATURES, ans: FEATURES[2],
+              why: "強音 (forte) 與弱音 (piano) 不斷交替，形成台階式力度強弱。" }
+        ]
+    };
+    const CLIP_SECONDS = 30;  // 沒有指定 end 的片段播 30 秒
+    listeningBank.questions.forEach(q => { q.type = 'listen'; q.isListen = true; q.lesson = '聆聽'; if (q.end == null) q.end = q.start + CLIP_SECONDS; });
+
+    const MOCK_SINGLE = 15, MOCK_EXAM = 5, MOCK_LISTEN = 3;
     const DEFAULT_NAME = "G3 學生";
     const SOLFEGE_SAY = { d: "do", r: "re", m: "mi", f: "fa", s: "so", l: "la", t: "ti" };
 
@@ -438,6 +485,9 @@
     function escapeHTML(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
     function allSingles() { return [...questionBank.lesson1.questions, ...questionBank.lesson2.questions]; }
     function allExams() { return [...questionBank.lesson1.exam, ...questionBank.lesson2.exam]; }
+    function allListening() { return [...listeningBank.questions]; }
+    // 聆聽重點 1 按樂曲次序，聆聽重點 2 隨機
+    function listeningRound() { const L = allListening(); return [...L.slice(0, 3), ...shuffle(L.slice(3))]; }
     function starsOf(q) {
         if (q.type === 'blanks') return q.rows.flat().filter(p => p && p.ans).length;
         if (q.type === 'pick') return q.items.length;
@@ -456,8 +506,10 @@
             const L = questionBank[key];
             $('sub-' + key).innerText = `單選題 ${L.questions.length} 題 + 考試格式 ${L.exam.length} 題（滿分 ${totalStars([...L.questions, ...L.exam])} ⭐）`;
         }
-        $('sub-mock').innerText = `隨機 ${MOCK_SINGLE} 題單選題 + ${MOCK_EXAM} 題考試格式，每次都不同！`;
-        $('sub-all').innerText = `全部 ${allSingles().length + allExams().length} 題（滿分 ${totalStars([...allSingles(), ...allExams()])} ⭐），考試前做一次！`;
+        $('sub-listen').innerText = `聽音樂，認出情景和巴洛克音樂特色（${allListening().length} 題）`;
+        $('sub-mock').innerText = `隨機 ${MOCK_SINGLE} 題單選 + ${MOCK_LISTEN} 題聆聽 + ${MOCK_EXAM} 題考試格式，每次都不同！`;
+        const everything = [...allSingles(), ...allListening(), ...allExams()];
+        $('sub-all').innerText = `全部 ${everything.length} 題（滿分 ${totalStars(everything)} ⭐），考試前做一次！`;
         renderHistory();
         if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
     };
@@ -520,24 +572,83 @@
     }
     function speakCurrent() { speakText(currentQList[currentIndex].q); }
 
+    // ---------- 聆聽：細小的 YouTube 播放器，只播指定片段 ----------
+    let ytReady = null, ytPlayer = null, clipTimer = null;
+    function loadYT() {
+        if (!ytReady) ytReady = new Promise(res => {
+            window.onYouTubeIframeAPIReady = res;
+            const s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api';
+            document.head.appendChild(s);
+        });
+        return ytReady;
+    }
+    const mmss = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+
+    function embedUrl(q, autoplay) {
+        return `https://www.youtube.com/embed/${q.video}?start=${q.start}&end=${q.end}&playsinline=1&rel=0&enablejsapi=1`
+            + `&origin=${encodeURIComponent(location.origin)}` + (autoplay ? '&autoplay=1' : '');
+    }
+
+    // 影片一定會顯示（可以直接按小影片播放）；YouTube 控制程式載入後，「播放」按鈕可以由頭播返指定片段
+    function renderClip(body, q) {
+        const box = el('div', 'clip-box');
+        const btn = el('button', 'main-btn play-btn', '▶️ 播放樂曲選段');
+        const video = el('div', 'clip-video');
+        const frame = el('iframe');
+        Object.assign(frame, { width: 200, height: 113, src: embedUrl(q, false), title: '樂曲選段', allowFullscreen: true });
+        frame.setAttribute('frameborder', '0');
+        frame.setAttribute('allow', 'autoplay; encrypted-media');
+        video.appendChild(frame);
+        box.append(btn, video, el('div', 'clip-info', `🎵 樂曲選段 ${mmss(q.start)} – ${mmss(q.end)}｜如果按了沒有聲音，請直接按小影片上的 ▶`));
+        body.appendChild(box);
+        state.frame = frame;
+        btn.onclick = () => playClip(q, btn);
+        loadYT().then(() => {
+            if (currentQList[currentIndex] !== q || !frame.isConnected) return;
+            ytPlayer = new YT.Player(frame, { events: { onReady: () => { state.ytReady = true; } } });
+        });
+    }
+
+    function playClip(q, btn) {
+        window.speechSynthesis && window.speechSynthesis.cancel();
+        btn.textContent = '🔁 再聽一次';
+        if (!state.ytReady) { state.frame.src = embedUrl(q, true); return; }
+        ytPlayer.loadVideoById({ videoId: q.video, startSeconds: q.start, endSeconds: q.end });
+        // 有些情況 endSeconds 不生效，所以自己再檢查一次
+        clearInterval(clipTimer);
+        clipTimer = setInterval(() => {
+            try { if (ytPlayer && ytPlayer.getCurrentTime() >= q.end) { ytPlayer.pauseVideo(); clearInterval(clipTimer); } } catch (e) {}
+        }, 500);
+    }
+
+    function stopClip() {
+        clearInterval(clipTimer);
+        if (ytPlayer) { try { ytPlayer.destroy(); } catch (e) {} ytPlayer = null; }
+        document.querySelectorAll('#q-body iframe').forEach(f => f.remove());  // 離開題目時一定停止播放
+    }
+
     // ---------- 開始 ----------
     function startLesson(key) {
         if (key === 'mock') {
             const singles = shuffle(allSingles()).slice(0, MOCK_SINGLE);
+            const listens = shuffle(allListening()).slice(0, MOCK_LISTEN);
             const exams = allExams();
             const picked = new Set(shuffle([...exams]).slice(0, MOCK_EXAM));
-            currentQList = [...singles, ...exams.filter(q => picked.has(q))];
+            currentQList = [...singles, ...listens, ...exams.filter(q => picked.has(q))];
             currentTitle = "模擬測驗";
         } else if (key === 'all') {
-            currentQList = [...shuffle(allSingles()), ...allExams()];
+            currentQList = [...shuffle(allSingles()), ...listeningRound(), ...allExams()];
             currentTitle = "全部題目";
+        } else if (key === 'listen') {
+            currentQList = listeningRound();
+            currentTitle = listeningBank.title;
         } else {
             const L = questionBank[key];
             currentQList = [...shuffle([...L.questions]), ...L.exam];
             currentTitle = L.title;
         }
-        $('lesson-header').innerText = key === 'mock' ? `🎯 模擬測驗：${MOCK_SINGLE} 題單選 + ${MOCK_EXAM} 題考試格式`
-            : key === 'all' ? '📚 全部題目大挑戰' : questionBank[key].header;
+        $('lesson-header').innerText = key === 'mock' ? `🎯 模擬測驗：${MOCK_SINGLE} 題單選 + ${MOCK_LISTEN} 題聆聽 + ${MOCK_EXAM} 題考試格式`
+            : key === 'all' ? '📚 全部題目大挑戰' : key === 'listen' ? listeningBank.header : questionBank[key].header;
         beginRound();
     }
 
@@ -560,11 +671,13 @@
     // ---------- 載入題目 ----------
     function loadQuestion() {
         const q = currentQList[currentIndex];
+        stopClip();
         state = {};
         $('progress-text').innerText = `第 ${currentIndex + 1} / ${currentQList.length} 題`;
         $('progress-fill').style.width = `${currentIndex / currentQList.length * 100}%`;
         $('star-count').innerText = stars;
-        $('page-tag').innerHTML = (q.isExam ? '<span class="exam">📝 考試格式</span>' : '') + `📄 ${q.lesson} 工作紙 P.${escapeHTML(q.page)}`;
+        $('page-tag').innerHTML = q.isListen ? escapeHTML(q.tag)
+            : (q.isExam ? '<span class="exam">📝 考試格式</span>' : '') + `📄 ${q.lesson} 工作紙 P.${escapeHTML(q.page)}`;
         $('question-text').innerText = q.q;
         $('next-btn').disabled = true;
         $('next-btn').innerText = currentIndex === currentQList.length - 1 ? '看結果 🏁' : '下一題 👉';
@@ -576,7 +689,10 @@
         if (q.type === 'blanks') renderBlanks(body, q);
         else if (q.type === 'pick') renderPick(body, q);
         else if (q.type === 'circle') renderCircle(body, q);
-        else renderOptions(body, q);
+        else {
+            if (q.type === 'listen') renderClip(body, q);
+            renderOptions(body, q);
+        }
 
         window.scrollTo(0, 0);
         if ($('auto-read-toggle').checked) setTimeout(speakCurrent, 400);
@@ -856,9 +972,11 @@
         fb.className = 'feedback ' + (good ? 'good' : 'bad');
         fb.innerHTML = '';
         const t = el('div', 'fb-text');
-        t.innerHTML = html + (q.why ? `<span class="why">📖 ${escapeHTML(q.why)}</span>` : '');
+        // 聆聽題答完才顯示樂曲名稱，免得提早洩露答案
+        const why = q.isListen ? `🎵 ${q.piece}${q.why ? '｜' + q.why : ''}` : q.why;
+        t.innerHTML = html + (why ? `<span class="why">📖 ${escapeHTML(why)}</span>` : '');
         fb.appendChild(t);
-        if (q.why) fb.appendChild(speakBtn(q.why, true));
+        if (why) fb.appendChild(speakBtn(why, true));
         fb.style.display = 'flex';
     }
 
@@ -875,6 +993,7 @@
 
     // ---------- 結算 ----------
     function showEnd() {
+        stopClip();
         $('game-play').classList.add('hidden');
         $('game-over').classList.remove('hidden');
 
@@ -888,7 +1007,7 @@
         $('review-box').classList.toggle('hidden', wrongList.length === 0);
         $('retry-btn').classList.toggle('hidden', wrongList.length === 0);
         $('review-list').innerHTML = wrongList.map(q =>
-            `<div class="review-item">📄 P.${escapeHTML(q.page)}　${escapeHTML(q.q.split('\n')[0])}${q.ans ? `<br>👉 <b>${escapeHTML(q.ans)}</b>` : ''}</div>`).join('');
+            `<div class="review-item">${q.isListen ? '🎧 ' + escapeHTML(q.piece) : '📄 P.' + escapeHTML(q.page)}${escapeHTML(q.q.split('\n')[0])}${q.ans ? `<br>👉 <b>${escapeHTML(q.ans)}</b>` : ''}</div>`).join('');
 
         const now = new Date();
         history.unshift({ date: `${now.getMonth() + 1}/${now.getDate()}`, name: childName, lesson: currentTitle, score: `${stars}/${maxStars}`, medal });
@@ -908,6 +1027,7 @@
 
     function goBack() {
         window.speechSynthesis && window.speechSynthesis.cancel();
+        stopClip();
         $('game-play').classList.add('hidden'); $('game-over').classList.add('hidden'); $('main-menu').classList.remove('hidden');
     }
 </script>
