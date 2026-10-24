@@ -97,7 +97,7 @@
         .bank.short { grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); }
         .bank-item { display: flex; align-items: center; gap: 6px; }
         .bank-btn { flex: 1; background: white; border: 2px solid #e6d3ee; border-radius: 12px; padding: 10px 8px; font-weight: bold; font-size: 15px; cursor: pointer; text-align: left; }
-        .bank.short .bank-btn { text-align: center; font-size: 20px; }
+        .bank.short .bank-btn { text-align: center; font-size: 20px; white-space: nowrap; padding: 10px 4px; }
         .bank-btn:disabled { opacity: .55; cursor: default; }
         .fill-rows { margin-bottom: 10px; }
         .fill-row { display: flex; gap: 8px; align-items: center; padding: 10px 4px; border-bottom: 1px dashed #eee; font-size: 17px; font-weight: bold; line-height: 2.1; }
@@ -180,6 +180,11 @@
         .ov-wrap > img { width: 100%; display: block; user-select: none; -webkit-user-drag: none; }
         .ov-chip { position: absolute; transform: translate(-50%, -50%); min-width: 28px; padding: 0 5px; margin: 0; font-size: 16px; line-height: 1.55; border-width: 2px; z-index: 2; }
         .ov-chip img { height: 24px; margin: 0; }
+        /* 配對題：左邊音符圖，右邊答案格 */
+        .match-rows .row-text { display: flex; align-items: center; gap: 14px; }
+        .match-img { height: 52px; width: 96px; object-fit: contain; cursor: zoom-in; }
+        .match-rows .chip { min-width: 120px; }
+        .match-rows .chip img { height: 34px; }
         .ov-chip.tight { min-width: 22px; padding: 0 2px; font-size: 14px; }
         .ov-chip.has-img.good .k { display: none; }
         .ov-chip.drop-over { transform: translate(-50%, -50%) scale(1.15); }
@@ -448,21 +453,25 @@
             questions: [
                 { page: 1, q: "音符是用來記錄甚麼的符號？", options: ["音樂", "數字", "文字"], ans: "音樂",
                   why: "音符是用來記錄音樂的符號。不同的音符代表聲音不同的高度和長度，組成不同的節奏及旋律。" },
-                { page: 1, q: "全音符有多少拍？", img: I + 'note-whole.png', options: ["4 拍", "2 拍", "1 拍"], ans: "4 拍" },
-                { page: 1, q: "二分音符有多少拍？", img: I + 'note-half.png', options: ["2 拍", "4 拍", "1 拍"], ans: "2 拍" },
-                { page: 1, q: "四分音符有多少拍？", img: I + 'note-quarter.png', options: ["1 拍", "2 拍", "半拍"], ans: "1 拍" },
-                { page: 1, q: "八分音符有多少拍？", img: I + 'note-eighth.png', options: ["半拍", "1 拍", "¼ 拍"], ans: "半拍" },
-                { page: 1, q: "十六分音符有多少拍？", img: I + 'note-16th.png', options: ["¼ 拍", "半拍", "⅛ 拍"], ans: "¼ 拍" },
-                { page: 1, q: "三十二分音符有多少拍？", img: I + 'note-32nd.png', options: ["⅛ 拍", "¼ 拍", "半拍"], ans: "⅛ 拍" },
-                { page: 1, q: "四分音符的英文名稱是？", img: I + 'note-quarter.png', options: ["crotchet", "minim", "quaver"], ans: "crotchet",
-                  why: "全音符 semibreve｜二分音符 minim｜四分音符 crotchet｜八分音符 quaver" },
-                { page: 1, q: "「quaver」是甚麼音符？", options: ["八分音符", "四分音符", "二分音符"], ans: "八分音符" },
+                // 筆記 P.1 表格：配對題 (每行次序隨機)
+                ...(() => {
+                    const N = [['note-whole', '全音符', '4 拍', 'rest-whole', '全休止符', 'Too-oo-oo-oo'], ['note-half', '二分音符', '2 拍', 'rest-half', '二分休止符', 'Too-oo'],
+                               ['note-quarter', '四分音符', '1 拍', 'rest-quarter', '四分休止符', 'Ta'], ['note-eighth-pair', '八分音符', '半拍', 'rest-eighth', '八分休止符', 'Ti-ti'],
+                               ['note-16th-four', '十六分音符', '¼ 拍', 'rest-16th', '十六分休止符', 'Ti-ka-ti-ka'], ['note-32nd', '三十二分音符', '⅛ 拍', 'rest-32nd', '三十二分休止符', null]];
+                    const row = (n, ans) => [{ img: I + n[0] + '.png' }, { ans }];
+                    return [
+                        { page: 1, type: 'blanks', layout: 'match', shuffleRows: true, q: "配對：這些是甚麼音符？", bank: N.map(n => ({ key: n[1] })), rows: N.map(n => row(n, n[1])) },
+                        { page: 1, type: 'blanks', layout: 'match', shuffleRows: true, q: "配對：這些音符有多少拍？(時值)", bank: N.map(n => ({ key: n[2] })), rows: N.map(n => row(n, n[2])),
+                          why: "全音符 4 拍｜二分音符 2 拍｜四分音符 1 拍｜八分音符 半拍｜十六分音符 ¼ 拍｜三十二分音符 ⅛ 拍" },
+                        { page: 1, type: 'blanks', layout: 'match', shuffleRows: true, q: "配對：這些音符的休止符是哪一個？", bank: N.map(n => ({ key: n[4], img: I + n[3] + '.png', text: n[4] })), rows: N.map(n => row(n, n[4])),
+                          why: "休止符和它的音符一樣長，只是不發聲。全休止符掛在第四線下面，二分休止符坐在第三線上面。" },
+                        { page: 1, type: 'blanks', layout: 'match', shuffleRows: true, q: "配對：這些音符的 Kodaly 讀音是甚麼？", bank: N.filter(n => n[5]).map(n => ({ key: n[5] })), rows: N.filter(n => n[5]).map(n => row(n, n[5])) }
+                    ];
+                })(),
                 { page: 1, q: "四分音符的 Kodaly 讀音是？", img: I + 'note-quarter.png', options: ["Ta", "Ti-ti", "Too-oo"], ans: "Ta" },
                 { page: 1, q: "兩個八分音符的 Kodaly 讀音是？", img: I + 'note-eighth-pair.png', options: ["Ti-ti", "Ta", "Ti-ka-ti-ka"], ans: "Ti-ti" },
                 { page: 1, q: "四個十六分音符的 Kodaly 讀音是？", img: I + 'note-16th-four.png', options: ["Ti-ka-ti-ka", "Ti-ti", "Ta"], ans: "Ti-ka-ti-ka" },
                 { page: 1, q: "二分音符的 Kodaly 讀音是？", img: I + 'note-half.png', options: ["Too-oo", "Ta", "Too-oo-oo-oo"], ans: "Too-oo" },
-                { page: 1, q: "這是甚麼休止符？", img: I + 'rest-quarter.png', options: ["四分休止符", "八分休止符", "二分休止符"], ans: "四分休止符",
-                  why: "四分休止符和四分音符一樣是 1 拍，只是不發聲。" },
                 { page: 2, q: "1 個全音符 = 多少個二分音符？", img: [I + 'note-whole.png', I + 'note-half.png'], options: ["2 個", "4 個", "3 個"], ans: "2 個" },
                 { page: 2, q: "1 個十六分音符 = 多少個三十二分音符？", options: ["2 個", "4 個", "8 個"], ans: "2 個" },
                 { page: 4, q: "附點音符的那一「點」有多長？", img: I + 'n1-dotted.png', options: ["自身音符的一半", "和自身音符一樣長", "1 拍"], ans: "自身音符的一半",
@@ -955,7 +964,7 @@
 
     // 配對 / 填充：拖答案卡到格上（或先點格，再點答案卡）
     function renderBank(body, q) {
-        const bank = el('div', 'bank' + (q.bank.some(b => b.img) ? ' notes' : q.bank.every(b => !b.text) ? ' short' : ''));
+        const bank = el('div', 'bank' + (q.bank.some(b => b.img) ? ' notes' : q.bank.every(b => !b.text && b.key.length <= 3) ? ' short' : ''));
         state.chips = []; state.cards = {};
         q.bank.forEach(b => {
             const item = el('div', 'bank-item');
@@ -975,13 +984,13 @@
     function renderBlanks(body, q) {
         renderBank(body, q);
 
-        const rows = el('div', q.layout === 'cards' ? 'card-rows' : 'fill-rows');
-        q.rows.forEach(parts => {
+        const rows = el('div', q.layout === 'cards' ? 'card-rows' : q.layout === 'match' ? 'fill-rows match-rows' : 'fill-rows');
+        (q.shuffleRows ? shuffle([...q.rows]) : q.rows).forEach(parts => {
             const row = el('div', 'fill-row');
             const text = el('div', 'row-text');
             parts.forEach(p => {
                 if (typeof p === 'string') text.appendChild(document.createTextNode(` ${p} `));
-                else if (p.img) { const im = el('img', 'row-img'); im.src = p.img; im.alt = '樂譜'; im.onclick = () => openLightbox(p.img); text.appendChild(im); }
+                else if (p.img) { const im = el('img', q.layout === 'match' ? 'match-img' : 'row-img'); im.src = p.img; im.alt = '樂譜'; im.onclick = () => openLightbox(p.img); text.appendChild(im); }
                 else {
                     const chip = el('span', 'chip', '?');
                     chip.dataset.ans = p.ans; chip.misses = 0;
